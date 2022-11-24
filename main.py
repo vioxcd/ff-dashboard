@@ -32,6 +32,7 @@ def create_db():
 			scores TEXT,
 			status TEXT,
 			media_id INTEGER,
+			media_type TEXT,
 			title TEXT
 		);
 	"""
@@ -42,7 +43,7 @@ def create_db():
 def save_list_to_db(data):
 	con = sqlite3.connect(DATABASE_NAME)
 	cur = con.cursor()
-	query = "INSERT INTO lists VALUES (?, ?, ?, ?, ?)"
+	query = "INSERT INTO lists VALUES (?, ?, ?, ?, ?, ?)"
 	cur.executemany(query, data)
 	con.commit()
 	print('Results saved!')
@@ -82,6 +83,7 @@ def query_list(page, username, per_page=50):
 				status,
 				media {
 					id,
+					type,
 					title {
 						english,
 						romaji,
@@ -154,6 +156,7 @@ if __name__ == "__main__":
 						media['score'],
 						media['status'],
 						media['media']['id'],
+						media['media']['type'],
 						media['media']['title']['english'] or \
 							media['media']['title']['romaji'] or \
 							media['media']['title']['native'] 
