@@ -36,6 +36,13 @@ def chunks(lst, n):
         yield lst[i:i + n]
 
 ## Variables
+# """
+# ⭐ Fluffy Folks Ranking Inclusion Rules ⭐
+# (1) Watched by 5 members at minimum (completed or watching by 5th episode)
+# (2) Minimum score of 85
+# (3) Sorted by: score > votes (number of audience) > alphabet
+# (4) Titles are formatted in lowercase English
+# """
 media_list: list[Media] = []
 for media in media_list_query:
 	media_list.append(Media(*media))
