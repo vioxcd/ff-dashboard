@@ -7,9 +7,9 @@ import requests
 DATABASE_NAME = "fluff.db"
 
 
-def get_fluff_users():
+def get_fluff_users_and_ids():
     with open('fluff', 'r') as f:
-        data = list(map(lambda x: x.rstrip('\n'), f.readlines()))
+        data = list(map(lambda x: x.rstrip('\n').split(','), f.readlines()))
         print(f'Fluff: {data}')
     return data
 
@@ -20,6 +20,7 @@ def create_db():
 
     query = """
 		CREATE TABLE users(
+            id INT,
 			username TEXT,
 			score_format TEXT
 		);
@@ -52,19 +53,22 @@ def save_list_to_db(data):
     print('Results saved!')
 
 
-def save_user_to_db(data):
+def save_user_to_db(id_, username, score_format):
+    """Saves username, id_, and score_format to db"""
     con = sqlite3.connect(DATABASE_NAME)
     cur = con.cursor()
-    query = f"INSERT INTO users VALUES ('{data[0]}', '{data[1]}')"
+    query = f"INSERT INTO users VALUES ('{id_}', '{username}',  '{score_format}')"
     cur.execute(query)
     con.commit()
-    print(f'{data} saved!')
+    print(f'{username} info saved!')
 
 
-def query_score_format(username):
+def query_score_format(id_):
     query = '''
-	query ($username: String) {
-		  User(name: $username) {
+	query ($id: Int) {
+		  User(id: $id) {
+            id,
+            name,
 			mediaListOptions {
 				scoreFormat
 			}
@@ -72,7 +76,7 @@ def query_score_format(username):
 	}
 	'''
     variables = {
-        'username': username,
+        'id': id_,
     }
     return {'query': query, 'variables': variables}
 
@@ -129,19 +133,19 @@ def fetch(params):
 
 
 if __name__ == "__main__":
-    users = get_fluff_users()
+    users_and_ids = get_fluff_users_and_ids()
 
     if not os.path.exists(DATABASE_NAME):
         create_db()
 
-    for username in users:
-        params = query_score_format(username)
+    for username, id_ in users_and_ids:
+        params = query_score_format(id_)
         results = fetch(params)
 
         score_format = None
         if results:
             score_format = results['User']['mediaListOptions']['scoreFormat']
-        save_user_to_db((username, score_format))
+        save_user_to_db(id_, username, score_format)
 
         page = 1  # starts from 1
         has_next_page = True
