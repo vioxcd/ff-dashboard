@@ -36,7 +36,8 @@ def create_db():
 			status TEXT,
 			media_id INTEGER,
 			media_type TEXT,
-			title TEXT
+			title TEXT,
+            progress INTEGER
 		);
 	"""
     cur.execute(query)
@@ -47,7 +48,7 @@ def create_db():
 def save_list_to_db(data):
     con = sqlite3.connect(DATABASE_NAME)
     cur = con.cursor()
-    query = "INSERT INTO lists VALUES (?, ?, ?, ?, ?, ?)"
+    query = "INSERT INTO lists VALUES (?, ?, ?, ?, ?, ?, ?)"
     cur.executemany(query, data)
     con.commit()
     print('Results saved!')
@@ -91,6 +92,7 @@ def query_list(page, username, per_page=50):
 			mediaList(userName: $username) {
 				score,
 				status,
+                progress,
 				media {
 					id,
 					type,
@@ -178,7 +180,8 @@ if __name__ == "__main__":
                      media['media']['type'],
                      media['media']['title']['english'] or \
                       media['media']['title']['romaji'] or \
-                      media['media']['title']['native']
+                      media['media']['title']['native'],
+                     media['progress']
                     ))
 
             # sleep for a while to avoid rate_limiting
