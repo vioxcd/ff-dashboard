@@ -2,7 +2,6 @@
 
 ## TODOs
 
-- [BUG]: username can change. track via IDs instead
 - Implement cover layout as in project slide
 - Various way to sort and filter (sort by: most watched, most favorited, most rewatched count. fetch accordingly)
 - Fetch media scores (see what's most loved by fluff as differed with AL -- biggest rating difference)
