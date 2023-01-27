@@ -142,6 +142,14 @@ if __name__ == "__main__":
         params = query_score_format(id_)
         results = fetch(params)
 
+		# if error happened
+        if not results:
+            continue
+
+		# check if username is still the same
+        if username != results['User']['name']:
+            username = results['User']['name']
+
         score_format = None
         if results:
             score_format = results['User']['mediaListOptions']['scoreFormat']
