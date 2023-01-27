@@ -21,10 +21,10 @@ media_list_query = cur.execute(
 		ROUND(AVG(appropriate_score), 2) AS avg_score,
 		COUNT(1) AS audience_count
 	FROM v_appropriate_score
-	WHERE status IN ('COMPLETED', 'CURRENT')
+	WHERE status = 'COMPLETED' OR (status = 'CURRENT' AND progress >= 5)
 	GROUP BY title, media_type
 	HAVING COUNT(1) >= 5
-	ORDER BY 3 DESC, 1 DESC
+	ORDER BY 3 DESC, 4 DESC, 1 DESC
 	'''
 )
 
@@ -47,7 +47,7 @@ media_list: list[Media] = []
 for media in media_list_query:
 	media_list.append(Media(*media))
 
-anime_list = [media for media in media_list if media.type == "ANIME"]
+anime_list = [media for media in media_list if media.type == "ANIME" and media.score >= 85.0]
 
 # Presentation Layer
 st.title("Fluffy Folks Ranking Dashboard")
