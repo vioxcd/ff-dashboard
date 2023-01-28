@@ -1,7 +1,9 @@
 import sqlite3
 from collections import namedtuple
 
+import requests
 import streamlit as st
+from PIL import Image
 
 # Config Layer
 st.set_page_config(page_title=":))", layout="wide")
@@ -53,15 +55,14 @@ anime_list = [media for media in media_list if media.type == "ANIME" and media.s
 # Presentation Layer
 st.title("Fluffy Folks Ranking Dashboard")
 
-col1, col2, col3 = st.columns([5, 5, 5])
+c = st.container()
+_, _, _, col4 = c.columns([1, 1, 15, 1])
+col4.write("score")
 
-for (media1, media2, media3) in chunks(anime_list[:9], 3):
-	with col1:
-		col1.write(media1.title)
-		col1.write(media1.score)
-	with col2:
-		col2.write(media2.title)
-		col2.write(media1.score)
-	with col3:
-		col3.write(media3.title)
-		col3.write(media1.score)
+for index, media in enumerate(anime_list[:10], start=1):
+	sample_image = "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx21366-qp94AxKx6ZaM.jpg"
+	col1, col2, col3, col4 = st.columns([1, 1, 15, 1])
+	col1.write(f"#{index}")
+	col2.image(sample_image, use_column_width="always")
+	col3.write(media.title)
+	col4.write(media.score)
