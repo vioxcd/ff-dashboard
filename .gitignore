@@ -3,3 +3,4 @@ ff.log
 fluff
 fluff.db
 *.bak
+ .python-version
