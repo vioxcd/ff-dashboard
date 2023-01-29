@@ -32,16 +32,14 @@ media_list_query = cur.execute(
 		md.*,
 		ar.avg_score,
 		ar.audience_count,
-		RANK() OVER (ORDER BY ar.avg_score DESC, ar.audience_count DESC, md.title DESC) AS ranking
+		RANK() OVER (PARTITION BY media_type ORDER BY ar.avg_score DESC, ar.audience_count DESC, md.title DESC) AS ranking
 	FROM v_as_rules ar
 	JOIN media_details md
 		USING (media_id)
-	WHERE ar.media_type = 'ANIME'
 	ORDER BY
 		ar.avg_score DESC,
 		ar.audience_count DESC,
 		md.title DESC
-	LIMIT 10
 	'''
 )
 
@@ -64,19 +62,38 @@ media_list: list[Media] = []
 for media in media_list_query:
 	media_list.append(Media(*media))
 
-anime_list: list[Media] = [media for media in media_list if media.ff_score >= 85.0]
+anime_list: list[Media] = [media for media in media_list \
+							if media.media_type == "ANIME" and media.ff_score >= 85.0]
+manga_list: list[Media] = [media for media in media_list \
+							if media.media_type == "MANGA" and media.ff_score >= 85.0]
 
 # Presentation Layer
 st.title("Fluffy Folks Ranking Dashboard")
 
-_, _, _, col4, col5 = st.columns([1, 1, 14, 1, 1])
-col4.write("score")
-col5.write("votes")
+tab1, tab2 = st.tabs(["Anime", "Manga"])
 
-for media in anime_list:
-	col1, col2, col3, col4, col5 = st.columns([1, 1, 14, 1, 1])
-	col1.write(f"#{media.ranking}")
-	col2.image(media.cover_image_url, use_column_width="always")
-	col3.write(media.title)
-	col4.write(media.ff_score)
-	col5.write(media.votes)
+with tab1:
+	_, _, _, col4, col5 = st.columns([1, 1, 14, 1, 1])
+	col4.write("score")
+	col5.write("votes")
+
+	for media in anime_list[:10]:
+		col1, col2, col3, col4, col5 = st.columns([1, 1, 14, 1, 1])
+		col1.write(f"#{media.ranking}")
+		col2.image(media.cover_image_url, use_column_width="always")
+		col3.write(media.title)
+		col4.write(media.ff_score)
+		col5.write(media.votes)
+
+with tab2:
+	_, _, _, col4, col5 = st.columns([1, 1, 14, 1, 1])
+	col4.write("score")
+	col5.write("votes")
+
+	for media in manga_list[:10]:
+		col1, col2, col3, col4, col5 = st.columns([1, 1, 14, 1, 1])
+		col1.write(f"#{media.ranking}")
+		col2.image(media.cover_image_url, use_column_width="always")
+		col3.write(media.title)
+		col4.write(media.ff_score)
+		col5.write(media.votes)
