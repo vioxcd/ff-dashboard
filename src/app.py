@@ -69,7 +69,6 @@ anime_list: list[Media] = [media for media in media_list if media.ff_score >= 85
 # Presentation Layer
 st.title("Fluffy Folks Ranking Dashboard")
 
-c = st.container()
 _, _, _, col4, col5 = st.columns([1, 1, 14, 1, 1])
 col4.write("score")
 col5.write("votes")
