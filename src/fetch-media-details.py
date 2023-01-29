@@ -16,7 +16,7 @@ def get_fluff_media():
         FROM
             v_as_rules
         WHERE
-            avg_score > 85.0
+            avg_score >= 80.0
         ORDER BY
             2 DESC
         '''
