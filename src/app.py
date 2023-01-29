@@ -1,5 +1,5 @@
 import sqlite3
-from collections import namedtuple
+from dataclasses import dataclass
 
 import streamlit as st
 
@@ -8,7 +8,20 @@ st.set_page_config(page_title=":))", layout="wide")
 
 # Data Layer
 ## Objects
-Media = namedtuple("Media", "title type score votes")
+@dataclass
+class Media:
+	media_id: int
+	title: str
+	season: str
+	season_year: int
+	media_type: str
+	cover_image_url: str
+	banner_image_url: str
+	avg_score: int
+	mean_score: int
+	ff_score: float
+	votes: int
+	ranking: int
 
 ## Fetching Data
 con = sqlite3.connect('fluff.db')
