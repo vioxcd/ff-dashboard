@@ -29,13 +29,19 @@ cur = con.cursor()
 media_list_query = cur.execute(
 	'''
 	SELECT
-		title,
-		media_type,
-		avg_score,
-		audience_count
-	FROM
-		v_as_rules
-	ORDER BY 3 DESC, 4 DESC, 1 DESC -- rules
+		md.*,
+		ar.avg_score,
+		ar.audience_count,
+		RANK() OVER (ORDER BY ar.avg_score DESC, ar.audience_count DESC, md.title DESC) AS ranking
+	FROM v_as_rules ar
+	JOIN media_details md
+		USING (media_id)
+	WHERE ar.media_type = 'ANIME'
+	ORDER BY
+		ar.avg_score DESC,
+		ar.audience_count DESC,
+		md.title DESC
+	LIMIT 10
 	'''
 )
 
@@ -58,19 +64,20 @@ media_list: list[Media] = []
 for media in media_list_query:
 	media_list.append(Media(*media))
 
-anime_list = [media for media in media_list if media.type == "ANIME" and media.score >= 85.0]
+anime_list: list[Media] = [media for media in media_list if media.ff_score >= 85.0]
 
 # Presentation Layer
 st.title("Fluffy Folks Ranking Dashboard")
 
 c = st.container()
-_, _, _, col4 = c.columns([1, 1, 15, 1])
+_, _, _, col4, col5 = st.columns([1, 1, 14, 1, 1])
 col4.write("score")
+col5.write("votes")
 
-for index, media in enumerate(anime_list[:10], start=1):
-	sample_image = "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx21366-qp94AxKx6ZaM.jpg"
-	col1, col2, col3, col4 = st.columns([1, 1, 15, 1])
-	col1.write(f"#{index}")
-	col2.image(sample_image, use_column_width="always")
+for media in anime_list:
+	col1, col2, col3, col4, col5 = st.columns([1, 1, 14, 1, 1])
+	col1.write(f"#{media.ranking}")
+	col2.image(media.cover_image_url, use_column_width="always")
 	col3.write(media.title)
-	col4.write(media.score)
+	col4.write(media.ff_score)
+	col5.write(media.votes)
