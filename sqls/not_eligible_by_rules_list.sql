@@ -5,7 +5,7 @@ FROM v_appropriate_score
 WHERE status IN ('COMPLETED', 'CURRENT')
 GROUP BY title, media_type
 HAVING COUNT(1) >= 5
-EXCEPT
+EXCEPT -- filter clause
 SELECT
   title,
   media_type

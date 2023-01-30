@@ -1,4 +1,5 @@
 -- Table Deduplication SQL
+-- Run each block below one by one in steps
 
 -- check unique vs. duplicated media
 -- SELECT
