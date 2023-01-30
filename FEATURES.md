@@ -15,6 +15,9 @@
 
 ## TODOs
 
+- [Refactor] Create object models (class and abstract class?) for every `table create` and `save` method
+- [Bug] AOTY should take into account when the series is completed (should be within the same year, or something like that)
+- [Bug] AOTY should take `ONA` format into account when deciding best movie. Fetch `episodes` count as some `ONA` has more than 1 episodes
 - Add `anichan_score` in the dashboard (as this is what's used in the `#ranking` channel)
 - Fetch all image types for various layout uses
 - Download all used images in local
