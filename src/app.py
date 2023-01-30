@@ -1,7 +1,9 @@
 import sqlite3
 from dataclasses import dataclass
 
+import requests
 import streamlit as st
+from PIL import Image
 
 # Config Layer
 st.set_page_config(page_title=":))", layout="wide")
@@ -50,6 +52,17 @@ def chunks(lst, n):
     for i in range(0, len(lst), n):
         yield lst[i:i + n]
 
+def get_image(url, title):
+	img = Image.open(requests.get(url, stream=True).raw)
+	print(f"{title} - {img.size}")
+	return img
+
+def crop(min_height, img):
+	w, h = img.size
+	delta_height = h - min_height
+	top_h = 0 + round(delta_height / 2)
+	bottom_h = h - round(delta_height / 2)
+	return img.crop((0, top_h, w, bottom_h))
 ## Variables
 # """
 # ⭐ Fluffy Folks Ranking Inclusion Rules ⭐
@@ -73,17 +86,15 @@ st.title("Fluffy Folks Ranking Dashboard")
 tab1, tab2 = st.tabs(["Anime", "Manga"])
 
 with tab1:
-	_, _, _, col4, col5 = st.columns([1, 1, 14, 1, 1])
-	col4.write("score")
-	col5.write("votes")
-
-	for media in anime_list[:10]:
-		col1, col2, col3, col4, col5 = st.columns([1, 1, 14, 1, 1])
-		col1.write(f"#{media.ranking}")
-		col2.image(media.cover_image_url, use_column_width="always")
-		col3.write(media.title)
-		col4.write(media.ff_score)
-		col5.write(media.votes)
+	with tab1.container():
+		for medias in chunks(anime_list[:10], 5):
+			images = [get_image(m.cover_image_url, m.title) for m in medias]
+			min_height = min([img.size[1] for img in images])
+			cropped_images = [crop(min_height, img) for img in images]
+			for col, media, img in zip(st.columns(5), medias, cropped_images):
+				col.image(img, caption=f"({media.ff_score} | {media.votes})")
+				col.caption(f"<div align='center'>{media.title}</div>", unsafe_allow_html=True)
+				col.write("")
 
 with tab2:
 	_, _, _, col4, col5 = st.columns([1, 1, 14, 1, 1])
