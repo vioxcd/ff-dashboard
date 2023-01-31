@@ -2,25 +2,25 @@
 
 ## Done
 
-|           | Feature                                                                     | Status | Description                                                                                                                 |
-|:---------:|-----------------------------------------------------------------------------|:------:|-----------------------------------------------------------------------------------------------------------------------------|
-|    API    | Fetch `progress`                                                            |    ✅️   | Needed for rules                                                                                                            |
-|    API    | Fetch media `scores`                                                        |    ✅️   |                                                                                                                             |
-|    API    | Fetch `rewatch` count                                                       |    ❌️   | Not many people track their rewatches                                                                                       |
-|    API    | Fetch all image types for various layout uses                               |    ✅️   |                                                                                                                             |
-|    API    | Fetch several missing fields for FF's AOTY                                  |    ✅️   | Missing: relationType (non sequel), source, and format                                                                      |
-|    API    | Fetch tags / genre / studio media data for extra analysis                   |    ✅️   | There should be a bridge table for media-tags                                                                               |
-|    Data   | Implement fluff's rules                                                     |    ✅️   | Rules' detail in README                                                                                                     |
-| Dashboard | Implement layout as in design                                               |    ✅   |                                                                                                                             |
-| Dashboard | Anime and Manga tab                                                         |    ✅   |                                                                                                                             |
-| Dashboard | Include animanga with rating below 85                                       |    ❌️   | As there's no conditional rendering in tabs, all data/images included will result in slower page load. Stick to 85+ for now |
-|    Bug    | API call uses `username` to identify users, but `username` can change       |    ✅   | Track user via their IDs instead                                                                                            |
-|    Bug    | AOTY's best movie category takes into account `ONA` format with one episode |    ✅   | Fetch media `episodes` data and use that in filter                                                                          |
+|           | Feature                                                                     | Status | Description                                                                                                                            |
+|:---------:|-----------------------------------------------------------------------------|:------:|----------------------------------------------------------------------------------------------------------------------------------------|
+|    API    | Fetch `progress`                                                            |    ✅️   | Needed for rules                                                                                                                       |
+|    API    | Fetch media `scores`                                                        |    ✅️   |                                                                                                                                        |
+|    API    | Fetch `rewatch` count                                                       |    ❌️   | Not many people track their rewatches                                                                                                  |
+|    API    | Fetch all image types for various layout uses                               |    ✅️   |                                                                                                                                        |
+|    API    | Fetch several missing fields for FF's AOTY                                  |    ✅️   | Missing: relationType (non sequel), source, and format                                                                                 |
+|    API    | Fetch tags / genre / studio media data for extra analysis                   |    ✅️   | There should be a bridge table for media-tags                                                                                          |
+|    Data   | Implement fluff's rules                                                     |    ✅️   | Rules' detail in README                                                                                                                |
+|    Data   | AOTY should take into account when the series is completed                  |    ❌️   | Some members' Anilist' `completedAt` property have `null` values, even though they've completed the series (probably bug from Anilist) |
+| Dashboard | Implement layout as in design                                               |    ✅   |                                                                                                                                        |
+| Dashboard | Anime and Manga tab                                                         |    ✅   |                                                                                                                                        |
+| Dashboard | Include animanga with rating below 85                                       |    ❌️   | As there's no conditional rendering in tabs, all data/images included will result in slower page load. Stick to 85+ for now            |
+|    Bug    | API call uses `username` to identify users, but `username` can change       |    ✅   | Track user via their IDs instead                                                                                                       |
+|    Bug    | AOTY's best movie category takes into account `ONA` format with one episode |    ✅   | Fetch media `episodes` data and use that in filter                                                                                     |
 
 ## TODOs
 
 - [Refactor] Create object models (class and abstract class?) for every `table create` and `save` method
-- [Bug] AOTY should take into account when the series is completed (should be within the same year, or something like that)
 - Add `anichan_score` in the dashboard (as this is what's used in the `#ranking` channel)
 - Download all used images in local
 - ✨  Fluffy Folks's anime of the year 2022 ✨ tab
