@@ -36,6 +36,7 @@ def create_table():
 			title TEXT,
             season TEXT,
             season_year INT,
+            episodes INT,
             type TEXT,
             format TEXT,
             genres TEXT,
@@ -80,7 +81,7 @@ def save_media_detail_to_db(data):
     con = sqlite3.connect(DATABASE_NAME)
     cur = con.cursor()
     # 16
-    query = "INSERT INTO media_details VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+    query = "INSERT INTO media_details VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
     cur.execute(query, data)
     con.commit()
     print(f'{data[1]} saved!')
@@ -117,6 +118,7 @@ def fetch_media_details(media_id):
             },
             season,
             seasonYear,
+            episodes,
             type,
             format,
             genres,
@@ -202,6 +204,7 @@ def process_media(data):
             media_detail["title"]["native"],
         media_detail["season"],
         media_detail["seasonYear"],
+        media_detail["episodes"],
         media_detail["type"],
         media_detail["format"],
         genres,

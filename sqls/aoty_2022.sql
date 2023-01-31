@@ -23,4 +23,4 @@
 -- SELECT * FROM v_aoty_2022 WHERE source = "ORIGINAL" ORDER BY ff_score DESC LIMIT 1
 
 -- best movie: drifting home
--- SELECT * FROM v_aoty_2022 WHERE format = "MOVIE" OR format = "ONA" ORDER BY ff_score DESC LIMIT 1
+-- SELECT * FROM v_aoty_2022 WHERE format = "MOVIE" OR (format = "ONA" AND episodes = 1) ORDER BY ff_score DESC LIMIT 1
