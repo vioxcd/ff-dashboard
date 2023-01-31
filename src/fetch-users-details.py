@@ -18,6 +18,7 @@ def create_db():
     con = sqlite3.connect(DATABASE_NAME)
     cur = con.cursor()
 
+    cur.execute("DROP TABLE IF EXISTS users")
     query = """
 		CREATE TABLE users(
             id INT,
@@ -29,6 +30,7 @@ def create_db():
     cur.execute(query)
     print('Table users created!')
 
+    cur.execute("DROP TABLE IF EXISTS lists")
     query = """
 		CREATE TABLE lists(
 			username TEXT,
@@ -37,7 +39,8 @@ def create_db():
 			media_id INTEGER,
 			media_type TEXT,
 			title TEXT,
-            progress INTEGER
+            progress INTEGER,
+            completed_at TEXT
 		);
 	"""
     cur.execute(query)
@@ -48,7 +51,7 @@ def create_db():
 def save_list_to_db(data):
     con = sqlite3.connect(DATABASE_NAME)
     cur = con.cursor()
-    query = "INSERT INTO lists VALUES (?, ?, ?, ?, ?, ?, ?)"
+    query = "INSERT INTO lists VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
     cur.executemany(query, data)
     con.commit()
     print('Results saved!')
@@ -93,6 +96,11 @@ def query_list(page, username, per_page=50):
 				score,
 				status,
                 progress,
+                completedAt {
+                    year
+                    month
+                    day
+                },
 				media {
 					id,
 					type,
@@ -137,8 +145,7 @@ def fetch(params):
 if __name__ == "__main__":
     users_and_ids = get_fluff_users_and_ids()
 
-    if not os.path.exists(DATABASE_NAME):
-        create_db()
+    create_db()
 
     for username, id_ in users_and_ids:
         params = query_score_format(id_)
@@ -172,6 +179,11 @@ if __name__ == "__main__":
                 page += 1
 
                 for media in results['Page']['mediaList']:
+                    day = media['completedAt']['day']
+                    month = media['completedAt']['month']
+                    year = media['completedAt']['year']
+                    completed_at = f"{day}-{month}-{year}" if day and month and year else "-"
+
                     data.append((
                      username,
                      media['score'],
@@ -181,7 +193,8 @@ if __name__ == "__main__":
                      media['media']['title']['english'] or \
                       media['media']['title']['romaji'] or \
                       media['media']['title']['native'],
-                     media['progress']
+                     media['progress'],
+                     completed_at
                     ))
 
             # sleep for a while to avoid rate_limiting
