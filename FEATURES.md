@@ -9,7 +9,8 @@
 |    API    | Fetch `rewatch` count                                                       |    ❌️   | Not many people track their rewatches                                                                                                  |
 |    API    | Fetch all image types for various layout uses                               |    ✅️   |                                                                                                                                        |
 |    API    | Fetch several missing fields for FF's AOTY                                  |    ✅️   | Missing: relationType (non sequel), source, and format                                                                                 |
-|    API    | Fetch tags / genre / studio media data for extra analysis                   |    ✅️   | There should be a bridge table for media-tags                                                                                          |
+|    API    | Fetch tags / genre / studio media data for extra analysis                   |    💭️   | There should be a bridge table for media-tags  Rethink: use `statistics` connection from the API instead of fetching things myself     |
+|    API    | Fetch things for favorites analysis                                         |    ✅️   | Anime, manga, chara, staff, and studio; only name and pictures                                                                         |
 |    Data   | Implement fluff's rules                                                     |    ✅️   | Rules' detail in README                                                                                                                |
 |    Data   | AOTY should take into account when the series is completed                  |    ❌️   | Some members' Anilist' `completedAt` property have `null` values, even though they've completed the series (probably bug from Anilist) |
 | Dashboard | Implement layout as in design                                               |    ✅   |                                                                                                                                        |
@@ -25,10 +26,10 @@
 - Download all used images in local
 - ✨  Fluffy Folks's anime of the year 2022 ✨ tab
 - Tags / genre / studio analysis tab
-- Fetch things for favorites (users favorites, related anime/manga/chara details and pictures)
 - Favorites tab (analysis!)
 - Most divisive (highest standard dev) & most differed from AL tab (biggest rating difference between fluff and AL)
 - 🏅 90+, 🥈 85+, 🥉 80+ sections (use `expander`)
 - Redirect to page on link click
 - Various way to sort and filter (sort by: most watched, most favorited, most rewatched count. fetch accordingly)
 - Track score changes overtime and display who contributed to the change
+- Similarity profile between members
