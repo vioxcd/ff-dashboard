@@ -35,6 +35,7 @@ def create_db():
 		CREATE TABLE lists(
 			username TEXT,
 			scores TEXT,
+			scores_anichan TEXT,
 			status TEXT,
 			media_id INTEGER,
 			media_type TEXT,
@@ -45,13 +46,12 @@ def create_db():
 	"""
     cur.execute(query)
     print('Table lists created!')
-    print(f'{DATABASE_NAME} created!')
 
 
 def save_list_to_db(data):
     con = sqlite3.connect(DATABASE_NAME)
     cur = con.cursor()
-    query = "INSERT INTO lists VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+    query = "INSERT INTO lists VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
     cur.executemany(query, data)
     con.commit()
     print('Results saved!')
@@ -86,6 +86,7 @@ def query_score_format(id_):
 
 
 def query_list(page, username, per_page=50):
+    # this query has anichan specific score format included
     query = '''
 	query ($page: Int, $perPage: Int, $username: String) {
 		Page (page: $page, perPage: $perPage) {
@@ -93,7 +94,8 @@ def query_list(page, username, per_page=50):
 				hasNextPage
 			},
 			mediaList(userName: $username) {
-				score,
+				score: score,
+				anichan_score: score(format: POINT_100),
 				status,
                 progress,
                 completedAt {
@@ -187,6 +189,7 @@ if __name__ == "__main__":
                     data.append((
                      username,
                      media['score'],
+                     media['anichan_score'],
                      media['status'],
                      media['media']['id'],
                      media['media']['type'],
