@@ -5,3 +5,4 @@ DROP VIEW IF EXISTS v_appropriate_score;
 DROP VIEW IF EXISTS v_as_rules;
 DROP VIEW IF EXISTS v_favorites_p90;
 DROP VIEW IF EXISTS v_buggy_users;
+DROP VIEW IF EXISTS v_lists;

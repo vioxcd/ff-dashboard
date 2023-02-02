@@ -40,4 +40,7 @@ sql:
 	@echo "Creating buggy users view..."
 	sqlite3 $(DB) < sqls/view_buggy_users.sql
 
+	@echo "Creating lists with correct scores"
+	sqlite3 $(DB) < sqls/view_lists.sql
+
 	@echo "Done!"
