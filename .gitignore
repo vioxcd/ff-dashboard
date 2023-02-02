@@ -1,7 +1,9 @@
-Makefile
 ff.log
 fluff
 fluff.db
 fluff.db-journal
 *.bak
 .python-version
+
+data/
+bak/
