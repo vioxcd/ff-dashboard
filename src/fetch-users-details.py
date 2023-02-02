@@ -85,7 +85,7 @@ def query_score_format(id_):
     return {'query': query, 'variables': variables}
 
 
-def query_list(page, username, per_page=50):
+def query_list(page, username, per_page):
     # this query has anichan specific score format included
     query = '''
 	query ($page: Int, $perPage: Int, $username: String) {
@@ -161,19 +161,18 @@ if __name__ == "__main__":
         if username != results['User']['name']:
             username = results['User']['name']
 
-        score_format = None
-        if results:
-            score_format = results['User']['mediaListOptions']['scoreFormat']
+        score_format = results['User']['mediaListOptions']['scoreFormat']
         save_user_to_db(id_, username, score_format)
 
         page = 1  # starts from 1
+        per_page = 1 if score_format in ('POINT_5', 'POINT_3') else 50
         has_next_page = True
         data = []
         while has_next_page:
             print(f'Processed {username} page {page}')
 
             # one fetch-save cycle
-            params = query_list(page, username)
+            params = query_list(page, username, per_page)
             results = fetch(params)
 
             if results:
@@ -201,7 +200,7 @@ if __name__ == "__main__":
                     ))
 
             # sleep for a while to avoid rate_limiting
-            time.sleep(1.0)
+            time.sleep(.8)
 
         save_list_to_db(data)
         print(f'Saving {len(data)} lists for user {username}')
