@@ -19,7 +19,7 @@ redo-db:
 
 app:
 	@echo "Starting streamlit app..."
-	python3 src/app.py
+	streamlit run src/app.py
 
 sql:
 	@echo "Setting up views"
