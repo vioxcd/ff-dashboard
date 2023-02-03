@@ -19,10 +19,11 @@ class Media:
 	media_type: str
 	cover_image_url: str
 	banner_image_url: str
-	avg_score: int
+	average_score: int
 	mean_score: int
-	ff_score: float
-	votes: int
+	anichan_score: int
+	ff_score: int
+	audience_count: int
 	ranking: int
 
 ## Fetching Data
@@ -31,15 +32,30 @@ cur = con.cursor()
 media_list_query = cur.execute(
 	'''
 	SELECT
-		md.*,
-		ar.avg_score,
+		md.media_id,
+		md.title,
+		md.season,
+		md.season_year,
+		md.type AS media_type,
+		md.cover_image_url_xl AS cover_image_url,
+		md.banner_image_url,
+		md.average_score,
+		md.mean_score,
+		ar.anichan_score,
+		ar.ff_score,
 		ar.audience_count,
-		RANK() OVER (PARTITION BY media_type ORDER BY ar.avg_score DESC, ar.audience_count DESC, md.title DESC) AS ranking
+		RANK() OVER (PARTITION BY md.type
+					 ORDER BY ar.anichan_score DESC,
+							  ar.ff_score DESC,
+							  ar.audience_count DESC,
+							  md.title DESC
+					) AS ranking
 	FROM v_as_rules ar
 	JOIN media_details md
 		USING (media_id)
 	ORDER BY
-		ar.avg_score DESC,
+		ar.anichan_score DESC,
+		ar.ff_score DESC,
 		ar.audience_count DESC,
 		md.title DESC
 	'''
@@ -92,7 +108,7 @@ with tab1:
 			min_height = min([img.size[1] for img in images])
 			cropped_images = [crop(min_height, img) for img in images]
 			for col, media, img in zip(st.columns(5), medias, cropped_images):
-				col.image(img, caption=f"({media.ff_score} | {media.votes})")
+				col.image(img, caption=f"({media.ff_score} | {media.audience_count})")
 				col.caption(f"<div align='center'>{media.title}</div>", unsafe_allow_html=True)
 				col.write("")
 
@@ -107,4 +123,4 @@ with tab2:
 		col2.image(media.cover_image_url, use_column_width="always")
 		col3.write(media.title)
 		col4.write(media.ff_score)
-		col5.write(media.votes)
+		col5.write(media.audience_count)
