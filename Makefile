@@ -13,6 +13,10 @@ all:
 clean:
 	rm ff.log fluff.db
 
+redo-db:
+	rm fluff.db
+	cp fluff.db.bak fluff.db
+
 app:
 	@echo "Starting streamlit app..."
 	python3 src/app.py
@@ -42,5 +46,8 @@ sql:
 
 	@echo "Adding is_buggy column to users table..."
 	sqlite3 $(DB) < sqls/mod_users_is_buggy.sql
+
+	@echo "Update scores to its correct value"
+	sqlite3 $(DB) < sqls/update_score.sql
 
 	@echo "Done!"
