@@ -29,12 +29,16 @@
 
 - [Refactor] Planning to run this for the whole year — think about how to model historical data (lineage?) and its management
 - [Refactor] Create object models (class and abstract class?) for every `table create` and `save` method
+- [Refactor] use dbt-like data transformation progression. e.g. do not touch the source data (like doing `ALTER ADD` and `UPDATE` in my case) and try to work with staging and intermediate layers (my appropriate_score is currently used to detect bugs, but it could've been separated in bug discovery case vs. actually transforming the score)
 - [Tidy] Source API use `score` (singular), but somehow I use `scores` (plural) as column name
-- Add logic to handle `anichan_score` bugs. e.g. `if score_format is POINT_3 OR POINT_5 then fetch them one-by-one` (also needs adjust `time.sleep` call)
+- [Upgrade] use ORM to handle table creation and data insertion
+- [Upgrade] use dbt to handle SQLs and view re-creation
+- [Upgrade] add logging
+- [Upgrade] add Airflow to orchestrate data fetch. (add scenario to account for slower data fetch in a more streamlined fashion, e.g. fetch initially, but only fetch when `score_format` of each user changes -- this means detecting the change in `score_format` before fetching data)
 - Add `anichan_score` in the dashboard (as this is what's used in the `#ranking` channel)
 - Download all used images in local
 - ✨  Fluffy Folks's anime of the year 2022 ✨ tab
-- Tags / genre / studio analysis tab
+- Tags / genre / studio analysis tab (use the user's `statistics` from the API. high goal)
 - Favorites tab (analysis!)
 - Most divisive (highest standard dev) & most differed from AL tab (biggest rating difference between fluff and AL)
 - 🏅 90+, 🥈 85+, 🥉 80+ sections (use `expander`)
