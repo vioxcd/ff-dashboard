@@ -40,7 +40,7 @@ sql:
 	@echo "Creating buggy users view..."
 	sqlite3 $(DB) < sqls/view_buggy_users.sql
 
-	@echo "Creating lists with correct scores"
-	sqlite3 $(DB) < sqls/view_lists.sql
+	@echo "Adding is_buggy column to users table..."
+	sqlite3 $(DB) < sqls/mod_users_is_buggy.sql
 
 	@echo "Done!"

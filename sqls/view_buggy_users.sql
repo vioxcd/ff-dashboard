@@ -4,7 +4,7 @@
 CREATE VIEW v_buggy_users AS
 WITH
 buggy_users AS (
-	SELECT DISTINCT vas.username, u.score_format, 1 AS is_buggy 
+	SELECT DISTINCT u.username, u.score_format, 1 AS is_buggy
 	FROM v_appropriate_score vas
 	JOIN users u
 	USING (username)
@@ -16,7 +16,8 @@ non_buggy_users AS (
 		SELECT username, score_format  -- get all users
 		FROM users
 		EXCEPT
-		SELECT username, score_format FROM buggy_users
+		SELECT username, score_format
+		FROM buggy_users
 	)
 )
 SELECT * FROM buggy_users
