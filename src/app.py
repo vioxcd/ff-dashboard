@@ -21,45 +21,9 @@ class Media:
 	banner_image_url: str
 	average_score: int
 	mean_score: int
-	anichan_score: int
-	ff_score: int
+	score: int
 	audience_count: int
 	ranking: int
-
-## Fetching Data
-con = sqlite3.connect('fluff.db')
-cur = con.cursor()
-media_list_query = cur.execute(
-	'''
-	SELECT
-		md.media_id,
-		md.title,
-		md.season,
-		md.season_year,
-		md.type AS media_type,
-		md.cover_image_url_xl AS cover_image_url,
-		md.banner_image_url,
-		md.average_score,
-		md.mean_score,
-		ar.anichan_score,
-		ar.ff_score,
-		ar.audience_count,
-		RANK() OVER (PARTITION BY md.type
-					 ORDER BY ar.anichan_score DESC,
-							  ar.ff_score DESC,
-							  ar.audience_count DESC,
-							  md.title DESC
-					) AS ranking
-	FROM v_as_rules ar
-	JOIN media_details md
-		USING (media_id)
-	ORDER BY
-		ar.anichan_score DESC,
-		ar.ff_score DESC,
-		ar.audience_count DESC,
-		md.title DESC
-	'''
-)
 
 # Logic Layer
 ## Helper Functions
@@ -79,6 +43,54 @@ def crop(min_height, img):
 	top_h = 0 + round(delta_height / 2)
 	bottom_h = h - round(delta_height / 2)
 	return img.crop((0, top_h, w, bottom_h))
+
+def get_media_list(score_type):
+	assert score_type in ('Anichan Score', 'Adjusted FF Score'), 'wrong score format'
+	query_param = {
+		'Anichan Score': 'anichan_score',
+		'Adjusted FF Score': 'ff_score'
+	}[score_type]
+
+	return cur.execute(
+		f'''
+		SELECT
+			md.media_id,
+			md.title,
+			md.season,
+			md.season_year,
+			md.type AS media_type,
+			md.cover_image_url_xl AS cover_image_url,
+			md.banner_image_url,
+			md.average_score,
+			md.mean_score,
+			ar.{query_param} AS score,
+			ar.audience_count,
+			RANK() OVER (PARTITION BY md.type
+						ORDER BY ar.{query_param} DESC,
+								ar.audience_count DESC,
+								md.title DESC
+						) AS ranking
+		FROM v_as_rules ar
+		JOIN media_details md
+			USING (media_id)
+		ORDER BY
+			ar.{query_param} DESC,
+			ar.audience_count DESC,
+			md.title DESC
+		'''
+	)
+
+
+## Fetching Data
+con = sqlite3.connect('fluff.db')
+cur = con.cursor()
+
+option = st.selectbox(
+    'Preferred Score',
+    ('Anichan Score', 'Adjusted FF Score'))
+
+st.write('You selected:', option)
+
 ## Variables
 # """
 # ⭐ Fluffy Folks Ranking Inclusion Rules ⭐
@@ -88,13 +100,13 @@ def crop(min_height, img):
 # (4) Titles are formatted in lowercase English
 # """
 media_list: list[Media] = []
-for media in media_list_query:
+for media in get_media_list(option):
 	media_list.append(Media(*media))
 
 anime_list: list[Media] = [media for media in media_list \
-							if media.media_type == "ANIME" and media.ff_score >= 85.0]
+							if media.media_type == "ANIME" and media.score >= 85.0]
 manga_list: list[Media] = [media for media in media_list \
-							if media.media_type == "MANGA" and media.ff_score >= 85.0]
+							if media.media_type == "MANGA" and media.score >= 85.0]
 
 # Presentation Layer
 st.title("Fluffy Folks Ranking Dashboard")
@@ -108,7 +120,8 @@ with tab1:
 			min_height = min([img.size[1] for img in images])
 			cropped_images = [crop(min_height, img) for img in images]
 			for col, media, img in zip(st.columns(5), medias, cropped_images):
-				col.image(img, caption=f"({media.ff_score} | {media.audience_count})")
+				caption = f"({media.score} | {media.audience_count})"
+				col.image(img, caption=caption)
 				col.caption(f"<div align='center'>{media.title}</div>", unsafe_allow_html=True)
 				col.write("")
 
@@ -122,5 +135,5 @@ with tab2:
 		col1.write(f"#{media.ranking}")
 		col2.image(media.cover_image_url, use_column_width="always")
 		col3.write(media.title)
-		col4.write(media.ff_score)
+		col4.write(media.score)
 		col5.write(media.audience_count)
