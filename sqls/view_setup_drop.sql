@@ -6,3 +6,4 @@ DROP VIEW IF EXISTS v_as_rules;
 DROP VIEW IF EXISTS v_favorites_p90;
 DROP VIEW IF EXISTS v_buggy_users;
 DROP VIEW IF EXISTS v_lists;
+ALTER TABLE users DROP COLUMN is_buggy;
