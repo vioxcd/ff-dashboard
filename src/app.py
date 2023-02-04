@@ -24,7 +24,8 @@ class Media:
 	banner_image_url: str
 	average_score: int
 	mean_score: int
-	score: int
+	anichan_score: int
+	ff_score: int
 	audience_count: int
 	ranking: int
 
@@ -56,13 +57,7 @@ def crop(min_height, img):
 	return img.crop((0, top_h, w, bottom_h))
 
 ## Fetching Data
-def get_media_list(score_type):
-	assert score_type in ('Anichan Score', 'Adjusted FF Score'), 'wrong score format'
-	query_param = {
-		'Anichan Score': 'anichan_score',
-		'Adjusted FF Score': 'ff_score'
-	}[score_type]
-
+def get_media_list():
 	return cur.execute(
 		f'''
 		SELECT
@@ -75,10 +70,12 @@ def get_media_list(score_type):
 			md.banner_image_url,
 			md.average_score,
 			md.mean_score,
-			ar.{query_param} AS score,
+			ar.anichan_score,
+			ar.ff_score,
 			ar.audience_count,
 			RANK() OVER (PARTITION BY md.type
-						ORDER BY ar.{query_param} DESC,
+						ORDER BY ar.anichan_score DESC,
+								ar.ff_score DESC,
 								ar.audience_count DESC,
 								md.title DESC
 						) AS ranking
@@ -86,7 +83,8 @@ def get_media_list(score_type):
 		JOIN media_details md
 			USING (media_id)
 		ORDER BY
-			ar.{query_param} DESC,
+			ar.anichan_score DESC,
+			ar.ff_score DESC,
 			ar.audience_count DESC,
 			md.title DESC
 		'''
@@ -118,17 +116,29 @@ st.write('You selected:', option)
 # (4) Titles are formatted in lowercase English
 # """
 media_list: list[Media] = []
-for media in get_media_list(option):
+for media in get_media_list():
 	media_list.append(Media(*media))
 
 anime_list: list[Media] = [media for media in media_list \
-							if media.media_type == "ANIME" and media.score >= 85.0]
+							if media.media_type == "ANIME" \
+								and (media.anichan_score >= 85.0 or media.ff_score >= 85.0)]
 manga_list: list[Media] = [media for media in media_list \
-							if media.media_type == "MANGA" and media.score >= 85.0]
+							if media.media_type == "MANGA"
+								and (media.anichan_score >= 85.0 or media.ff_score >= 85.0)]
 
 # Presentation Layer
 st.title("Fluffy Folks Ranking Dashboard")
 
+## Hide expander borders
+hide = """
+<style>
+ul.streamlit-expander {
+    border: 0 !important;
+</style>
+"""
+st.markdown(hide, unsafe_allow_html=True)
+
+## Tabs
 tab1, tab2, tab3 = st.tabs([ "Awards 2022", "Anime", "Manga"])
 
 with tab1:
@@ -146,16 +156,72 @@ with tab1:
 				col.write("")
 
 with tab2:
-	with tab2.container():
-		for medias in chunks(anime_list[:10], 5):
-			images = [get_image(m.cover_image_url, m.title) for m in medias]
-			min_height = min([img.size[1] for img in images])
-			cropped_images = [crop(min_height, img) for img in images]
-			for col, media, img in zip(st.columns(5), medias, cropped_images):
-				caption = f"({media.score} | {media.audience_count})"
-				col.image(img, caption=caption)
-				col.caption(f"<div align='center'>{media.title}</div>", unsafe_allow_html=True)
-				col.write("")
+	section_gold = []
+	section_silver = []
+	section_bronze = []
+
+	for anime in anime_list:
+		if anime.anichan_score >= 90 or anime.ff_score >= 90:
+			section_gold.append(anime)
+		elif 90 > anime.anichan_score > 85 or 90 > anime.ff_score > 85:
+			section_silver.append(anime)
+		elif anime.anichan_score == 85 or anime.ff_score == 85:
+			section_bronze.append(anime)
+
+	start_rank_gold = 1
+	start_rank_silver = 1 + len(section_gold)
+	start_rank_bronze = 1 + len(section_silver)
+
+	with st.expander("🏅 90+", expanded=True):
+		_, _, _, col4, col5, col6 = st.columns([1, 2, 9, 2, 2, 2])
+		col4.write(f"<div align='center'>Anichan Score</div>", unsafe_allow_html=True)
+		col5.write(f"<div align='center'>Adjusted Score</div>", unsafe_allow_html=True)
+		col6.write(f"<div align='center'>Audience</div>", unsafe_allow_html=True)
+
+		st.write("")
+
+		for rank, media in enumerate(section_gold, start=start_rank_gold):
+			col1, col2, col3, col4, col5, col6 = st.columns([1, 2, 9, 2, 2, 2])
+			col1.write(f"#{rank}")
+			col2.image(media.cover_image_url, use_column_width="always")
+			col3.write(media.title)
+			col4.write(f"<div align='center'>{media.anichan_score}</div>", unsafe_allow_html=True)
+			col5.write(f"<div align='center'>{media.ff_score}</div>", unsafe_allow_html=True)
+			col6.write(f"<div align='center'>{media.audience_count}</div>", unsafe_allow_html=True)
+
+	with st.expander("🥈 85+"):
+		_, _, _, col4, col5, col6 = st.columns([1, 2, 9, 2, 2, 2])
+		col4.write(f"<div align='center'>Anichan Score</div>", unsafe_allow_html=True)
+		col5.write(f"<div align='center'>Adjusted Score</div>", unsafe_allow_html=True)
+		col6.write(f"<div align='center'>Audience</div>", unsafe_allow_html=True)
+
+		st.write("")
+
+		for rank, media in enumerate(section_silver, start=start_rank_silver):
+			col1, col2, col3, col4, col5, col6 = st.columns([1, 2, 9, 2, 2, 2])
+			col1.write(f"#{rank}")
+			col2.write("")
+			col3.write(media.title)
+			col4.write(f"<div align='center'>{media.anichan_score}</div>", unsafe_allow_html=True)
+			col5.write(f"<div align='center'>{media.ff_score}</div>", unsafe_allow_html=True)
+			col6.write(f"<div align='center'>{media.audience_count}</div>", unsafe_allow_html=True)
+
+	with st.expander("🥉 85"):
+		_, _, _, col4, col5, col6 = st.columns([1, 2, 9, 2, 2, 2])
+		col4.write(f"<div align='center'>Anichan Score</div>", unsafe_allow_html=True)
+		col5.write(f"<div align='center'>Adjusted Score</div>", unsafe_allow_html=True)
+		col6.write(f"<div align='center'>Audience</div>", unsafe_allow_html=True)
+
+		st.write("")
+
+		for rank, media in enumerate(section_bronze, start=start_rank_bronze):
+			col1, col2, col3, col4, col5, col6 = st.columns([1, 2, 9, 2, 2, 2])
+			col1.write(f"#{rank}")
+			col2.write("")
+			col3.write(media.title)
+			col4.write(f"<div align='center'>{media.anichan_score}</div>", unsafe_allow_html=True)
+			col5.write(f"<div align='center'>{media.ff_score}</div>", unsafe_allow_html=True)
+			col6.write(f"<div align='center'>{media.audience_count}</div>", unsafe_allow_html=True)
 
 with tab3:
 	_, _, _, col4, col5 = st.columns([1, 1, 14, 1, 1])
