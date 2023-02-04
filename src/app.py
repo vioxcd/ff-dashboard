@@ -101,12 +101,6 @@ def get_aoty_list():
 		FROM v_aoty_2022
 	''')
 
-option = st.selectbox(
-    'Preferred Score',
-    ('Anichan Score', 'Adjusted FF Score'))
-
-st.write('You selected:', option)
-
 ## Variables
 # """
 # ⭐ Fluffy Folks Ranking Inclusion Rules ⭐
