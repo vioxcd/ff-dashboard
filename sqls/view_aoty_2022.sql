@@ -21,27 +21,27 @@ aoty_2022 AS (
     title DESC
 ),
 aoty AS (
-	SELECT "AOTY" AS award, 1 AS award_order,
+	SELECT "Anime of the Year" AS award, 1 AS award_order,
 		* FROM aoty_2022 ORDER BY ff_score DESC LIMIT 1
 ),
 -- anime of the season (winter): my dress up darling
 aots_winter AS (
-	SELECT "AOTS Winter" AS award, 2 AS award_order,
+	SELECT "Anime of the Season: Winter" AS award, 2 AS award_order,
 		* FROM aoty_2022 WHERE season = "WINTER" ORDER BY ff_score DESC LIMIT 1
 ),
 -- anime of the season (spring): kaguya sama: love is war -ultra romantic-
 aots_spring AS (
-	SELECT "AOTS Spring" AS award, 3 AS award_order,
+	SELECT "Anime of the Season: Spring" AS award, 3 AS award_order,
 		* FROM aoty_2022 WHERE season = "SPRING" ORDER BY ff_score DESC LIMIT 1
 ),
 -- anime of the season (summer): made in abyss: the golden city of the scorching sun
 aots_summer AS (
-	SELECT "AOTS Summer" AS award, 4 AS award_order,
+	SELECT "Anime of the Season: Summer" AS award, 4 AS award_order,
 		* FROM aoty_2022 WHERE season = "SUMMER" ORDER BY ff_score DESC LIMIT 1
 ),
 -- anime of the season (fall): mob psycho iii
 aots_fall AS (
-	SELECT "AOTS Fall" AS award, 5 AS award_order,
+	SELECT "Anime of the Season: Fall" AS award, 5 AS award_order,
 		* FROM aoty_2022 WHERE season = "FALL" ORDER BY ff_score DESC LIMIT 1
 ),
 -- most popular: bocchi the rock!

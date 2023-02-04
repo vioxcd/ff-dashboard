@@ -8,6 +8,9 @@ from PIL import Image
 # Config Layer
 st.set_page_config(page_title=":))", layout="wide")
 
+con = sqlite3.connect('fluff.db')
+cur = con.cursor()
+
 # Data Layer
 ## Objects
 @dataclass
@@ -24,6 +27,14 @@ class Media:
 	score: int
 	audience_count: int
 	ranking: int
+
+@dataclass
+class AOTY:
+	award: int
+	award_order: str
+	media_id: int
+	title: str
+	cover_image_url: str
 
 # Logic Layer
 ## Helper Functions
@@ -44,6 +55,7 @@ def crop(min_height, img):
 	bottom_h = h - round(delta_height / 2)
 	return img.crop((0, top_h, w, bottom_h))
 
+## Fetching Data
 def get_media_list(score_type):
 	assert score_type in ('Anichan Score', 'Adjusted FF Score'), 'wrong score format'
 	query_param = {
@@ -80,10 +92,16 @@ def get_media_list(score_type):
 		'''
 	)
 
-
-## Fetching Data
-con = sqlite3.connect('fluff.db')
-cur = con.cursor()
+def get_aoty_list():
+	return cur.execute('''
+		SELECT
+			award,
+			award_order,
+			media_id,
+			title,
+			cover_image_url_xl AS cover_image_url
+		FROM v_aoty_2022
+	''')
 
 option = st.selectbox(
     'Preferred Score',
@@ -111,10 +129,24 @@ manga_list: list[Media] = [media for media in media_list \
 # Presentation Layer
 st.title("Fluffy Folks Ranking Dashboard")
 
-tab1, tab2 = st.tabs(["Anime", "Manga"])
+tab1, tab2, tab3 = st.tabs([ "Awards 2022", "Anime", "Manga"])
 
 with tab1:
 	with tab1.container():
+		aoty_list = [AOTY(*awardee) for awardee in get_aoty_list()]
+		for awardees in chunks(aoty_list, 3):
+			images = [get_image(a.cover_image_url, a.title) for a in awardees]
+			min_height = min([img.size[1] for img in images])
+			cropped_images = [crop(min_height, img) for img in images]
+			for col, awardee, img in zip(st.columns(3), awardees, cropped_images):
+				caption = f"{awardee.award}"
+				col.image(img)
+				col.caption(f"<h3 align='center';>{awardee.award}</h3>", unsafe_allow_html=True)
+				col.caption(f"<div align='center'>{awardee.title}</div>", unsafe_allow_html=True)
+				col.write("")
+
+with tab2:
+	with tab2.container():
 		for medias in chunks(anime_list[:10], 5):
 			images = [get_image(m.cover_image_url, m.title) for m in medias]
 			min_height = min([img.size[1] for img in images])
@@ -125,7 +157,7 @@ with tab1:
 				col.caption(f"<div align='center'>{media.title}</div>", unsafe_allow_html=True)
 				col.write("")
 
-with tab2:
+with tab3:
 	_, _, _, col4, col5 = st.columns([1, 1, 14, 1, 1])
 	col4.write("score")
 	col5.write("votes")
