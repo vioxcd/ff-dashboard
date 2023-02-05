@@ -50,6 +50,9 @@ sql:
 	@echo "Update scores to its correct value..."
 	sqlite3 $(DB) < sqls/update_score.sql
 
+	@echo "Creating media standard dev. view..."
+	sqlite3 $(DB) < sqls/view_media_stddev.sql
+
 	@echo "Creating wide media-tags view..."
 	sqlite3 $(DB) < sqls/view_wide_tags.sql
 
