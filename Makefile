@@ -47,7 +47,10 @@ sql:
 	@echo "Adding is_buggy column to users table..."
 	sqlite3 $(DB) < sqls/mod_users_is_buggy.sql
 
-	@echo "Update scores to its correct value"
+	@echo "Update scores to its correct value..."
 	sqlite3 $(DB) < sqls/update_score.sql
+
+	@echo "Creating wide media-tags view..."
+	sqlite3 $(DB) < sqls/view_wide_tags.sql
 
 	@echo "Done!"
