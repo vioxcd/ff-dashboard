@@ -14,5 +14,5 @@ SELECT *,
 		ELSE scores
 	END AS appropriate_score
 FROM lists
-	JOIN users
-	USING (username)
+JOIN users
+USING (username)
