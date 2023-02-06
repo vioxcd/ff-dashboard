@@ -29,6 +29,7 @@ tags_info AS (
 	FROM media_tags_bridge
 	JOIN media_tags
 	USING (tag_id)
+	WHERE category != ""  -- filter out empty category (ex: "Impersonation")
 ),
 wide_tags AS (
 	SELECT *,
