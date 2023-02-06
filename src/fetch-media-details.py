@@ -9,20 +9,8 @@ DATABASE_NAME = "fluff.db"
 def get_fluff_media():
     con = sqlite3.connect(DATABASE_NAME)
     cur = con.cursor()
-    media_list_query = cur.execute(
-        '''
-        SELECT
-            DISTINCT media_id, avg_score
-        FROM
-            v_as_rules
-        WHERE
-            avg_score >= 80.0
-        ORDER BY
-            2 DESC
-        '''
-    )
-    return [media_id for (media_id, _) in media_list_query]
- 
+    return list (cur.execute('''SELECT DISTINCT media_id FROM lists'''))
+
 
 def create_table():
     con = sqlite3.connect(DATABASE_NAME)
