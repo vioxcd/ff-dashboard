@@ -44,9 +44,9 @@ def chunks(lst, n):
     for i in range(0, len(lst), n):
         yield lst[i:i + n]
 
-def get_image(url, title):
+def get_image(url, name):
 	img = Image.open(requests.get(url, stream=True).raw)
-	print(f"{title} - {img.size}")
+	print(f"{name} - {img.size}")
 	return img
 
 def crop(min_height, img):
@@ -143,7 +143,6 @@ with tab1:
 			min_height = min([img.size[1] for img in images])
 			cropped_images = [crop(min_height, img) for img in images]
 			for col, awardee, img in zip(st.columns(3), awardees, cropped_images):
-				caption = f"{awardee.award}"
 				col.image(img)
 				col.caption(f"<h3 align='center';>{awardee.award}</h3>", unsafe_allow_html=True)
 				col.caption(f"<div align='center'>{awardee.title}</div>", unsafe_allow_html=True)
