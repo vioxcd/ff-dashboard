@@ -37,6 +37,14 @@ class AOTY:
 	title: str
 	cover_image_url: str
 
+@dataclass
+class Favorite:
+	name: str
+	type: str
+	cover_image_url: str
+	counts: int
+	pct_rank: float
+
 # Logic Layer
 ## Helper Functions
 def chunks(lst, n):
@@ -101,6 +109,9 @@ def get_aoty_list():
 		FROM v_aoty_2022
 	''')
 
+def get_favorites() -> list[Favorite]:
+	return [Favorite(*f) for f in cur.execute('''SELECT * FROM v_favorites_p90''')]
+
 ## Variables
 # """
 # ⭐ Fluffy Folks Ranking Inclusion Rules ⭐
@@ -133,7 +144,40 @@ ul.streamlit-expander {
 st.markdown(hide, unsafe_allow_html=True)
 
 ## Tabs
-tab1, tab2, tab3 = st.tabs([ "Awards 2022", "Anime", "Manga"])
+tab0, tab1, tab2, tab3 = st.tabs(["Favorites", "Awards 2022", "Anime", "Manga"])
+
+with tab0:
+	favorites_list = get_favorites()
+
+	# divide favorites by type
+	anime_fav: list[Favorite] = []
+	manga_fav: list[Favorite]  = []
+	characters_fav: list[Favorite]  = []
+	staff_fav: list[Favorite]  = []
+	studios_fav: list[Favorite]  = []
+
+	for fav in favorites_list:
+		match fav.type:
+			case "anime":
+				anime_fav.append(fav)
+			case "manga":
+				manga_fav.append(fav)
+			case "characters":
+				characters_fav.append(fav)
+			case "staff":
+				staff_fav.append(fav)
+			case "studios":
+				studios_fav.append(fav)
+
+	with st.expander("💕️ Top Favorited Anime", expanded=True):
+		for animes in chunks(anime_fav, 5):
+			images = [get_image(a.cover_image_url, a.name) for a in animes]
+			min_height = min([img.size[1] for img in images])
+			cropped_images = [crop(min_height, img) for img in images]
+			for col, anime, img in zip(st.columns(5), animes, cropped_images):
+				col.image(img, caption=f"({anime.counts})")
+				col.caption(f"<div align='center'>{anime.name}</div>", unsafe_allow_html=True)
+				col.write("")
 
 with tab1:
 	with tab1.container():
