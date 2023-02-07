@@ -2,8 +2,12 @@ import sqlite3
 import time
 
 import requests
+from pyrate_limiter import BucketFullException, Duration, Limiter, RequestRate
 
 DATABASE_NAME = "fluff.db"
+
+minutely_rate = RequestRate(80, Duration.MINUTE)
+limiter = Limiter(minutely_rate)
 
 
 def get_fluff_users_and_ids():
@@ -139,6 +143,7 @@ def get_query(query_type, page, user_id, per_page=50):
 	return {'query': query_template % query, 'variables': variables}
 
 
+@limiter.ratelimit('identity')
 def fetch(params):
     print(f"Requesting {params['variables']}")
     url = 'https://graphql.anilist.co'
@@ -148,11 +153,6 @@ def fetch(params):
     # handle rate limit error
     if "errors" in results:
         print(results['errors'][0]['message'])
-
-        if results['errors'][0]['status'] == 429:
-            print('Waiting for rate limit to be restored')
-            time.sleep(70)
-
         return None
 
     return results['data']
@@ -197,7 +197,14 @@ if __name__ == "__main__":
 
 				# one fetch-save cycle
 				query_params = get_query(query_type, page, user_id)
-				results = fetch(query_params)
+
+				results = None
+				try:
+					results = fetch(query_params)
+				except BucketFullException as err:
+					print(err)
+					print(err.meta_info)
+					time.sleep(70)
 
 				if results:
 					fav_items = results['User']['favourites'][query_type]
@@ -207,9 +214,6 @@ if __name__ == "__main__":
 					data = [extract_favourites(node, query_type, user_id)
 							for node in fav_items['nodes']]
 					save_favourites_to_db(data)
-				
-				# sleep for a while to avoid rate_limiting
-				time.sleep(1.0)
 
 			print(f'Saving {query_type} favourites for user {username}')
 	print('Done!')
