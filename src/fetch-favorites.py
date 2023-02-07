@@ -223,6 +223,8 @@ if __name__ == "__main__":
 					data = [extract_favourites(node, query_type, user_id)
 							for node in fav_items['nodes']]
 					save_favourites_to_db(data)
+				else:
+					has_next_page = False
 
 			print(f'Saving {query_type} favourites for user {username}')
 	print('Done!')
