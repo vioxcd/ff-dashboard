@@ -26,6 +26,7 @@ def create_table():
     query = """
 		CREATE TABLE favourites(
 			user_id INT,
+			item_id,
 			name TEXT,
 			type TEXT,
 			cover_image_url TEXT
@@ -39,7 +40,7 @@ def create_table():
 def save_favourites_to_db(data):
     con = sqlite3.connect(DATABASE_NAME)
     cur = con.cursor()
-    query = "INSERT INTO favourites VALUES (?, ?, ?, ?)"
+    query = "INSERT INTO favourites VALUES (?, ?, ?, ?, ?)"
     cur.executemany(query, data)
     con.commit()
     print('Results saved!')
@@ -62,6 +63,7 @@ def get_query(query_type, page, user_id, per_page=50):
 		"anime": '''
 			anime(page: $page, perPage: $perPage) {
 				nodes {
+					id,
 					title {
 						romaji,
 						english
@@ -78,6 +80,7 @@ def get_query(query_type, page, user_id, per_page=50):
 		"manga": '''
 			manga(page: $page, perPage: $perPage) {
 				nodes {
+					id,
 					title {
 						romaji,
 						english
@@ -94,6 +97,7 @@ def get_query(query_type, page, user_id, per_page=50):
 		"characters": '''
 			characters(page: $page, perPage: $perPage) {
 				nodes {
+					id,
 					name {
 						full
 					},
@@ -110,6 +114,7 @@ def get_query(query_type, page, user_id, per_page=50):
 		"staff": '''
 			staff(page: $page, perPage: $perPage) {
 				nodes {
+					id,
 					name {
 						full
 					},
@@ -125,6 +130,7 @@ def get_query(query_type, page, user_id, per_page=50):
 		"studios": '''
 			studios(page: $page, perPage: $perPage) {
 				nodes {
+					id,
 					name 
 				},
 				pageInfo {
@@ -163,6 +169,7 @@ def extract_favourites(node, query_type, user_id):
 		case "anime" | "manga":
 			return (
 				user_id,
+				node['id'],
 				node['title']['english'] or node['title']['romaji'],
 				query_type,
 				node['coverImage']['large'],
@@ -170,6 +177,7 @@ def extract_favourites(node, query_type, user_id):
 		case "characters" | "staff":
 			return (
 				user_id,
+				node['id'],
 				node['name']['full'],
 				query_type,
 				node['image']['large'],
@@ -177,6 +185,7 @@ def extract_favourites(node, query_type, user_id):
 		case "studios":
 			return (
 				user_id,
+				node['id'],
 				node['name'],
 				query_type,
 				None,  # studio don't have cover image
