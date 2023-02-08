@@ -1,9 +1,15 @@
+import math
 import sqlite3
 import time
 
 import requests
+from pyrate_limiter import BucketFullException, Duration, Limiter, RequestRate
 
 DATABASE_NAME = "fluff.db"
+
+# https://anilist.gitbook.io/anilist-apiv2-docs/overview/rate-limiting
+minutely_rate = RequestRate(60, Duration.MINUTE)
+limiter = Limiter(minutely_rate)
 
 
 def get_fluff_media():
@@ -95,6 +101,7 @@ def save_media_tag_bridge_to_db(media_id, tags):
     print(f"{media_id}'s tags saved!")
 
 
+@limiter.ratelimit('identity')
 def fetch_media_details(media_id):
     query = '''
     query ($media_id: Int) {
@@ -161,11 +168,6 @@ def fetch_media_details(media_id):
     # handle rate limit error
     if "errors" in results:
         print(results['errors'][0]['message'])
-
-        if results['errors'][0]['status'] == 429:
-            print('Waiting for rate limit to be restored')
-            time.sleep(70)
-
         return None
 
     return results['data']
@@ -214,7 +216,15 @@ if __name__ == '__main__':
     tags = set()
 
     for media_id in media_ids:
-        data = fetch_media_details(media_id)
+        data = None
+        try:
+            data = fetch_media_details(media_id)
+        except BucketFullException as err:
+            print(err)
+            print(err.meta_info)
+            sleep_for = math.ceil(float(err.meta_info['remaining_time']))
+            time.sleep(sleep_for)
+
         if not data:
             print(f"Error on {media_id}")
             continue
