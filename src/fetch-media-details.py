@@ -8,7 +8,7 @@ from pyrate_limiter import BucketFullException, Duration, Limiter, RequestRate
 DATABASE_NAME = "fluff.db"
 
 # https://anilist.gitbook.io/anilist-apiv2-docs/overview/rate-limiting
-minutely_rate = RequestRate(60, Duration.MINUTE)
+minutely_rate = RequestRate(80, Duration.MINUTE)
 limiter = Limiter(minutely_rate)
 
 RETRY_ATTEMPTS = 3  # control variable if BucketFullException is encountered
