@@ -11,6 +11,8 @@ DATABASE_NAME = "fluff.db"
 minutely_rate = RequestRate(60, Duration.MINUTE)
 limiter = Limiter(minutely_rate)
 
+RETRY_ATTEMPTS = 3  # control variable if BucketFullException is encountered
+
 
 def get_fluff_media():
     con = sqlite3.connect(DATABASE_NAME)
@@ -231,13 +233,20 @@ if __name__ == '__main__':
 
     for media in medias:
         data = None
-        try:
-            data = fetch_media_details(media)
-        except BucketFullException as err:
-            print(err)
-            print(err.meta_info)
-            sleep_for = math.ceil(float(err.meta_info['remaining_time']))
-            time.sleep(sleep_for)
+
+        for retries in range(RETRY_ATTEMPTS):
+            if retries != 0:
+                print(f"Retrying for {media}")
+
+            try:
+                data = fetch_media_details(media)
+            except BucketFullException as err:
+                print(err)
+                print(err.meta_info)
+                sleep_for = math.ceil(float(err.meta_info['remaining_time']))
+                time.sleep(sleep_for)
+            else:
+                break
 
         if not data:
             print(f"Error on {media}")
