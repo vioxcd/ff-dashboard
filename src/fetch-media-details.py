@@ -15,7 +15,14 @@ limiter = Limiter(minutely_rate)
 def get_fluff_media():
     con = sqlite3.connect(DATABASE_NAME)
     cur = con.cursor()
-    return list (cur.execute('''SELECT DISTINCT media_id FROM lists'''))
+    return [item for [item] in cur.execute('''
+        SELECT title
+        FROM v_as_rules
+        UNION
+        SELECT name
+        FROM favourites
+        WHERE type IN ("anime", "manga")
+    ''')]
 
 
 def create_table():
@@ -102,10 +109,14 @@ def save_media_tag_bridge_to_db(media_id, tags):
 
 
 @limiter.ratelimit('identity')
-def fetch_media_details(media_id):
+def fetch_media_details(id_or_title: int | str):
+    query_and_media_header = (
+        ("String", "search"),
+        ("Int", "id")
+    )[type(id_or_title) == int]
     query = '''
-    query ($media_id: Int) {
-        Media(id: $media_id) {
+    query ($search: %s) {
+        Media(%s: $search) {
             title {
                 english,
                 native,
@@ -158,8 +169,8 @@ def fetch_media_details(media_id):
             }
         }
     }
-    '''
-    params = {'query': query, 'variables': {'media_id': media_id}}
+    ''' % query_and_media_header
+    params = {'query': query, 'variables': {'search': id_or_title}}
     url = 'https://graphql.anilist.co'
 
     response = requests.post(url, json=params)
@@ -214,6 +225,8 @@ if __name__ == '__main__':
     create_table()
     media_ids = get_fluff_media()
     tags = set()
+
+    print(f"Processing {len(media_ids)} items")
 
     for media_id in media_ids:
         data = None
