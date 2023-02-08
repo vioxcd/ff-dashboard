@@ -1,3 +1,4 @@
+import math
 import sqlite3
 import time
 
@@ -213,7 +214,8 @@ if __name__ == "__main__":
 				except BucketFullException as err:
 					print(err)
 					print(err.meta_info)
-					time.sleep(70)
+					sleep_for = math.ceil(float(err.meta_info['remaining_time']))
+					time.sleep(sleep_for)
 
 				if results:
 					fav_items = results['User']['favourites'][query_type]
