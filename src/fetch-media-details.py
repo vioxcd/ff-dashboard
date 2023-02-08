@@ -53,8 +53,7 @@ def create_table():
 		CREATE TABLE IF NOT EXISTS media_tags(
             tag_id INT,
             name TEXT,
-            category TEXT,
-            rank INT
+            category TEXT
 		);
 	"""
     cur.execute(query)
@@ -64,7 +63,8 @@ def create_table():
     query = """
 		CREATE TABLE IF NOT EXISTS media_tags_bridge(
             media_id INT,
-            tag_id INT
+            tag_id INT,
+            rank INT
 		);
 	"""
     cur.execute(query)
@@ -81,22 +81,22 @@ def save_media_detail_to_db(data):
     print(f'{data[1]} saved!')
 
 
-def save_media_tags_to_db(data):
+def save_media_tags_to_db(tags):
     con = sqlite3.connect(DATABASE_NAME)
     cur = con.cursor()
-    query = "INSERT INTO media_tags VALUES (?, ?, ?, ?)"
-    cur.executemany(query, data)
+    query = "INSERT INTO media_tags VALUES (?, ?, ?)"
+    cur.executemany(query, tags)
     con.commit()
     if data:
         print(f'{data} saved!')
 
 
 def save_media_tag_bridge_to_db(media_id, tags):
-    media_id_tag_id_pairs = [(media_id, tag['id']) for tag in tags]
+    media_tag_bridges = [(media_id, tag['id'], tag['rank']) for tag in tags]
     con = sqlite3.connect(DATABASE_NAME)
     cur = con.cursor()
-    query = "INSERT INTO media_tags_bridge VALUES (?, ?)"
-    cur.executemany(query, media_id_tag_id_pairs)
+    query = "INSERT INTO media_tags_bridge VALUES (?, ?, ?)"
+    cur.executemany(query, media_tag_bridges)
     con.commit()
     print(f"{media_id}'s tags saved!")
 
@@ -241,7 +241,8 @@ if __name__ == '__main__':
                     if tag['id'] not in tags]
 
         """Save unseen tags"""
-        tags_ = [list(tag.values()) for tag in new_tags]
+
+        tags_ = [(tag['id'], tag['name'], tag['category']) for tag in new_tags]
         save_media_tags_to_db(tags_ )
 
         """Update tags list"""
