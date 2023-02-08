@@ -6,7 +6,7 @@ from pyrate_limiter import BucketFullException, Duration, Limiter, RequestRate
 
 DATABASE_NAME = "fluff.db"
 
-minutely_rate = RequestRate(80, Duration.MINUTE)
+minutely_rate = RequestRate(60, Duration.MINUTE)
 limiter = Limiter(minutely_rate)
 
 
