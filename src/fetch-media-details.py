@@ -81,7 +81,7 @@ def create_table():
 def save_media_detail_to_db(data):
     con = sqlite3.connect(DATABASE_NAME)
     cur = con.cursor()
-    # 16
+    # 17
     query = "INSERT INTO media_details VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
     cur.execute(query, data)
     con.commit()
@@ -117,6 +117,7 @@ def fetch_media_details(id_or_title: int | str):
     query = '''
     query ($search: %s) {
         Media(%s: $search) {
+            id,
             title {
                 english,
                 native,
@@ -199,7 +200,7 @@ def process_media(data):
 
     """Creating object before saving"""
     return (
-        media_id,
+        media_detail['id'],
         media_detail["title"]["english"] or \
             media_detail["title"]["romaji"] or \
             media_detail["title"]["native"],
@@ -223,15 +224,15 @@ def process_media(data):
 
 if __name__ == '__main__':
     create_table()
-    media_ids = get_fluff_media()
+    medias = get_fluff_media()
     tags = set()
 
-    print(f"Processing {len(media_ids)} items")
+    print(f"Processing {len(medias)} items")
 
-    for media_id in media_ids:
+    for media in medias:
         data = None
         try:
-            data = fetch_media_details(media_id)
+            data = fetch_media_details(media)
         except BucketFullException as err:
             print(err)
             print(err.meta_info)
@@ -239,7 +240,7 @@ if __name__ == '__main__':
             time.sleep(sleep_for)
 
         if not data:
-            print(f"Error on {media_id}")
+            print(f"Error on {media}")
             continue
         
         # 'media_id', 'title', 'season', 'season_year', 'type',
@@ -263,4 +264,4 @@ if __name__ == '__main__':
         tags.update(new_tag_ids)
 
         """Save media-tag relationship"""
-        save_media_tag_bridge_to_db(media_id, data["Media"]["tags"])
+        save_media_tag_bridge_to_db(data["Media"]["id"], data["Media"]["tags"])
