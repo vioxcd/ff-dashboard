@@ -30,14 +30,14 @@ RETRY_ATTEMPTS = 3  # control variable if BucketFullException is encountered
 def get_fluff_media():
     con = sqlite3.connect(DATABASE_NAME)
     cur = con.cursor()
-    return list(cur.execute('''
+    return [media_id for (media_id,) in cur.execute('''
         SELECT media_id
         FROM v_as_rules
         UNION
         SELECT item_id
         FROM favourites
         WHERE type IN ("anime", "manga")
-    '''))
+    ''')]
 
 
 def create_table():
