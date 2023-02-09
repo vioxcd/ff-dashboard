@@ -11,7 +11,7 @@ from pyrate_limiter import BucketFullException, Duration, Limiter, RequestRate
 # / CONFIGS
 logging.basicConfig(
     level=logging.INFO,
-    format="%(asctime)s [%(levelname)-5.5s] %(message)s",
+    format="%(asctime)s [%(levelname)s] %(message)s",
     handlers=[
         logging.FileHandler("{0}/{1}.log".format("logs", os.path.basename(__file__))),
         logging.StreamHandler(sys.stdout)
@@ -20,7 +20,7 @@ logging.basicConfig(
 
 DATABASE_NAME = "fluff.db"
 
-minutely_rate = RequestRate(60, Duration.MINUTE)
+minutely_rate = RequestRate(80, Duration.MINUTE)
 limiter = Limiter(minutely_rate)
 
 RETRY_ATTEMPTS = 3  # control variable if BucketFullException is encountered
@@ -245,7 +245,7 @@ if __name__ == "__main__":
 							for node in fav_items['nodes']]
 					save_favourites_to_db(data)
 				else:
-					logging.warning(f"Data doesn't exist on {username}")
+					logging.error(f"Data doesn't exist on {username}")
 					has_next_page = False
 
 			logging.info(f'Saving {query_type} favourites for user {username}')

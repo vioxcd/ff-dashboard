@@ -8,7 +8,7 @@ import requests
 
 logging.basicConfig(
     level=logging.INFO,
-    format="%(asctime)s [%(levelname)-5.5s] %(message)s",
+    format="%(asctime)s [%(levelname)s] %(message)s",
     handlers=[
         logging.FileHandler("{0}/{1}.log".format("logs", os.path.basename(__file__))),
         logging.StreamHandler(sys.stdout)
