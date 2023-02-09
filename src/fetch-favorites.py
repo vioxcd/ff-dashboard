@@ -1,16 +1,29 @@
+import logging
 import math
+import os
 import sqlite3
+import sys
 import time
 
 import requests
 from pyrate_limiter import BucketFullException, Duration, Limiter, RequestRate
+
+# / CONFIGS
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)-5.5s] %(message)s",
+    handlers=[
+        logging.FileHandler("{0}/{1}.log".format("logs", os.path.basename(__file__))),
+        logging.StreamHandler(sys.stdout)
+    ]
+)
 
 DATABASE_NAME = "fluff.db"
 
 minutely_rate = RequestRate(60, Duration.MINUTE)
 limiter = Limiter(minutely_rate)
 
-
+# / Functions
 def get_fluff_users_and_ids():
     con = sqlite3.connect(DATABASE_NAME)
     cur = con.cursor()
@@ -35,7 +48,7 @@ def create_table():
 
 	"""
     cur.execute(query)
-    print('Table favourites created!')
+    logging.info('Table favourites created!')
 
 
 def save_favourites_to_db(data):
@@ -44,7 +57,7 @@ def save_favourites_to_db(data):
     query = "INSERT INTO favourites VALUES (?, ?, ?, ?, ?)"
     cur.executemany(query, data)
     con.commit()
-    print('Results saved!')
+    logging.info('Results saved!')
 
 
 def get_query(query_type, page, user_id, per_page=50):
@@ -152,14 +165,14 @@ def get_query(query_type, page, user_id, per_page=50):
 
 @limiter.ratelimit('identity')
 def fetch(params):
-    print(f"Requesting {params['variables']}")
+    logging.info(f"Requesting {params['variables']}")
     url = 'https://graphql.anilist.co'
     response = requests.post(url, json=params)
     results = response.json()
 
     # handle rate limit error
     if "errors" in results:
-        print(results['errors'][0]['message'])
+        logging.error(results['errors'][0]['message'])
         return None
 
     return results['data']
@@ -203,7 +216,7 @@ if __name__ == "__main__":
 			page = 1  # starts from 1
 			has_next_page = True
 			while has_next_page:
-				print(f'Processing {query_type} favourites for {username} on page {page}')
+				logging.info(f'Processing {query_type} favourites for {username} on page {page}')
 
 				# one fetch-save cycle
 				query_params = get_query(query_type, page, user_id)
@@ -212,8 +225,8 @@ if __name__ == "__main__":
 				try:
 					results = fetch(query_params)
 				except BucketFullException as err:
-					print(err)
-					print(err.meta_info)
+					logging.error(err)
+					logging.error(err.meta_info)
 					sleep_for = math.ceil(float(err.meta_info['remaining_time']))
 					time.sleep(sleep_for)
 
@@ -226,7 +239,8 @@ if __name__ == "__main__":
 							for node in fav_items['nodes']]
 					save_favourites_to_db(data)
 				else:
+					logging.warning(f"Data doesn't exist on {username}")
 					has_next_page = False
 
-			print(f'Saving {query_type} favourites for user {username}')
-	print('Done!')
+			logging.info(f'Saving {query_type} favourites for user {username}')
+	logging.info('Done!')

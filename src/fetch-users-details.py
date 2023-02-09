@@ -1,8 +1,19 @@
+import logging
 import os
 import sqlite3
+import sys
 import time
 
 import requests
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)-5.5s] %(message)s",
+    handlers=[
+        logging.FileHandler("{0}/{1}.log".format("logs", os.path.basename(__file__))),
+        logging.StreamHandler(sys.stdout)
+    ]
+)
 
 DATABASE_NAME = "fluff.db"
 
@@ -10,7 +21,7 @@ DATABASE_NAME = "fluff.db"
 def get_fluff_users_and_ids():
     with open('fluff', 'r') as f:
         data = list(map(lambda x: x.rstrip('\n').split(','), f.readlines()))
-        print(f'Fluff: {data}')
+        logging.info(f'Fluff: {data}')
     return data
 
 
@@ -25,10 +36,9 @@ def create_db():
 			username TEXT,
 			score_format TEXT
 		);
-
 	"""
     cur.execute(query)
-    print('Table users created!')
+    logging.info('Table users created!')
 
     cur.execute("DROP TABLE IF EXISTS lists")
     query = """
@@ -45,7 +55,7 @@ def create_db():
 		);
 	"""
     cur.execute(query)
-    print('Table lists created!')
+    logging.info('Table lists created!')
 
 
 def save_list_to_db(data):
@@ -54,7 +64,7 @@ def save_list_to_db(data):
     query = "INSERT INTO lists VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
     cur.executemany(query, data)
     con.commit()
-    print('Results saved!')
+    logging.info('Results saved!')
 
 
 def save_user_to_db(id_, username, score_format):
@@ -64,7 +74,7 @@ def save_user_to_db(id_, username, score_format):
     query = f"INSERT INTO users VALUES ('{id_}', '{username}',  '{score_format}')"
     cur.execute(query)
     con.commit()
-    print(f'{username} info saved!')
+    logging.info(f'{username} info saved!')
 
 
 def query_score_format(id_):
@@ -126,17 +136,17 @@ def query_list(page, username, per_page):
 
 def fetch(params):
     """Fetch data, returns Page. Returns None on error"""
-    print(f"Requesting {params['variables']}")
+    logging.info(f"Requesting {params['variables']}")
     url = 'https://graphql.anilist.co'
     response = requests.post(url, json=params)
     results = response.json()
 
     # handle rate limit error
     if "errors" in results:
-        print(results['errors']['message'])
+        logging.error(results['errors']['message'])
 
         if results['errors']['status'] == 429:
-            print('Waiting for rate limit to be restored')
+            logging.error('Waiting for rate limit to be restored')
             time.sleep(70)
 
         return None
@@ -169,7 +179,7 @@ if __name__ == "__main__":
         has_next_page = True
         data = []
         while has_next_page:
-            print(f'Processed {username} page {page}')
+            logging.info(f'Processed {username} page {page}')
 
             # one fetch-save cycle
             params = query_list(page, username, per_page)
@@ -203,6 +213,6 @@ if __name__ == "__main__":
             time.sleep(.8)
 
         save_list_to_db(data)
-        print(f'Saving {len(data)} lists for user {username}')
+        logging.info(f'Saving {len(data)} lists for user {username}')
 
-    print('Done!')
+    logging.info('Done!')
