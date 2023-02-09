@@ -23,6 +23,8 @@ DATABASE_NAME = "fluff.db"
 minutely_rate = RequestRate(60, Duration.MINUTE)
 limiter = Limiter(minutely_rate)
 
+RETRY_ATTEMPTS = 3  # control variable if BucketFullException is encountered
+
 # / Functions
 def get_fluff_users_and_ids():
     con = sqlite3.connect(DATABASE_NAME)
@@ -220,15 +222,19 @@ if __name__ == "__main__":
 
 				# one fetch-save cycle
 				query_params = get_query(query_type, page, user_id)
-
 				results = None
-				try:
-					results = fetch(query_params)
-				except BucketFullException as err:
-					logging.error(err)
-					logging.error(err.meta_info)
-					sleep_for = math.ceil(float(err.meta_info['remaining_time']))
-					time.sleep(sleep_for)
+
+				for retries in range(RETRY_ATTEMPTS):
+					if retries != 0:
+						logging.warning(f"Retrying for {username} {query_type}")
+
+					try:
+						results = fetch(query_params)
+					except BucketFullException as err:
+						logging.error(err)
+						logging.error(err.meta_info)
+						sleep_for = math.ceil(float(err.meta_info['remaining_time']))
+						time.sleep(sleep_for)
 
 				if results:
 					fav_items = results['User']['favourites'][query_type]
