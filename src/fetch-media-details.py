@@ -17,14 +17,14 @@ RETRY_ATTEMPTS = 3  # control variable if BucketFullException is encountered
 def get_fluff_media():
     con = sqlite3.connect(DATABASE_NAME)
     cur = con.cursor()
-    return [item for [item] in cur.execute('''
-        SELECT title
+    return list(cur.execute('''
+        SELECT media_id
         FROM v_as_rules
         UNION
-        SELECT name
+        SELECT item_id
         FROM favourites
         WHERE type IN ("anime", "manga")
-    ''')]
+    '''))
 
 
 def create_table():
@@ -96,8 +96,8 @@ def save_media_tags_to_db(tags):
     query = "INSERT INTO media_tags VALUES (?, ?, ?)"
     cur.executemany(query, tags)
     con.commit()
-    if data:
-        print(f'{data} saved!')
+    if tags:
+        print(f'{tags} saved!')
 
 
 def save_media_tag_bridge_to_db(media_id, tags):
@@ -111,14 +111,10 @@ def save_media_tag_bridge_to_db(media_id, tags):
 
 
 @limiter.ratelimit('identity')
-def fetch_media_details(id_or_title: int | str):
-    query_and_media_header = (
-        ("String", "search"),
-        ("Int", "id")
-    )[type(id_or_title) == int]
+def fetch_media_details(media_id):
     query = '''
-    query ($search: %s) {
-        Media(%s: $search) {
+    query ($media_id: Int) {
+        Media(id: $media_id) {
             id,
             title {
                 english,
@@ -172,8 +168,8 @@ def fetch_media_details(id_or_title: int | str):
             }
         }
     }
-    ''' % query_and_media_header
-    params = {'query': query, 'variables': {'search': id_or_title}}
+    '''
+    params = {'query': query, 'variables': {'media_id': media_id}}
     url = 'https://graphql.anilist.co'
 
     response = requests.post(url, json=params)
@@ -226,20 +222,20 @@ def process_media(data):
 
 if __name__ == '__main__':
     create_table()
-    medias = get_fluff_media()
+    media_ids = get_fluff_media()
     tags = set()
 
-    print(f"Processing {len(medias)} items")
+    print(f"Processing {len(media_ids)} items")
 
-    for media in medias:
+    for media_id in media_ids:
         data = None
 
         for retries in range(RETRY_ATTEMPTS):
             if retries != 0:
-                print(f"Retrying for {media}")
+                print(f"Retrying for {media_id}")
 
             try:
-                data = fetch_media_details(media)
+                data = fetch_media_details(media_id)
             except BucketFullException as err:
                 print(err)
                 print(err.meta_info)
@@ -249,7 +245,7 @@ if __name__ == '__main__':
                 break
 
         if not data:
-            print(f"Error on {media}")
+            print(f"Data not found on {media_id}")
             continue
         
         # 'media_id', 'title', 'season', 'season_year', 'type',
@@ -273,4 +269,4 @@ if __name__ == '__main__':
         tags.update(new_tag_ids)
 
         """Save media-tag relationship"""
-        save_media_tag_bridge_to_db(data["Media"]["id"], data["Media"]["tags"])
+        save_media_tag_bridge_to_db(media_id, data["Media"]["tags"])
