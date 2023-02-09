@@ -1,9 +1,22 @@
+import logging
 import math
+import os
 import sqlite3
+import sys
 import time
 
 import requests
 from pyrate_limiter import BucketFullException, Duration, Limiter, RequestRate
+
+# / CONFIGS
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    handlers=[
+        logging.FileHandler("{0}/{1}.log".format("logs", os.path.basename(__file__))),
+        logging.StreamHandler(sys.stdout)
+    ]
+)
 
 DATABASE_NAME = "fluff.db"
 
@@ -13,7 +26,7 @@ limiter = Limiter(minutely_rate)
 
 RETRY_ATTEMPTS = 3  # control variable if BucketFullException is encountered
 
-
+# / Functions
 def get_fluff_media():
     con = sqlite3.connect(DATABASE_NAME)
     cur = con.cursor()
@@ -55,7 +68,7 @@ def create_table():
 		);
 	"""
     cur.execute(query)
-    print('Table `media details` created!')
+    logging.info('Table `media details` created!')
 
     cur.execute("DROP TABLE IF EXISTS media_tags")
     query = """
@@ -66,7 +79,7 @@ def create_table():
 		);
 	"""
     cur.execute(query)
-    print('Table `media tags` created!')
+    logging.info('Table `media tags` created!')
 
     cur.execute("DROP TABLE IF EXISTS media_tags_bridge")
     query = """
@@ -77,7 +90,7 @@ def create_table():
 		);
 	"""
     cur.execute(query)
-    print('Table `media tags bridge` created!')
+    logging.info('Table `media tags bridge` created!')
 
 
 def save_media_detail_to_db(data):
@@ -87,7 +100,7 @@ def save_media_detail_to_db(data):
     query = "INSERT INTO media_details VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
     cur.execute(query, data)
     con.commit()
-    print(f'{data[1]} saved!')
+    logging.info(f'{data[1]} saved!')
 
 
 def save_media_tags_to_db(tags):
@@ -97,7 +110,7 @@ def save_media_tags_to_db(tags):
     cur.executemany(query, tags)
     con.commit()
     if tags:
-        print(f'{tags} saved!')
+        logging.info(f'{tags} saved!')
 
 
 def save_media_tag_bridge_to_db(media_id, tags):
@@ -107,7 +120,7 @@ def save_media_tag_bridge_to_db(media_id, tags):
     query = "INSERT INTO media_tags_bridge VALUES (?, ?, ?)"
     cur.executemany(query, media_tag_bridges)
     con.commit()
-    print(f"{media_id}'s tags saved!")
+    logging.info(f"{media_id}'s tags saved!")
 
 
 @limiter.ratelimit('identity')
@@ -177,7 +190,8 @@ def fetch_media_details(media_id):
 
     # handle rate limit error
     if "errors" in results:
-        print(results['errors'][0]['message'])
+        logging.error(f"Error when fetching {media_id}")
+        logging.error(results['errors'][0]['message'])
         return None
 
     return results['data']
@@ -225,27 +239,27 @@ if __name__ == '__main__':
     media_ids = get_fluff_media()
     tags = set()
 
-    print(f"Processing {len(media_ids)} items")
+    logging.info(f"Processing {len(media_ids)} items")
 
     for media_id in media_ids:
         data = None
 
         for retries in range(RETRY_ATTEMPTS):
             if retries != 0:
-                print(f"Retrying for {media_id}")
+                logging.warning(f"Retrying for {media_id}")
 
             try:
                 data = fetch_media_details(media_id)
             except BucketFullException as err:
-                print(err)
-                print(err.meta_info)
+                logging.error(err)
+                logging.error(err.meta_info)
                 sleep_for = math.ceil(float(err.meta_info['remaining_time']))
                 time.sleep(sleep_for)
             else:
                 break
 
         if not data:
-            print(f"Data not found on {media_id}")
+            logging.error(f"Data not found on {media_id}")
             continue
         
         # 'media_id', 'title', 'season', 'season_year', 'type',
