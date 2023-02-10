@@ -59,4 +59,7 @@ sql:
 	@echo "Creating underrated view..."
 	sqlite3 $(DB) < sqls/view_underrated.sql
 
+	@echo "Creating studios statistics view..."
+	sqlite3 $(DB) < sqls/view_studios_stats.sql
+
 	@echo "Done!"
