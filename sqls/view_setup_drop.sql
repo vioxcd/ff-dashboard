@@ -8,4 +8,5 @@ DROP VIEW IF EXISTS v_buggy_users;
 DROP VIEW IF EXISTS v_lists;
 DROP VIEW IF EXISTS v_wide_tags;
 DROP VIEW IF EXISTS v_media_stddev;
+DROP VIEW IF EXISTS v_underrated;
 ALTER TABLE users DROP COLUMN is_buggy;

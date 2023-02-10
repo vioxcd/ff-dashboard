@@ -56,4 +56,7 @@ sql:
 	@echo "Creating wide media-tags view..."
 	sqlite3 $(DB) < sqls/view_wide_tags.sql
 
+	@echo "Creating underrated view..."
+	sqlite3 $(DB) < sqls/view_underrated.sql
+
 	@echo "Done!"
