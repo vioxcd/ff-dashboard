@@ -62,4 +62,10 @@ sql:
 	@echo "Creating studios statistics view..."
 	sqlite3 $(DB) < sqls/view_studios_stats.sql
 
+	@echo "Creating tags 90th percentile statistics view..."
+	sqlite3 $(DB) < sqls/view_tags_counts_p90.sql
+
+	@echo "Creating tags per-media 90th percentile statistics view..."
+	sqlite3 $(DB) < sqls/view_tags_counts_by_media_p90.sql
+
 	@echo "Done!"
