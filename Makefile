@@ -71,4 +71,7 @@ sql:
 	@echo "Creating tags subcategory's ranks view..."
 	sqlite3 $(DB) < sqls/view_tags_subcategory_ranked.sql
 
+	@echo "Creating tags subcategory's favourites stats view..."
+	sqlite3 $(DB) < sqls/view_tags_subcategory_favorited.sql
+
 	@echo "Done!"
