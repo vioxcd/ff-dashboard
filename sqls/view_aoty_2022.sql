@@ -14,11 +14,6 @@ aoty_2022 AS (
     AND ff_score >= 80.0
     AND media_type = 'ANIME'
     AND season_year = 2022
-  ORDER BY
-    anichan_score DESC,
-    ff_score DESC,
-    audience_count DESC,
-    title DESC
 ),
 aoty AS (
 	SELECT "Anime of the Year" AS award, 1 AS award_order,
