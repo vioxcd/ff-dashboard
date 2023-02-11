@@ -93,3 +93,83 @@
 -- (5411429, 6145, "Science SARU", "studios", ""),
 -- (5411429, 44, "Shaft", "studios", "")
 -- ;
+
+-- * All unique titles that might get displayed
+-- criteria: either they fulfill the rules or are favorited
+-- WITH
+-- all_titles AS (
+--   SELECT title, media_type
+--   FROM v_as_rules
+--   UNION
+--   SELECT name, UPPER(type)
+--   FROM favourites
+--   WHERE type IN ("anime", "manga")
+-- )
+-- SELECT title FROM all_titles
+-- EXCEPT
+-- SELECT title FROM media_details
+
+-- * Should be looked again to investigate what this could be used for
+-- ? Is this a kind of "popularity and salience (rank) of tags?"
+-- Tags Rank
+-- Normalized counts and ranks (divide by max. avg w/ tag_rank)
+-- WITH
+-- tags_counted_ranked AS (
+--  SELECT
+--    name,
+--    sub_category,
+--    COUNT(1) AS counts,
+--    CAST(AVG(rank) AS INTEGER) AS tag_rank_avg
+--  FROM v_wide_tags
+--  GROUP BY 1, 2
+-- ),
+-- highest_counts AS (
+--  SELECT MAX(counts) AS highest_count FROM tags_counted_ranked
+-- ),
+-- normalize_counts_and_ranks AS (
+--  SELECT
+--    name,
+--    sub_category,
+--    ((counts / hc.highest_count) + (tag_rank_avg / 100.0)) / 2 AS normalized_cr
+--  FROM tags_counted_ranked, highest_counts hc
+-- )
+-- SELECT *
+-- FROM normalize_counts_and_ranks
+-- ORDER BY normalized_cr DESC
+
+-- * Should be looked again to investigate what this could be used for
+-- ? Kinda looks the same w/ tags_subcategory_favorited. but it's normalized?
+-- Most favorited tags' subcategory, normalized
+-- CREATE VIEW v_tags_subcategory_favorited_normalized
+-- AS
+-- WITH
+-- wide_favourite_tags AS (
+--   SELECT f.user_id, vwt.*
+--   FROM favourites f
+--   JOIN v_wide_tags vwt
+--   ON f.name = vwt.title
+-- ),
+-- tags_counted_ranked AS (
+--  SELECT
+--    name,
+--    sub_category,
+--    COUNT(1) AS counts,
+--    CAST(AVG(rank) AS INTEGER) AS rank_avg
+--  FROM wide_favourite_tags
+--  GROUP BY 1, 2
+-- ),
+-- highest_counts AS (
+--  SELECT MAX(counts) AS highest_count FROM tags_counted_ranked
+-- ),
+-- normalized_counts_and_ranks AS (
+--  SELECT
+--    name,
+--    sub_category,
+--    counts,
+--    rank_avg,
+--    ((counts / hc.highest_count) + (rank_avg / 100.0)) / 2 AS normalized_cr
+--  FROM tags_counted_ranked, highest_counts hc
+-- )
+-- SELECT *
+-- FROM normalized_counts_and_ranks
+-- ORDER BY normalized_cr DESC
