@@ -1,5 +1,6 @@
 import sqlite3
 from dataclasses import dataclass
+from typing import Iterator
 
 import requests
 import streamlit as st
@@ -59,6 +60,17 @@ def crop(min_height, img):
 	top_h = 0 + round(delta_height / 2)
 	bottom_h = h - round(delta_height / 2)
 	return img.crop((0, top_h, w, bottom_h))
+
+## Presentation Functions
+def get_expanded_sections(media_ranked: list[Media]) -> list[tuple[str, bool, Iterator[Media]]]:
+	section_gold = (media for media in media_ranked if media.section == "gold")
+	section_silver = (media for media in media_ranked if media.section == "silver")
+	section_bronze = (media for media in media_ranked if media.section == "bronze")
+	return [
+		("🏅 90+", True, section_gold),
+		("🥈 85+", False, section_silver),
+		("🥉 85", False, section_bronze),
+	]
 
 ## Fetching Data
 def get_media_section_and_ranking() -> list[Media]:
@@ -152,70 +164,40 @@ with tab1:
 				col.write("")
 
 with tab2:
-	section_gold = (anime for anime in anime_ranked if anime.section == "gold")
-	section_silver = (anime for anime in anime_ranked if anime.section == "silver")
-	section_bronze = (anime for anime in anime_ranked if anime.section == "bronze")
+	for title, is_expanded, section in get_expanded_sections(anime_ranked):
+		with st.expander(title, expanded=is_expanded):
+			_, _, _, col4, col5, col6 = st.columns([1, 2, 9, 2, 2, 2])
+			col4.write(f"<div align='center'>Anichan Score</div>", unsafe_allow_html=True)
+			col5.write(f"<div align='center'>Adjusted Score</div>", unsafe_allow_html=True)
+			col6.write(f"<div align='center'>Audience</div>", unsafe_allow_html=True)
 
-	with st.expander("🏅 90+", expanded=True):
-		_, _, _, col4, col5, col6 = st.columns([1, 2, 9, 2, 2, 2])
-		col4.write(f"<div align='center'>Anichan Score</div>", unsafe_allow_html=True)
-		col5.write(f"<div align='center'>Adjusted Score</div>", unsafe_allow_html=True)
-		col6.write(f"<div align='center'>Audience</div>", unsafe_allow_html=True)
+			st.write("")
 
-		st.write("")
+			for media in section:
+				col1, col2, col3, col4, col5, col6 = st.columns([1, 2, 9, 2, 2, 2])
+				col1.write(f"#{media.ranking}")
+				col2.image(media.cover_image_url, use_column_width="always")
+				col3.write(media.title)
+				col4.write(f"<div align='center'>{media.anichan_score}</div>", unsafe_allow_html=True)
+				col5.write(f"<div align='center'>{media.ff_score}</div>", unsafe_allow_html=True)
+				col6.write(f"<div align='center'>{media.audience_count}</div>", unsafe_allow_html=True)
 
-		for media in section_gold:
-			col1, col2, col3, col4, col5, col6 = st.columns([1, 2, 9, 2, 2, 2])
-			col1.write(f"#{media.ranking}")
-			col2.image(media.cover_image_url, use_column_width="always")
-			col3.write(media.title)
-			col4.write(f"<div align='center'>{media.anichan_score}</div>", unsafe_allow_html=True)
-			col5.write(f"<div align='center'>{media.ff_score}</div>", unsafe_allow_html=True)
-			col6.write(f"<div align='center'>{media.audience_count}</div>", unsafe_allow_html=True)
-
-	with st.expander("🥈 85+"):
-		_, _, _, col4, col5, col6 = st.columns([1, 2, 9, 2, 2, 2])
-		col4.write(f"<div align='center'>Anichan Score</div>", unsafe_allow_html=True)
-		col5.write(f"<div align='center'>Adjusted Score</div>", unsafe_allow_html=True)
-		col6.write(f"<div align='center'>Audience</div>", unsafe_allow_html=True)
-
-		st.write("")
-
-		for media in section_silver:
-			col1, col2, col3, col4, col5, col6 = st.columns([1, 2, 9, 2, 2, 2])
-			col1.write(f"#{media.ranking}")
-			col2.write("")
-			col3.write(media.title)
-			col4.write(f"<div align='center'>{media.anichan_score}</div>", unsafe_allow_html=True)
-			col5.write(f"<div align='center'>{media.ff_score}</div>", unsafe_allow_html=True)
-			col6.write(f"<div align='center'>{media.audience_count}</div>", unsafe_allow_html=True)
-
-	with st.expander("🥉 85"):
-		_, _, _, col4, col5, col6 = st.columns([1, 2, 9, 2, 2, 2])
-		col4.write(f"<div align='center'>Anichan Score</div>", unsafe_allow_html=True)
-		col5.write(f"<div align='center'>Adjusted Score</div>", unsafe_allow_html=True)
-		col6.write(f"<div align='center'>Audience</div>", unsafe_allow_html=True)
-
-		st.write("")
-
-		for media in section_bronze:
-			col1, col2, col3, col4, col5, col6 = st.columns([1, 2, 9, 2, 2, 2])
-			col1.write(f"#{media.ranking}")
-			col2.write("")
-			col3.write(media.title)
-			col4.write(f"<div align='center'>{media.anichan_score}</div>", unsafe_allow_html=True)
-			col5.write(f"<div align='center'>{media.ff_score}</div>", unsafe_allow_html=True)
-			col6.write(f"<div align='center'>{media.audience_count}</div>", unsafe_allow_html=True)
-
+# similar to the code above, but this one is for manga
 with tab3:
-	_, _, _, col4, col5 = st.columns([1, 1, 14, 1, 1])
-	col4.write("score")
-	col5.write("votes")
+	for title, is_expanded, section in get_expanded_sections(manga_ranked):
+		with st.expander(title, expanded=is_expanded):
+			_, _, _, col4, col5, col6 = st.columns([1, 2, 9, 2, 2, 2])
+			col4.write(f"<div align='center'>Anichan Score</div>", unsafe_allow_html=True)
+			col5.write(f"<div align='center'>Adjusted Score</div>", unsafe_allow_html=True)
+			col6.write(f"<div align='center'>Audience</div>", unsafe_allow_html=True)
 
-	for media in manga_list[:10]:
-		col1, col2, col3, col4, col5 = st.columns([1, 1, 14, 1, 1])
-		col1.write(f"#{media.ranking}")
-		col2.image(media.cover_image_url, use_column_width="always")
-		col3.write(media.title)
-		col4.write(media.score)
-		col5.write(media.audience_count)
+			st.write("")
+
+			for media in section:
+				col1, col2, col3, col4, col5, col6 = st.columns([1, 2, 9, 2, 2, 2])
+				col1.write(f"#{media.ranking}")
+				col2.image(media.cover_image_url, use_column_width="always")
+				col3.write(media.title)
+				col4.write(f"<div align='center'>{media.anichan_score}</div>", unsafe_allow_html=True)
+				col5.write(f"<div align='center'>{media.ff_score}</div>", unsafe_allow_html=True)
+				col6.write(f"<div align='center'>{media.audience_count}</div>", unsafe_allow_html=True)
