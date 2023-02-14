@@ -32,6 +32,9 @@ sql:
 	@echo "Creating scores defined as rules view..."
 	sqlite3 $(DB) < sqls/view_as_rules.sql
 
+	@echo "Creating media lists section and ranking view..."
+	sqlite3 $(DB) < sqls/view_media_section_and_ranking.sql
+
 	@echo "Creating AOTY 2022 view..."
 	sqlite3 $(DB) < sqls/view_aoty_2022.sql
 
