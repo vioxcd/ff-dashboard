@@ -6,7 +6,7 @@ import streamlit as st
 from PIL import Image
 
 # Config Layer
-st.set_page_config(page_title=":))", layout="wide")
+st.set_page_config(page_title="FFD :)", layout="wide")
 
 con = sqlite3.connect('fluff.db')
 cur = con.cursor()
@@ -91,7 +91,7 @@ anime_ranked = [m for m in media_ranked if m.media_type == "ANIME"]
 manga_ranked = [m for m in media_ranked if m.media_type == "MANGA"]
 
 # Presentation Layer
-st.title("Fluffy Folks Ranking Dashboard")
+st.title("Fluffy Folks Dashboard")
 
 ## Hide expander borders
 hide = """
