@@ -47,17 +47,15 @@ def get_media_lists() -> list[Media]:
 @limiter.ratelimit('identity')
 def download_image(media: Media) -> None:
     res = requests.get(media.cover_image_url, stream=True)
-    file_format = media.cover_image_url.split(".")[-1]
-    # handle "/" in media title, e.g. Fate/Stay Night
-    title = media.title.replace("/", " ") if "/" in media.title else media.title
-    file_name = f"{title}_{media.media_type}.{file_format}"
+    media_ident = f"{media.title}_{media.media_type}"
+    file_name = media.cover_image_url.split("/")[-1]
     file_path = os.path.join(IMAGES_FOLDER, file_name)
     if res.status_code == 200:
         with open(file_path,'wb') as f:
             shutil.copyfileobj(res.raw, f)
-        logging.info(f'Image sucessfully Downloaded: {file_name}')
+        logging.info(f'{media_ident} sucessfully downloaded: {file_name}')
     else:
-        logging.info(f"Image {file_name} couldn't be retrieved")
+        logging.info(f"{file_name} couldn't be retrieved")
 
 
 if __name__ == "__main__":
