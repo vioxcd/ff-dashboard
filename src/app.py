@@ -124,7 +124,7 @@ ul.streamlit-expander {
 st.markdown(hide, unsafe_allow_html=True)
 
 ## Tabs
-tab0, tab1, tab2, tab3 = st.tabs(["Favorites", "Awards 2022", "Anime", "Manga"])
+tab0, tab1, tab2, tab3, tab4 = st.tabs([ "Favorites", "Awards 2022", "Anime", "Manga", "Help & FAQs"])
 
 with tab0:
 	favorites_list = get_favorites()
@@ -210,3 +210,8 @@ with tab3:
 				col4.write(f"<div align='center'>{media.anichan_score}</div>", unsafe_allow_html=True)
 				col5.write(f"<div align='center'>{media.ff_score}</div>", unsafe_allow_html=True)
 				col6.write(f"<div align='center'>{media.audience_count}</div>", unsafe_allow_html=True)
+
+with tab4:
+	with open("HELP.md", 'r') as f:
+		markdown = f.read()
+	tab4.markdown(markdown)
