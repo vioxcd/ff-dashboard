@@ -1,3 +1,4 @@
+import os
 import sqlite3
 from dataclasses import dataclass
 from typing import Iterator
@@ -49,8 +50,16 @@ def chunks(lst, n):
     for i in range(0, len(lst), n):
         yield lst[i:i + n]
 
-def get_image(url, name):
+def get_image_from_url(url, name):
 	img = Image.open(requests.get(url, stream=True).raw)
+	print(f"{name} - {img.size}")
+	return img
+
+def get_local_image(url, name):
+	IMAGES_FOLDER = os.path.join(os.getcwd(), "images")
+	file_name = url.split("/")[-1]
+	file_path = os.path.join(IMAGES_FOLDER, file_name)
+	img = Image.open(file_path)
 	print(f"{name} - {img.size}")
 	return img
 
@@ -142,7 +151,7 @@ with tab0:
 
 	with st.expander("💕️ Top Favorited Anime", expanded=True):
 		for animes in chunks(anime_fav, 5):
-			images = [get_image(a.cover_image_url, a.name) for a in animes]
+			images = [get_local_image(a.cover_image_url, a.name) for a in animes]
 			min_height = min([img.size[1] for img in images])
 			cropped_images = [crop(min_height, img) for img in images]
 			for col, anime, img in zip(st.columns(5), animes, cropped_images):
@@ -154,7 +163,7 @@ with tab1:
 	with tab1.container():
 		aoty_list = [AOTY(*awardee) for awardee in get_aoty_list()]
 		for awardees in chunks(aoty_list, 3):
-			images = [get_image(a.cover_image_url, a.title) for a in awardees]
+			images = [get_local_image(a.cover_image_url, a.title) for a in awardees]
 			min_height = min([img.size[1] for img in images])
 			cropped_images = [crop(min_height, img) for img in images]
 			for col, awardee, img in zip(st.columns(3), awardees, cropped_images):
@@ -176,7 +185,7 @@ with tab2:
 			for media in section:
 				col1, col2, col3, col4, col5, col6 = st.columns([1, 2, 9, 2, 2, 2])
 				col1.write(f"#{media.ranking}")
-				col2.image(media.cover_image_url, use_column_width="always")
+				col2.image(get_local_image(media.cover_image_url, media.title), use_column_width="always")
 				col3.write(media.title)
 				col4.write(f"<div align='center'>{media.anichan_score}</div>", unsafe_allow_html=True)
 				col5.write(f"<div align='center'>{media.ff_score}</div>", unsafe_allow_html=True)
