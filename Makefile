@@ -17,6 +17,10 @@ redo-db:
 	rm fluff.db
 	cp fluff.db.bak fluff.db
 
+download-images:
+	mkdir -p images
+	python3 src/download-images.py
+
 app:
 	@echo "Starting streamlit app..."
 	streamlit run src/app.py
