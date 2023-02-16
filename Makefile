@@ -60,6 +60,9 @@ sql:
 	@echo "Creating media standard dev. view..."
 	sqlite3 $(DB) < sqls/view_media_stddev.sql
 
+	@echo "Creating most divisive media (on the 90th percentile) view..."
+	sqlite3 $(DB) < sqls/view_divisive_media.sql
+
 	@echo "Creating wide media-tags view..."
 	sqlite3 $(DB) < sqls/view_wide_tags.sql
 

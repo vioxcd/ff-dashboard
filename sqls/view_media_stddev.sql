@@ -30,8 +30,16 @@ scores_stddev AS (
 	SELECT
 		a.title,
 		a.media_type,
-		SQRT(SUM(POWER(f.scores_anichan - a.anichan_avg, 2)) / a.n) AS anichan_stddev,
-		SQRT(SUM(POWER(f.appropriate_score - a.ff_avg, 2)) / a.n) AS ff_stddev,
+		a.anichan_avg,
+		a.ff_avg,
+		CAST(
+			SQRT(SUM(POWER(f.scores_anichan - a.anichan_avg, 2)) / a.n)
+			AS INTEGER
+		) AS anichan_stddev,
+		CAST(
+			SQRT(SUM(POWER(f.appropriate_score - a.ff_avg, 2)) / a.n)
+			AS INTEGER
+		) AS ff_stddev,
 		a.n
 	FROM average_scores a
 	JOIN filtered_lists f
@@ -42,5 +50,5 @@ scores_stddev AS (
 SELECT *
 FROM scores_stddev
 ORDER BY
-	anichan_stddev DESC,
-	ff_stddev DESC
+	ff_stddev DESC,
+	anichan_stddev DESC
