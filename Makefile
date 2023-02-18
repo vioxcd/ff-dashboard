@@ -61,7 +61,7 @@ sql:
 	sqlite3 $(DB) < sqls/view_media_stddev.sql
 
 	@echo "Creating most divisive media on .9 percentile view..."
-	sqlite3 $(DB) < sqls/view_divisive_media.sql
+	sqlite3 $(DB) < sqls/view_divisive_media_p90.sql
 
 	@echo "Creating most dropped media on .9 percentile view..."
 	sqlite3 $(DB) < sqls/view_dropped_media_p90.sql
