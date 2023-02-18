@@ -9,6 +9,7 @@ DROP VIEW IF EXISTS v_buggy_users;
 DROP VIEW IF EXISTS v_lists;
 DROP VIEW IF EXISTS v_wide_tags;
 DROP VIEW IF EXISTS v_divisive_media_p90;
+DROP VIEW IF EXISTS v_dropped_media_p90;
 DROP VIEW IF EXISTS v_media_stddev;
 DROP VIEW IF EXISTS v_underrated;
 DROP VIEW IF EXISTS v_studios_stats;
