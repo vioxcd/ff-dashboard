@@ -1,5 +1,5 @@
 -- setup sql
-DROP VIEW IF EXISTS vm_anichan_to_p3p5_scores;
+DROP VIEW IF EXISTS vm_anichan_to_3_and_5_scores_format_mapping;
 DROP VIEW IF EXISTS v_aoty_2022;
 DROP VIEW IF EXISTS v_appropriate_score;
 DROP VIEW IF EXISTS v_as_rules;

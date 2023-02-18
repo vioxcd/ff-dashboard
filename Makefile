@@ -46,7 +46,7 @@ sql:
 	sqlite3 $(DB) < sqls/view_favourites_p90.sql
 
 	@echo "Creating favourites on .9 percentile view..."
-	sqlite3 $(DB) < sqls/view_mapping_anichan_to_p3p5_scores.sql
+	sqlite3 $(DB) < sqls/view_mapping_anichan_to_3_and_5_scores_format.sql
 
 	@echo "Creating buggy users view..."
 	sqlite3 $(DB) < sqls/view_buggy_users.sql
