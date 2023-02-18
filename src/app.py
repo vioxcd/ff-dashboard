@@ -124,9 +124,10 @@ ul.streamlit-expander {
 st.markdown(hide, unsafe_allow_html=True)
 
 ## Tabs
-tab0, tab1, tab2, tab3, tab4 = st.tabs([ "Favorites", "Awards 2022", "Anime", "Manga", "Help & FAQs"])
+tabs = ["Favorites", "Awards 2022", "Anime", "Manga", "Help & FAQs"]
+favorites_tab, aoty_2022_tab, anime_tab, manga_tab, help_tab = st.tabs(tabs)
 
-with tab0:
+with favorites_tab:
 	favorites_list = get_favorites()
 
 	# divide favorites by type
@@ -159,8 +160,8 @@ with tab0:
 				col.caption(f"<div align='center'>{anime.name}</div>", unsafe_allow_html=True)
 				col.write("")
 
-with tab1:
-	with tab1.container():
+with aoty_2022_tab:
+	with aoty_2022_tab.container():
 		aoty_list = [AOTY(*awardee) for awardee in get_aoty_list()]
 		for awardees in chunks(aoty_list, 3):
 			images = [get_local_image(a.cover_image_url, a.title) for a in awardees]
@@ -172,7 +173,7 @@ with tab1:
 				col.caption(f"<div align='center'>{awardee.title}</div>", unsafe_allow_html=True)
 				col.write("")
 
-with tab2:
+with anime_tab:
 	for title, is_expanded, section in get_expanded_sections(anime_ranked):
 		with st.expander(title, expanded=is_expanded):
 			_, _, _, col4, col5, col6 = st.columns([1, 2, 9, 2, 2, 2])
@@ -192,7 +193,7 @@ with tab2:
 				col6.write(f"<div align='center'>{media.audience_count}</div>", unsafe_allow_html=True)
 
 # similar to the code above, but this one is for manga
-with tab3:
+with manga_tab:
 	for title, is_expanded, section in get_expanded_sections(manga_ranked):
 		with st.expander(title, expanded=is_expanded):
 			_, _, _, col4, col5, col6 = st.columns([1, 2, 9, 2, 2, 2])
@@ -211,7 +212,7 @@ with tab3:
 				col5.write(f"<div align='center'>{media.ff_score}</div>", unsafe_allow_html=True)
 				col6.write(f"<div align='center'>{media.audience_count}</div>", unsafe_allow_html=True)
 
-with tab4:
+with help_tab:
 	with open("HELP.md", 'r') as f:
 		markdown = f.read()
-	tab4.markdown(markdown)
+	help_tab.markdown(markdown)
