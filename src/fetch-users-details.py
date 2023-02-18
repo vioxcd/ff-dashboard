@@ -44,8 +44,8 @@ def create_db():
     query = """
 		CREATE TABLE lists(
 			username TEXT,
-			scores TEXT,
-			scores_anichan TEXT,
+			score TEXT,
+			anichan_score TEXT,
 			status TEXT,
 			media_id INTEGER,
 			media_type TEXT,

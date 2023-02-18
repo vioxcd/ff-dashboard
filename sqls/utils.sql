@@ -51,7 +51,7 @@
 --
 -- SELECT
 -- 	username,
--- 	scores_anichan,
+-- 	anichan_score,
 -- 	appropriate_score
 -- FROM v_appropriate_score
 -- WHERE media_type = "ANIME"

@@ -4,7 +4,7 @@
 -- ? to be used in an Airflow pipeline
 CREATE VIEW vm_anichan_to_3_and_5_scores_format_mapping
 AS
-SELECT username, scores, scores_anichan
+SELECT username, score, anichan_score
 FROM lists
 WHERE username IN (
 	SELECT username

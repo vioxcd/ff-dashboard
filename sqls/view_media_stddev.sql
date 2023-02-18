@@ -8,10 +8,10 @@ filtered_lists AS (
 		media_id,
 		title,
 		media_type,
-		CAST(scores_anichan AS INTEGER) AS scores_anichan,
+		CAST(anichan_score AS INTEGER) AS anichan_score,
 		CAST(appropriate_score AS INTEGER) AS appropriate_score 
 	FROM v_appropriate_score
-	WHERE CAST(scores_anichan AS INTEGER) > 0
+	WHERE CAST(anichan_score AS INTEGER) > 0
 		AND CAST(appropriate_score AS INTEGER) > 0
 ),
 average_scores AS (
@@ -19,7 +19,7 @@ average_scores AS (
 		media_id,
 		title,
 		media_type,
-		CAST(AVG(scores_anichan) AS INTEGER) AS anichan_avg,
+		CAST(AVG(anichan_score) AS INTEGER) AS anichan_avg,
 		CAST(AVG(appropriate_score) AS INTEGER) AS ff_avg,
 		COUNT(1) AS n
 	FROM filtered_lists
@@ -33,7 +33,7 @@ scores_stddev AS (
 		a.anichan_avg,
 		a.ff_avg,
 		CAST(
-			SQRT(SUM(POWER(f.scores_anichan - a.anichan_avg, 2)) / a.n)
+			SQRT(SUM(POWER(f.anichan_score - a.anichan_avg, 2)) / a.n)
 			AS INTEGER
 		) AS anichan_stddev,
 		CAST(

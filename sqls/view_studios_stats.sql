@@ -7,7 +7,7 @@ media_scores AS (
   SELECT
     md.*,
     vas.username,
-    vas.scores_anichan,
+    vas.anichan_score,
     vas.appropriate_score
   FROM v_appropriate_score vas
   JOIN media_details md
@@ -18,7 +18,7 @@ media_scores AS (
 studio_stats AS (
   SELECT
     studios,
-    CAST(AVG(scores_anichan) AS INTEGER) AS anichan_avg,
+    CAST(AVG(anichan_score) AS INTEGER) AS anichan_avg,
     CAST(AVG(appropriate_score) AS INTEGER) AS ff_avg,
     COUNT(1) AS n
   FROM media_scores
