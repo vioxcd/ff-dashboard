@@ -1,7 +1,43 @@
 -- Place for various utility queries
 -- ! NOT TO BE RUN DIRECTLY
 
--- Rename cover_image column name mistakes
+-- * Table Deduplication SQL
+-- * Run each block below one by one in steps
+-- check unique vs. duplicated media
+-- SELECT
+-- 	COUNT (DISTINCT media_id) AS unique_media_count,
+-- 	COUNT (media_id) AS duplicated_media_count
+-- FROM
+-- 	media_details
+-- create backup table with unique media
+-- CREATE TABLE media_details_bak AS SELECT * FROM media_details GROUP BY media_id
+-- delete table with duplicates
+-- DELETE FROM media_details
+-- restore item to the original table from backup
+-- INSERT INTO media_details
+-- SELECT * FROM media_details_bak
+-- drop the backup table
+-- DROP TABLE media_details_bak
+
+
+-- * See titles that are not eligible by rules (investigating `as_rules` view)
+-- SELECT
+--   title,
+--   media_type
+-- FROM v_appropriate_score
+-- WHERE status IN ('COMPLETED', 'CURRENT')
+-- GROUP BY title, media_type
+-- HAVING COUNT(1) >= 5
+-- EXCEPT -- filter clause
+-- SELECT
+--   title,
+--   media_type
+-- FROM v_appropriate_score
+-- WHERE status = 'COMPLETED' OR (status = 'CURRENT' AND progress >= 5)
+-- GROUP BY title, media_type
+-- HAVING COUNT(1) >= 5
+
+-- * Rename cover_image column name mistakes
 -- probably only ran once (ever)
 -- ALTER TABLE media_details RENAME COLUMN cover_image_url_md TO cover_image_url_xl_bak;
 -- ALTER TABLE media_details RENAME COLUMN cover_image_url_xl TO cover_image_url_md;
