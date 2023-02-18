@@ -6,6 +6,5 @@ fluff.db-journal
 .python-version
 
 data/
-bak/
 logs/
 images/

@@ -7,7 +7,7 @@ get_media_lists AS (
 	SELECT
 		md.media_id,
 		md.title,
-		md.type AS media_type,
+		md.media_type,
 		md.cover_image_url_xl AS cover_image_url,
 		ar.anichan_score,
 		ar.ff_score,

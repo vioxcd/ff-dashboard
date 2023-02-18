@@ -12,7 +12,7 @@ media_scores AS (
   FROM v_appropriate_score vas
   JOIN media_details md
   USING(media_id)
-  WHERE type = "ANIME"
+  WHERE md.media_type = "ANIME"
 	AND studios != ""
 ),
 studio_stats AS (

@@ -40,7 +40,7 @@ def get_media_lists() -> list[Media]:
     con = sqlite3.connect(DATABASE_NAME)
     cur = con.cursor()
     return [Media(*m) for m in cur.execute('''
-        SELECT DISTINCT(title), type, cover_image_url_xl FROM media_details
+        SELECT DISTINCT(title), media_type, cover_image_url_xl FROM media_details
     ''')]
 
 

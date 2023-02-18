@@ -12,7 +12,7 @@ aoty_2022 AS (
   USING (media_id)
   WHERE anichan_score >= 80.0
     AND ff_score >= 80.0
-    AND media_type = 'ANIME'
+    AND md.media_type = 'ANIME'
     AND season_year = 2022
 ),
 aoty AS (

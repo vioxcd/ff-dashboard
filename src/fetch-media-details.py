@@ -53,7 +53,7 @@ def create_table():
             season TEXT,
             season_year INT,
             episodes INT,
-            type TEXT,
+            media_type TEXT,
             format TEXT,
             genres TEXT,
 			cover_image_url_xl TEXT,

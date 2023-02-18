@@ -7,13 +7,13 @@ media_scores AS (
   SELECT
     vas.username,
     md.title,
-  	md.type,
+    md.media_type,
   	CAST(md.mean_score AS INTEGER) AS mean_score,
     vas.appropriate_score
   FROM v_appropriate_score vas
   JOIN media_details md
   USING(media_id)
-  WHERE type = "ANIME"
+  WHERE md.media_type = "ANIME"
 )
 SELECT
   *,

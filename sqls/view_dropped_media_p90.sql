@@ -35,6 +35,6 @@ SELECT
 	md.cover_image_url_xl
 FROM ordered_dropped dc
 	JOIN media_details md
-	ON dc.title = md.title AND dc.media_type = md.type
+	USING (title, media_type)
 WHERE pct_rank > .9 -- * can change this if it's too much
 ORDER BY n DESC
