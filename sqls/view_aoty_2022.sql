@@ -1,13 +1,31 @@
 CREATE VIEW v_aoty_2022
 AS
 WITH
+aoty_2022_rules AS (
+	-- this CTE is taken from `as_rules`
+	-- the `WHERE` clause is modified with `retrieved_date = "2023-02-01"` to make sure it's getting the correct entries
+	SELECT
+		media_id,
+		title,
+		media_type,
+		CAST(AVG(anichan_score) AS INTEGER) AS anichan_score,
+		CAST(AVG(appropriate_score) AS INTEGER) AS ff_score,
+		COUNT(1) AS audience_count
+	FROM v_appropriate_score
+	WHERE (status = 'COMPLETED' OR (status IN ('CURRENT', 'PAUSED') AND progress >= 5)) -- rules: completed or at least 5 eps progress
+		AND CAST(anichan_score AS INTEGER) > 0 -- don't calculate non-rating
+		AND CAST(appropriate_score AS INTEGER) > 0 -- don't calculate non-rating
+		AND retrieved_date = "2023-02-01" -- retrieve date here
+	GROUP BY title, media_type
+	HAVING COUNT(1) >= 5 -- rules: minimum watched by 5 members
+),
 aoty_2022 AS (
   SELECT
     md.*,
     ar.anichan_score,
     ar.ff_score,
     ar.audience_count
-  FROM v_as_rules ar
+  FROM aoty_2022_rules ar
   JOIN media_details md
   USING (media_id)
   WHERE anichan_score >= 80.0
