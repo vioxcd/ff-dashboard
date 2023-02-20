@@ -8,3 +8,4 @@ fluff.db-journal
 data/
 logs/
 images/
+airflow/
