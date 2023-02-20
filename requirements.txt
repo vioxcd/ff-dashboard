@@ -1,3 +1,5 @@
 pyrate-limiter==2.9.0
 requests==2.28.2
 streamlit==1.17.0
+apache-airflow==2.5.1
+dbt-core-1.4.1
