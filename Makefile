@@ -1,17 +1,38 @@
 DB = fluff.db
-
-all:
-	@echo "Fetching fluff's scores..."
-	python3 src/fetch-users-details.py
-
-	@echo "Fetching media details..."
-	python3 src/fetch-media-details.py
-
-	@echo "Fetching fluff's favorites..."
-	python3 src/fetch-favorites.py
+export AIRFLOW_HOME := $(shell pwd)/airflow
+PREV_AIRFLOW_DAGS_FOLDER := $(AIRFLOW_HOME)/dags
+NEW_AIRFLOW_DAGS_FOLDER := $(shell pwd)/dags
 
 clean:
 	rm ff.log fluff.db
+
+setup-airflow:
+	@echo $(AIRFLOW_HOME)
+
+	# required airflow initialization
+	airflow db init
+	airflow users create \
+		--username admin \
+		--password admin \
+		--firstname Airflow \
+		--lastname Admin \
+		--role Admin \
+		--email me@example.com
+
+	# set dags folder
+	mkdir -p dags
+	sed -i "s|dags_folder = $(PREV_AIRFLOW_DAGS_FOLDER)|dags_folder = $(NEW_AIRFLOW_DAGS_FOLDER)|" airflow/airflow.cfg
+
+	# set timezone
+	sed -i 's|default_timezone = utc|default_timezone = Asia/Jakarta|' airflow/airflow.cfg
+	sed -i 's|default_ui_timezone = UTC|default_ui_timezone = Asia/Jakarta|' airflow/airflow.cfg
+
+	# set environment variables for the project
+	airflow variables set DATABASE_NAME $(DB)
+
+start-airflow:
+	airflow webserver --port 8080 &
+	airflow scheduler &
 
 redo-db:
 	rm fluff.db
