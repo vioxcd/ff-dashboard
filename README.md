@@ -38,4 +38,8 @@ airflow standalone
 # Visit localhost:8080 in the browser and use the admin account details
 # shown on the terminal to login.
 # Enable the example_bash_operator dag in the home page
+
+# Use below command to setup command-line autocompletion
+eval "$(register-python-argcomplete airflow)"
 ```
+
