@@ -38,8 +38,19 @@ airflow standalone
 # Visit localhost:8080 in the browser and use the admin account details
 # shown on the terminal to login.
 # Enable the example_bash_operator dag in the home page
-
-# Use below command to setup command-line autocompletion
-eval "$(register-python-argcomplete airflow)"
 ```
 
+Some custom terminal stuff that is quite useful
+
+```bash
+# Use below command to setup command-line autocompletion
+eval "$(register-python-argcomplete airflow)"
+
+# Silence SQLAlchemy deprecation warning
+# https://stackoverflow.com/a/75109965
+export SQLALCHEMY_SILENCE_UBER_WARNING=1
+```
+
+### How To Use
+
+Most of the commands I use are recorded in the [Makefile](./Makefile).

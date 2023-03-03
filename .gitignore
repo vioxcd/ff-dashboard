@@ -5,6 +5,8 @@ fluff.db-journal
 *.bak
 .python-version
 
+__pycache__
+bak/
 data/
 logs/
 images/
