@@ -2,9 +2,10 @@ import logging
 import os
 import sqlite3
 import sys
-import time
+from datetime import datetime as dt
 
 import requests
+from pyrate_limiter import Duration, Limiter, RequestRate
 
 logging.basicConfig(
     level=logging.INFO,
@@ -17,10 +18,17 @@ logging.basicConfig(
 
 DATABASE_NAME = "fluff.db"
 
+# https://anilist.gitbook.io/anilist-apiv2-docs/overview/rate-limiting
+minutely_rate = RequestRate(80, Duration.MINUTE)
+limiter = Limiter(minutely_rate)
 
-def get_fluff_users_and_ids():
+
+def get_fluff() -> list[tuple[int, str, int]]:
+    """Load fluff data (gen, username, and AL ids)"""
+    # gen: int, username: str, id: int
+    format_fluff = lambda d: (int(d[0]), d[1], int(d[2]))
     with open('fluff', 'r') as f:
-        data = list(map(lambda x: x.rstrip('\n').split(','), f.readlines()))
+        data = [format_fluff(line.rstrip('\n').split(',')) for line in f.readlines()]
         logging.info(f'Fluff: {data}')
     return data
 
@@ -31,27 +39,28 @@ def create_db():
 
     cur.execute("DROP TABLE IF EXISTS users")
     query = """
-		CREATE TABLE users(
+        CREATE TABLE users(
             id INT,
-			username TEXT,
-			score_format TEXT
-		);
+            username TEXT,
+            score_format TEXT,
+            generation INT
+        );
 	"""
     cur.execute(query)
     logging.info('Table users created!')
 
-    cur.execute("DROP TABLE IF EXISTS lists")
     query = """
-		CREATE TABLE lists(
-			username TEXT,
-			score TEXT,
-			anichan_score TEXT,
-			status TEXT,
-			media_id INTEGER,
-			media_type TEXT,
-			title TEXT,
+        CREATE TABLE raw_lists(
+            username TEXT,
+            score TEXT,
+            anichan_score TEXT,
+            status TEXT,
+            media_id INTEGER,
+            media_type TEXT,
+            title TEXT,
             progress INTEGER,
-            completed_at TEXT
+            completed_at TEXT,
+            retrieved_date TEXT
 		);
 	"""
     cur.execute(query)
@@ -61,23 +70,23 @@ def create_db():
 def save_list_to_db(data):
     con = sqlite3.connect(DATABASE_NAME)
     cur = con.cursor()
-    query = "INSERT INTO lists VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
+    query = "INSERT INTO lists VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
     cur.executemany(query, data)
     con.commit()
     logging.info('Results saved!')
 
 
-def save_user_to_db(id_, username, score_format):
-    """Saves username, id_, and score_format to db"""
+def save_user_to_db(id_, username, score_format, gen):
+    """Saves username, id_, score_format and gen to db"""
     con = sqlite3.connect(DATABASE_NAME)
     cur = con.cursor()
-    query = f"INSERT INTO users VALUES ('{id_}', '{username}',  '{score_format}')"
+    query = f"INSERT INTO users VALUES ('{id_}', '{username}', '{score_format}', '{gen}')"
     cur.execute(query)
     con.commit()
     logging.info(f'{username} info saved!')
 
 
-def query_score_format(id_):
+def query_score_format(id_: int):
     query = '''
 	query ($id: Int) {
 		  User(id: $id) {
@@ -134,6 +143,7 @@ def query_list(page, username, per_page):
     return {'query': query, 'variables': variables}
 
 
+@limiter.ratelimit('identity', delay=True)
 def fetch(params):
     """Fetch data, returns Page. Returns None on error"""
     logging.info(f"Requesting {params['variables']}")
@@ -143,23 +153,19 @@ def fetch(params):
 
     # handle rate limit error
     if "errors" in results:
-        logging.error(results['errors']['message'])
-
-        if results['errors']['status'] == 429:
-            logging.error('Waiting for rate limit to be restored')
-            time.sleep(70)
-
+        logging.error(f"Error when fetching {params['variables']}")
+        logging.error(results['errors'][0]['message'])
         return None
 
     return results['data']
 
 
 if __name__ == "__main__":
-    users_and_ids = get_fluff_users_and_ids()
+    fluffs = get_fluff()
 
     create_db()
 
-    for username, id_ in users_and_ids:
+    for gen, username, id_ in fluffs:
         params = query_score_format(id_)
         results = fetch(params)
 
@@ -172,7 +178,7 @@ if __name__ == "__main__":
             username = results['User']['name']
 
         score_format = results['User']['mediaListOptions']['scoreFormat']
-        save_user_to_db(id_, username, score_format)
+        save_user_to_db(id_, username, score_format, gen)
 
         page = 1  # starts from 1
         per_page = 1 if score_format in ('POINT_5', 'POINT_3') else 50
@@ -206,11 +212,9 @@ if __name__ == "__main__":
                       media['media']['title']['romaji'] or \
                       media['media']['title']['native'],
                      media['progress'],
-                     completed_at
+                     completed_at,
+                     dt.now().strftime("%Y-%m-%d")  # retrieved_date
                     ))
-
-            # sleep for a while to avoid rate_limiting
-            time.sleep(.8)
 
         save_list_to_db(data)
         logging.info(f'Saving {len(data)} lists for user {username}')
