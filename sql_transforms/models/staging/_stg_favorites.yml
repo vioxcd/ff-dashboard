@@ -1,0 +1,10 @@
+version: 2
+
+models:
+  - name: stg_favorites
+    description: This model fetches favourites table
+    columns:
+      - name: type
+        tests:
+          - accepted_values:
+              values: ["anime", "manga", "characters", "staff", "studios"]
