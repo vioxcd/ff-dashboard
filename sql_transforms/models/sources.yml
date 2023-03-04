@@ -1,0 +1,11 @@
+version: 2
+
+sources:
+  - name: ff_anilist
+    description: Fluffy Folks data taken from Anilist
+    schema: main
+    tables:
+      # - name: users
+      # - name: lists
+      - name: favourites
+      # - name: media_details
