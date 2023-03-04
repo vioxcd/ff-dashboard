@@ -2,6 +2,7 @@ from datetime import datetime as dt
 
 import requests
 from pyrate_limiter import Duration, Limiter, RequestRate
+from queries import *
 
 from airflow.hooks.base import BaseHook
 
@@ -88,56 +89,13 @@ class AnilistApiHook(BaseHook):
 		pass
 
 	def get_score_format_query(self, id_: int):
-		query = '''
-		query ($id: Int) {
-			User(id: $id) {
-				id,
-				name,
-				mediaListOptions {
-					scoreFormat
-				}
-			}
-		}
-		'''
-		variables = {
-			'id': id_,
-		}
-		return {'query': query, 'variables': variables}
+		variables = {'id': id_}
+		return {'query': QUERY_SCORE_FORMAT, 'variables': variables}
 
-	def get_list_query(self, page, username, per_page=50):
-        # this query has anichan specific score format included
-		query = '''
-		query ($page: Int, $perPage: Int, $username: String) {
-			Page (page: $page, perPage: $perPage) {
-				pageInfo {
-					hasNextPage
-				},
-				mediaList(userName: $username) {
-					score: score,
-					anichan_score: score(format: POINT_100),
-					status,
-					progress,
-					completedAt {
-						year
-						month
-						day
-					},
-					media {
-						id,
-						type,
-						title {
-							english,
-							romaji,
-							native
-						}
-					}
-				}
-			}
-		}
-		'''
+	def get_list_query(self, page: int, username: str, per_page: int = 50):
 		variables = {
 			'page': page,
 			'perPage': per_page,
 			'username': username,
 		}
-		return {'query': query, 'variables': variables}
+		return {'query': QUERY_USERS_MEDIALIST, 'variables': variables}
