@@ -4,7 +4,7 @@ version: 2
 # https://docs.getdbt.com/faqs/tests/uniqueness-two-columns#2-test-an-expression
 
 models:
-  - name: stg_raw_lists
+  - name: stg_lists
     description: >
       This model is the cleaned version of lists.
       Cleaning done by adjusting the "buggy" score from `raw_lists` table`.
