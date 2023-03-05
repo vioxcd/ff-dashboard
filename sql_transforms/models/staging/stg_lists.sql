@@ -51,7 +51,12 @@ transformed_to_appropriate_score AS (
 		*,
 		CASE u.score_format
 			WHEN 'POINT_10_DECIMAL' THEN CAST(l.anichan_score AS REAL) / 10
-			WHEN 'POINT_10' THEN CAST(l.anichan_score AS REAL) / 10
+			WHEN 'POINT_10' THEN CAST(l.anichan_score AS INTEGER) / 10
+			ELSE l.score
+		END AS correct_score,
+		CASE u.score_format
+			WHEN 'POINT_10_DECIMAL' THEN CAST(l.anichan_score AS INTEGER)
+			WHEN 'POINT_10' THEN CAST(l.anichan_score AS INTEGER)
 			WHEN 'POINT_5' THEN l.score * 20
 			WHEN 'POINT_3' THEN
 				CASE l.score
@@ -73,8 +78,9 @@ SELECT
 	username,
 	score_format,
 	generation,
-	CAST(appropriate_score AS INTEGER) AS score,
+	correct_score AS score,
 	CAST(anichan_score AS INTEGER) AS anichan_score,
+	CAST(appropriate_score AS INTEGER) AS appropriate_score,
 	status,
 	media_id,
 	media_type,
