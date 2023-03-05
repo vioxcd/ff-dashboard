@@ -33,18 +33,6 @@ sql:
 	@echo "Creating appropriate score view..."
 	sqlite3 $(DB) < sqls/view_appropriate_score.sql
 
-	@echo "Creating scores defined as rules view..."
-	sqlite3 $(DB) < sqls/view_as_rules.sql
-
-	@echo "Creating media lists section and ranking view..."
-	sqlite3 $(DB) < sqls/view_media_section_and_ranking.sql
-
-	@echo "Creating AOTY 2022 view..."
-	sqlite3 $(DB) < sqls/view_aoty_2022.sql
-
-	@echo "Creating favourites on .9 percentile view..."
-	sqlite3 $(DB) < sqls/view_favourites_p90.sql
-
 	@echo "Creating anichan to 3 and 5 score format mapping view..."
 	sqlite3 $(DB) < sqls/view_mapping_anichan_to_3_and_5_scores_format.sql
 
@@ -56,6 +44,18 @@ sql:
 
 	@echo "Update scores to its correct value..."
 	sqlite3 $(DB) < sqls/update_score.sql
+
+	@echo "Creating scores defined as rules view..."
+	sqlite3 $(DB) < sqls/view_as_rules.sql
+
+	@echo "Creating media lists section and ranking view..."
+	sqlite3 $(DB) < sqls/view_media_section_and_ranking.sql
+
+	@echo "Creating AOTY 2022 view..."
+	sqlite3 $(DB) < sqls/view_aoty_2022.sql
+
+	@echo "Creating favourites on .9 percentile view..."
+	sqlite3 $(DB) < sqls/view_favourites_p90.sql
 
 	@echo "Creating media standard dev. view..."
 	sqlite3 $(DB) < sqls/view_media_stddev.sql

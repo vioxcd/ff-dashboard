@@ -209,3 +209,14 @@
 -- SELECT *
 -- FROM normalized_counts_and_ranks
 -- ORDER BY normalized_cr DESC
+
+-- * The initial mapping of point 3 and 5 scores should've been a table:)
+-- CREATE TABLE score_mapping
+-- AS
+-- SELECT *
+-- FROM vm_anichan_to_3_and_5_scores_format_mapping
+-- WHERE 0
+--
+-- INSERT INTO score_mapping
+-- SELECT *
+-- FROM vm_anichan_to_3_and_5_scores_format_mapping
