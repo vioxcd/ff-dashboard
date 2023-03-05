@@ -5,7 +5,9 @@ sources:
     description: Fluffy Folks data taken from Anilist
     schema: main
     tables:
-      # - name: users
+      - name: users
       # - name: lists
       - name: favourites
+      - name: raw_lists
+      - name: score_mapping
       # - name: media_details
