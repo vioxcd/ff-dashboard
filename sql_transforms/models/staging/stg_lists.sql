@@ -45,7 +45,7 @@ all_lists AS (
 	SELECT * FROM nonmapped_lists
 ),
 
-appropriate_score AS (
+transformed_to_appropriate_score AS (
 	-- the same operation as in `v_appropriate_score`
 	SELECT
 		*,
@@ -66,14 +66,15 @@ appropriate_score AS (
 	USING (username)
 )
 
+-- made it as how initial `lists` looks like
+-- important for next stage deduplication
 SELECT
 	id AS user_id,
 	username,
 	score_format,
 	generation,
-	score,
-	anichan_score,
-	appropriate_score,
+	CAST(appropriate_score AS INTEGER) AS score,
+	CAST(anichan_score AS INTEGER) AS anichan_score,
 	status,
 	media_id,
 	media_type,
@@ -81,7 +82,7 @@ SELECT
 	progress,
 	completed_at,
 	retrieved_date
-FROM appropriate_score
+FROM transformed_to_appropriate_score
 ORDER BY
 	user_id,
 	media_id
