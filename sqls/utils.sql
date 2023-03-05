@@ -210,23 +210,35 @@
 -- FROM normalized_counts_and_ranks
 -- ORDER BY normalized_cr DESC
 
+-- * The initial mapping of point 3 and 5 scores should've been a table:)
+-- CREATE TABLE score_mapping
+-- AS
+-- SELECT *
+-- FROM vm_anichan_to_3_and_5_scores_format_mapping
+-- WHERE 0
+--
+-- INSERT INTO score_mapping
+-- SELECT *
+-- FROM vm_anichan_to_3_and_5_scores_format_mapping
+
 -- * Adding slowly-changing dimension field to mark historical data
 -- * Columns are added for lists (retrieved_date) and users (generation)
 -- lists case: the year is ongoing and currently there's an 2022 AOTY that needs to be maintained
 -- the data can't be overwritten because it'd change the AOTY lists. therefore, there's a need to
 -- maintain historical data, e.g. data before February 2023, in the db.
--- -- newest entry is from 1st February (see `completedAt` column and check `llure` for example))
+-- newest entry is from 1st February (see `completedAt` column and check `llure` for example))
 -- ALTER TABLE lists
 -- ADD COLUMN retrieved_date TEXT;
 -- UPDATE lists
 -- SET retrieved_date = "2023-02-01";
--- .
--- users case: fluffy folks has new members!! make sure they won't change 2022 AOTY lists
+-- 
+-- * Users case: fluffy folks has new members!
+-- make sure they won't change 2022 AOTY lists!!
 -- I can actually just use `retrieved time` for their lists to filter for AOTY.
 -- but, I'll mark that they're new case in this project via `generation` column just in case
 -- ALTER TABLE users
 -- ADD COLUMN generation INTEGER;
 -- UPDATE users
 -- SET generation = 1;
--- .
+-- 
 -- new users are added in fluff.txt
