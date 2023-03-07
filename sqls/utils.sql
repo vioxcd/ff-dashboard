@@ -229,6 +229,8 @@
 -- newest entry is from 1st February (see `completedAt` column and check `llure` for example))
 -- ALTER TABLE lists
 -- ADD COLUMN retrieved_date TEXT;
+--
+-- Mark all current as from 1 February 2023
 -- UPDATE lists
 -- SET retrieved_date = "2023-02-01";
 -- 
