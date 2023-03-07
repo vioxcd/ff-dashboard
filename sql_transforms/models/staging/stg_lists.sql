@@ -1,94 +1,54 @@
 {{ config(
-	tags=["staging", "cleaning", "bug_fixing", "mapping"]
+	tags=["staging", "historical"]
 ) }}
 
 WITH
-mapped_lists AS (
-	-- `raw_lists` score has this bug where the 1st record out of each 50 batch
-	-- are the actual score used by the user, while the other 49s follows the `anichan_score`
-	--
-	-- here, try to map each of those buggy `score` to an already known mapping of
-	-- `anichan_score` (the mappings are from previously done "correct but slow" ETL)
-	SELECT
-		rl.username,
-		m.score,  -- use score from the mapping
-		rl.anichan_score,
-		rl.status,
-		rl.media_id,
-		rl.media_type,
-		rl.title,
-		rl.progress,
-		rl.completed_at,
-		rl.retrieved_date
-	FROM {{ source('ff_anilist', 'score_mapping') }} m
-		JOIN {{ source('ff_anilist', 'raw_lists') }} rl
-		ON m.anichan_score = rl.score
-			AND m.username = rl.username
-	WHERE CAST(rl.score AS INTEGER) != 0
-),
-
-nonmapped_lists AS (
-	SELECT *
-	FROM {{ source('ff_anilist', 'raw_lists') }}
-	WHERE
-		username || '-' || media_id || '-' || media_type NOT IN (
-			SELECT username || '-' || media_id || '-' || media_type
-			FROM mapped_lists
-		)
-),
-
 all_lists AS (
-	-- vertically join the two lists
-	-- and at the same time remove duplicate entries
-	SELECT * FROM mapped_lists
+	SELECT *
+	FROM {{ ref("stg_lists_2022") }}
 	UNION
-	SELECT * FROM nonmapped_lists
+	SELECT *
+	FROM {{ ref("stg_raw_lists") }}
+
 ),
 
-transformed_to_appropriate_score AS (
-	-- the same operation as in `v_appropriate_score`
-	SELECT
-		*,
-		CASE u.score_format
-			WHEN 'POINT_10_DECIMAL' THEN CAST(l.anichan_score AS REAL) / 10
-			WHEN 'POINT_10' THEN CAST(l.anichan_score AS INTEGER) / 10
-			ELSE l.score
-		END AS correct_score,
-		CASE u.score_format
-			WHEN 'POINT_10_DECIMAL' THEN CAST(l.anichan_score AS INTEGER)
-			WHEN 'POINT_10' THEN CAST(l.anichan_score AS INTEGER)
-			WHEN 'POINT_5' THEN l.score * 20
-			WHEN 'POINT_3' THEN
-				CASE l.score
-					WHEN 1 THEN 35
-					WHEN 2 THEN 70
-					WHEN 3 THEN 100
-				END
-			ELSE l.score
-		END AS appropriate_score
-	FROM all_lists l
-		JOIN {{ source('ff_anilist', 'users') }} u
-	USING (username)
+numbered_lists AS (
+	-- any difference between the columns listed in PARTITION BY
+	-- would result in the record being identified as new
+	-- i.e. it's different from the previous ones.
+	-- and as it's different, it's possible to filter using `number = 1`
+	-- (2 means it's "unchanged" (duplicated);
+	-- 1 can be used to filter what's "changed")
+	SELECT *,
+		ROW_NUMBER() OVER (
+			PARTITION BY
+				username,
+				media_id,
+				media_type,
+				anichan_score,
+				status
+			ORDER BY
+				retrieved_date
+		) AS number
+	FROM all_lists
+),
+
+historical_lists AS (
+	SELECT *,
+		LEAD(retrieved_date) OVER (
+			PARTITION BY
+				username,
+				media_id,
+				media_type
+			ORDER BY
+				retrieved_date ASC
+		) AS next_date
+	FROM numbered_lists
+	WHERE number = 1 -- ' filter
 )
 
--- made it as how initial `lists` looks like
--- important for next stage deduplication
 SELECT
-	id AS user_id,
-	username,
-	score_format,
-	generation,
-	correct_score AS score,
-	CAST(anichan_score AS INTEGER) AS anichan_score,
-	CAST(appropriate_score AS INTEGER) AS appropriate_score,
-	status,
-	media_id,
-	media_type,
-	title,
-	progress,
-	completed_at,
-	retrieved_date
-FROM transformed_to_appropriate_score
-ORDER BY
-	user_id,
-	media_id
+	user_id, username, score_format, generation, score,
+	anichan_score, appropriate_score, status, media_id, media_type,
+	title, progress, completed_at, retrieved_date, next_date
+FROM historical_lists

@@ -220,3 +220,12 @@
 -- INSERT INTO score_mapping
 -- SELECT *
 -- FROM vm_anichan_to_3_and_5_scores_format_mapping
+
+-- * Mark all current as from 1 February 2023
+-- ' Got an idea for a SCD. Implemented it in `stg_lists`
+-- ' Below are code for adding `retrieved_date` time indicator to the initial table
+-- ALTER TABLE lists
+-- ADD COLUMN retrieved_date TEXT;
+
+-- UPDATE lists
+-- SET retrieved_date = "2023-02-01";

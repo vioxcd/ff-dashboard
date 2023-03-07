@@ -1,0 +1,7 @@
+version: 2
+
+models:
+  - name: stg_lists_2022
+    description: >
+      This model fetches the initial table, that is `lists_2022`,
+      made the score appropriate and the column aligned to `stg_raw_lists`
