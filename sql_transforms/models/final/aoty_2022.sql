@@ -1,37 +1,22 @@
-{{ config(tags='final') }}
+{{ config(
+	tags=["final", "aoty_2022"]
+) }}
 
 -- the same as `as_rules`
 WITH
-as_rules AS (
-	SELECT
-		media_id,
-		title,
-		media_type,
-		CAST(ROUND(AVG(anichan_score)) AS INTEGER) AS anichan_score,
-		CAST(ROUND(AVG(appropriate_score)) AS INTEGER) AS ff_score,
-		COUNT(1) AS audience_count
-	FROM {{ source('ff_anilist', 'lists_2022') }}
-	WHERE
-		(status = 'COMPLETED' OR (status IN ('CURRENT', 'PAUSED') AND progress >= 5))
-		AND anichan_score > 0
-		AND appropriate_score > 0
-	GROUP BY title, media_type
-	HAVING COUNT(1) >= 5
-),
-
 aoty_2022 AS (
   SELECT
     md.*,
     ar.anichan_score,
     ar.ff_score,
     ar.audience_count
-  FROM v_as_rules ar
+  FROM {{ ref('int_aoty_2022__as_rules') }} ar
   JOIN media_details md
   USING (media_id)
-  WHERE anichan_score >= 80.0
-    AND ff_score >= 80.0
+  WHERE ar.anichan_score >= 80.0
+    AND ar.ff_score >= 80.0
     AND md.media_type = 'ANIME'
-    AND season_year = 2022
+    AND md.season_year = 2022
 ),
 
 aoty AS (
