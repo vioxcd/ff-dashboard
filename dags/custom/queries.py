@@ -41,7 +41,7 @@ query ($page: Int, $perPage: Int, $username: String) {
 }
 '''
 
-QUERY_USERS_FAVORITES_TEMPLATE = '''
+QUERY_USERS_FAVOURITES_TEMPLATE = '''
 query ($page: Int, $perPage: Int, $id: Int) {
 	User(id: $id) {
 		favourites {
@@ -51,7 +51,7 @@ query ($page: Int, $perPage: Int, $id: Int) {
 }
 '''
 
-QUERY_USERS_FAVORITES_OPTS = {
+QUERY_USERS_FAVOURITES_OPTS = {
 	"anime": '''
 		anime(page: $page, perPage: $perPage) {
 			nodes {

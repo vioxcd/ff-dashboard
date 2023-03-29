@@ -27,14 +27,14 @@ class AnilistFetchUserListOperator(BaseOperator):
 
     def execute(self, context):
         # load static users data
-        fluffs = self.get_fluff()
+        fluffs = self._get_fluff()
 
         # create users and lists table
-        self.create_db()
+        self._create_db()
         hooks = AnilistApiHook()
 
         for gen, username, id_ in fluffs:
-            results = hooks.fetch_user_score_format(id_)
+            results = hooks.get_user_score_format(id_)
             if not results:  # if error happened
                 self.log.error(f"Error when fetching {username} score format")
                 continue
@@ -46,20 +46,20 @@ class AnilistFetchUserListOperator(BaseOperator):
 
 			# persist user details to db
             score_format = results['User']['mediaListOptions']['scoreFormat']
-            self.save_user_to_db(id_, username, score_format, gen)
+            self._save_user_to_db(id_, username, score_format, gen)
 
             # next, prepare to process lists data
-            data = hooks.fetch_user_lists(username)
+            data = hooks.get_user_lists(username)
 
             if not data:  # in case some error happened
                 self.log.error(f"Error encountered. Fetch on {username} is aborted")
                 continue
-            self.save_list_to_db(data)
+            self._save_list_to_db(data)
             self.log.info(f'Saving {len(data)} lists for user {username}')
 
         self.log.info('Done!')
 
-    def get_fluff(self) -> list[tuple[int, str, int]]:
+    def _get_fluff(self) -> list[tuple[int, str, int]]:
         """Load fluff data (gen, username, and AL ids)"""
         # gen: int, username: str, id: int
         format_fluff = lambda d: (int(d[0]), str(d[1]), int(d[2]))
@@ -69,7 +69,7 @@ class AnilistFetchUserListOperator(BaseOperator):
             self.log.info(f'Fluff: {data}')
         return data
 
-    def create_db(self):
+    def _create_db(self):
         con = sqlite3.connect(DATABASE_NAME)
         cur = con.cursor()
 
@@ -103,7 +103,7 @@ class AnilistFetchUserListOperator(BaseOperator):
         cur.execute(query)
         self.log.info('Table lists created!')
 
-    def save_user_to_db(self, id_, username, score_format, gen):
+    def _save_user_to_db(self, id_, username, score_format, gen):
         """Saves username, id_, score_format and gen to db"""
         con = sqlite3.connect(DATABASE_NAME)
         cur = con.cursor()
@@ -112,7 +112,7 @@ class AnilistFetchUserListOperator(BaseOperator):
         con.commit()
         self.log.info(f'{username} info saved!')
 
-    def save_list_to_db(self, data):
+    def _save_list_to_db(self, data):
         con = sqlite3.connect(DATABASE_NAME)
         cur = con.cursor()
         query = "INSERT INTO raw_lists VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
@@ -121,9 +121,9 @@ class AnilistFetchUserListOperator(BaseOperator):
         self.log.info('Results saved!')
 
 
-class AnilistFetchUserFavoritesOperator(BaseOperator):
+class AnilistFetchUserFavouritesOperator(BaseOperator):
     """
-    Operator that fetches user's favorites list from the Anilist API
+    Operator that fetches user's favourites list from the Anilist API
 
     Parameters
     ----------
@@ -133,23 +133,23 @@ class AnilistFetchUserFavoritesOperator(BaseOperator):
     """
     @apply_defaults
     def __init__(self, fluff_file: Optional[str] = None, **kwargs):
-        super(AnilistFetchUserFavoritesOperator, self).__init__(**kwargs)
+        super(AnilistFetchUserFavouritesOperator, self).__init__(**kwargs)
         self._fluff_file = fluff_file if fluff_file else 'fluff'
 
     def execute(self, context):
         # load static users data
-        fluffs = [(row[1], row[2]) for row in self.get_fluff()]
+        fluffs = [(row[1], row[2]) for row in self._get_fluff()]
 
         # create users and lists table
-        self.create_db()
+        self._create_db()
         hooks = AnilistApiHook()
 
-        results = hooks.fetch_favorites(fluffs)
-        self.save_favourites_to_db(results)
+        results = hooks.get_favourites(fluffs)
+        self._save_favourites_to_db(results)
 
         self.log.info('Done!')
 
-    def get_fluff(self) -> list[tuple[int, str, int]]:
+    def _get_fluff(self) -> list[tuple[int, str, int]]:
         """Load fluff data (gen, username, and AL ids)"""
         # gen: int, username: str, id: int
         format_fluff = lambda d: (int(d[0]), str(d[1]), int(d[2]))
@@ -159,11 +159,12 @@ class AnilistFetchUserFavoritesOperator(BaseOperator):
             self.log.info(f'Fluff: {data}')
         return data
 
-    def create_db(self):
+    def _create_db(self):
         con = sqlite3.connect(DATABASE_NAME)
         cur = con.cursor()
 
         cur.execute("DROP TABLE IF EXISTS favourites")
+
         query = """
             CREATE TABLE favourites(
                 user_id INT,
@@ -177,7 +178,7 @@ class AnilistFetchUserFavoritesOperator(BaseOperator):
         cur.execute(query)
         self.log.info('Table favourites created!')
 
-    def save_favourites_to_db(self, data):
+    def _save_favourites_to_db(self, data):
         con = sqlite3.connect(DATABASE_NAME)
         cur = con.cursor()
         query = "INSERT INTO favourites VALUES (?, ?, ?, ?, ?)"
