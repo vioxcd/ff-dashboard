@@ -15,6 +15,8 @@ class AnilistFetchUserListOperator(BaseOperator):
     fluff_file : str
         path-like string to file containing fluffy folks' data with the format
         of `generation,username,id`
+    fluff_db : str
+        path-like string to sqlite3 db
     """
     @apply_defaults
     def __init__(
@@ -111,6 +113,7 @@ class AnilistFetchUserListOperator(BaseOperator):
         """Saves username, id_, score_format and gen to db"""
         con = sqlite3.connect(self._database_name)
         cur = con.cursor()
+
         query = f"INSERT INTO users VALUES ('{id_}', '{username}', '{score_format}', '{gen}')"
         cur.execute(query)
         con.commit()
@@ -119,6 +122,7 @@ class AnilistFetchUserListOperator(BaseOperator):
     def _save_list_to_db(self, data):
         con = sqlite3.connect(self._database_name)
         cur = con.cursor()
+
         query = "INSERT INTO raw_lists VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
         cur.executemany(query, data)
         con.commit()
@@ -134,6 +138,8 @@ class AnilistFetchUserFavouritesOperator(BaseOperator):
     fluff_file : str
         path-like string to file containing fluffy folks' data with the format
         of `generation,username,id`
+    fluff_db : str
+        path-like string to sqlite3 db
     """
     @apply_defaults
     def __init__(
@@ -175,16 +181,14 @@ class AnilistFetchUserFavouritesOperator(BaseOperator):
         cur = con.cursor()
 
         cur.execute("DROP TABLE IF EXISTS favourites")
-
         query = """
             CREATE TABLE favourites(
                 user_id INT,
-                item_id,
+                item_id INT,
                 name TEXT,
                 type TEXT,
                 cover_image_url TEXT
             );
-
         """
         cur.execute(query)
         self.log.info('Table favourites created!')
@@ -205,26 +209,21 @@ class AnilistFetchMediaDetailsOperator(BaseOperator):
 
     Parameters
     ----------
-    fluff_file : str
-        path-like string to file containing fluffy folks' data with the format
-        of `generation,username,id`
     fluff_db : str
         path-like string to sqlite3 db
     """
     @apply_defaults
     def __init__(
             self,
-            fluff_file: Optional[str] = None,
             fluff_db: Optional[str] = None,
             **kwargs
         ):
         super(AnilistFetchMediaDetailsOperator, self).__init__(**kwargs)
-        self._fluff_file = fluff_file if fluff_file else 'fluff'
         self._database_name = fluff_db if fluff_db else Variable.get("DATABASE_NAME")
 
     def execute(self, context):
         # load static users data
-        media_ids  = self._get_fluff_media()
+        media_ids = self._get_fluff_media()
         self.log.info(f"Processing {len(media_ids)} items")
 
         # create users and lists table
