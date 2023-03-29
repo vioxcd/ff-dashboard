@@ -24,6 +24,7 @@ class AnilistApiHook(BaseHook):
 
 	def __init__(self):
 		super().__init__()
+		self._records_counts = {"processed": 0, "failed": 0}
 
 	@_limiter.ratelimit('identity', delay=True)
 	def _fetch(self, query_params):
@@ -35,9 +36,15 @@ class AnilistApiHook(BaseHook):
 		# handle rate limit error
 		if "errors" in results:
 			self.log.error(results['errors'][0]['message'])
+			self._records_counts['failed'] += 1
 			return None
+		self._records_counts['processed'] += 1
 
 		return results['data']
+
+	def log_processed_results(self) -> None:
+		self.log.info(f"Processed: {self._records_counts['processed']}")
+		self.log.info(f"Failed: {self._records_counts['failed']}")
 	
 	def get_user_score_format(self, id_: int):
 		query_params = self._get_score_format_query(id_)

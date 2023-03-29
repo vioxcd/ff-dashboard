@@ -57,6 +57,7 @@ class AnilistFetchUserListOperator(BaseOperator):
             self._save_list_to_db(data)
             self.log.info(f'Saving {len(data)} lists for user {username}')
 
+        hooks.log_processed_results()
         self.log.info('Done!')
 
     def _get_fluff(self) -> list[tuple[int, str, int]]:
@@ -147,6 +148,7 @@ class AnilistFetchUserFavouritesOperator(BaseOperator):
         results = hooks.get_favourites(fluffs)
         self._save_favourites_to_db(results)
 
+        hooks.log_processed_results()
         self.log.info('Done!')
 
     def _get_fluff(self) -> list[tuple[int, str, int]]:
