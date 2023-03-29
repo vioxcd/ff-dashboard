@@ -106,7 +106,7 @@ class AnilistApiHook(BaseHook):
 
 					fav_items = [self.extract_favourites(node, query_type, user_id)
 								 for node in results['User']['favourites'][query_type]['nodes']]
-					data.append(fav_items)
+					data.extend(fav_items)
 
 					has_next_page = results['User']['favourites'][query_type]['pageInfo']['hasNextPage']
 					page += 1
