@@ -192,7 +192,139 @@ class AnilistFetchUserFavouritesOperator(BaseOperator):
     def _save_favourites_to_db(self, data):
         con = sqlite3.connect(self._database_name)
         cur = con.cursor()
+
         query = "INSERT INTO favourites VALUES (?, ?, ?, ?, ?)"
         cur.executemany(query, data)
         con.commit()
         self.log.info('Results saved!')
+
+
+class AnilistFetchMediaDetailsOperator(BaseOperator):
+    """
+    Operator that fetches media list from the Anilist API
+
+    Parameters
+    ----------
+    fluff_file : str
+        path-like string to file containing fluffy folks' data with the format
+        of `generation,username,id`
+    fluff_db : str
+        path-like string to sqlite3 db
+    """
+    @apply_defaults
+    def __init__(
+            self,
+            fluff_file: Optional[str] = None,
+            fluff_db: Optional[str] = None,
+            **kwargs
+        ):
+        super(AnilistFetchMediaDetailsOperator, self).__init__(**kwargs)
+        self._fluff_file = fluff_file if fluff_file else 'fluff'
+        self._database_name = fluff_db if fluff_db else Variable.get("DATABASE_NAME")
+
+    def execute(self, context):
+        # load static users data
+        media_ids  = self._get_fluff_media()
+        self.log.info(f"Processing {len(media_ids)} items")
+
+        # create users and lists table
+        self._create_db()
+        hooks = AnilistApiHook()
+
+        for (media_details, tags_, media_tag_bridges) in hooks.get_media_details(media_ids):
+            self._save_media_detail_to_db(media_details)
+            self._save_media_tags_to_db(tags_ )
+            self._save_media_tag_bridge_to_db(media_tag_bridges)
+
+        hooks.log_processed_results()
+        self.log.info('Done!')
+
+    def _get_fluff_media(self) -> list[int]:
+        con = sqlite3.connect(self._database_name)
+        cur = con.cursor()
+        return [media_id for (media_id,) in cur.execute('''
+            SELECT media_id
+            FROM v_as_rules
+            UNION
+            SELECT item_id
+            FROM favourites
+            WHERE type IN ("anime", "manga")
+        ''')]
+
+    def _create_db(self):
+        con = sqlite3.connect(self._database_name)
+        cur = con.cursor()
+
+        cur.execute("DROP TABLE IF EXISTS media_details")
+        # genres and studios are comma-separated list represented in string
+        query = """
+            CREATE TABLE IF NOT EXISTS media_details(
+                media_id INT,
+                title TEXT,
+                season TEXT,
+                season_year INT,
+                episodes INT,
+                media_type TEXT,
+                format TEXT,
+                genres TEXT,
+                cover_image_url_xl TEXT,
+                cover_image_url_lg TEXT,
+                cover_image_url_md TEXT,
+                banner_image_url TEXT,
+                average_score REAL,
+                mean_score REAL,
+                source TEXT,
+                studios TEXT,
+                is_sequel BOOLEAN
+            );
+        """
+        cur.execute(query)
+        self.log.info('Table `media details` created!')
+
+        cur.execute("DROP TABLE IF EXISTS media_tags")
+        query = """
+            CREATE TABLE IF NOT EXISTS media_tags(
+                tag_id INT,
+                name TEXT,
+                category TEXT
+            );
+        """
+        cur.execute(query)
+        self.log.info('Table `media tags` created!')
+
+        cur.execute("DROP TABLE IF EXISTS media_tags_bridge")
+        query = """
+            CREATE TABLE IF NOT EXISTS media_tags_bridge(
+                media_id INT,
+                tag_id INT,
+                rank INT
+            );
+        """
+        cur.execute(query)
+        self.log.info('Table `media tags bridge` created!')
+
+    def _save_media_detail_to_db(self, data):
+        con = sqlite3.connect(self._database_name)
+        cur = con.cursor()
+        # 17
+        query = "INSERT INTO media_details VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+        cur.execute(query, data)
+        con.commit()
+        self.log.info(f'{data[1]} saved!')
+
+    def _save_media_tags_to_db(self, tags):
+        con = sqlite3.connect(self._database_name)
+        cur = con.cursor()
+        query = "INSERT INTO media_tags VALUES (?, ?, ?)"
+        cur.executemany(query, tags)
+        con.commit()
+        if tags:
+            self.log.info(f'{tags} saved!')
+
+
+    def _save_media_tag_bridge_to_db(self, media_tag_bridges):
+        con = sqlite3.connect(self._database_name)
+        cur = con.cursor()
+        query = "INSERT INTO media_tags_bridge VALUES (?, ?, ?)"
+        cur.executemany(query, media_tag_bridges)
+        con.commit()
