@@ -85,8 +85,37 @@ class AnilistApiHook(BaseHook):
 	def fetch_media_details(self, users: list[str]):
 		pass
 
-	def fetch_favorites(self, users: list[str]):
-		pass
+	@limiter.ratelimit('identity', delay=True)
+	def fetch_favorites(self, users: list[tuple[str, int]]):
+		data = []
+
+		for username, user_id in users:
+			for query_type in ['anime', 'manga', 'characters', 'staff', 'studios']:
+				page = 1  # starts from 1
+				has_next_page = True
+				while has_next_page:
+					self.log.info(f'Processing {query_type} favourites for {username} on page {page}')
+
+					# one fetch-save cycle
+					query_params = self.get_favorites_query(query_type, page, user_id)
+					results = self.fetch(query_params)
+
+					if not results:
+						self.log.error(f"Error when fetching favorites {query_type} for {username} on page {page}")
+						break
+
+					fav_items = [self.extract_favourites(node, query_type, user_id)
+								 for node in results['User']['favourites'][query_type]['nodes']]
+					data.append(fav_items)
+
+					has_next_page = results['User']['favourites'][query_type]['pageInfo']['hasNextPage']
+					page += 1
+
+				self.log.info(f'Saving {query_type} favourites for user {username}')
+
+		self.log.info('Done!')
+		return data
+
 
 	def get_score_format_query(self, id_: int):
 		variables = {'id': id_}
@@ -99,3 +128,39 @@ class AnilistApiHook(BaseHook):
 			'username': username,
 		}
 		return {'query': QUERY_USERS_MEDIALIST, 'variables': variables}
+
+	def get_favorites_query(self, query_type: str, page: int, user_id: int, per_page: int = 50):
+		query = QUERY_USERS_FAVORITES_OPTS[query_type]
+		variables = {
+			'page': page,
+			'perPage': per_page,
+			'id': user_id,
+		}
+		return {'query': QUERY_USERS_FAVORITES_TEMPLATE % query, 'variables': variables}
+
+	def extract_favourites(self, node, query_type, user_id):
+		match query_type:
+			case "anime" | "manga":
+				return (
+					user_id,
+					node['id'],
+					node['title']['english'] or node['title']['romaji'],
+					query_type,
+					node['coverImage']['large'],
+				)
+			case "characters" | "staff":
+				return (
+					user_id,
+					node['id'],
+					node['name']['full'],
+					query_type,
+					node['image']['large'],
+				)
+			case "studios":
+				return (
+					user_id,
+					node['id'],
+					node['name'],
+					query_type,
+					None,  # studio don't have cover image
+				)
