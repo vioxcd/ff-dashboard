@@ -1,5 +1,3 @@
-import json
-import os
 import sqlite3
 from typing import Optional
 
@@ -18,21 +16,9 @@ class AnilistFetchUserListOperator(BaseOperator):
 
     Parameters
     ----------
-    conn_id : str
-        ID of the connection to use to connect to the Movielens API. Connection
-        is expected to include authentication details (login/password) and the
-        host that is serving the API.
-    output_path : str
-        Path to write the fetched ratings to.
-    start_date : str
-        (Templated) start date to start fetching ratings from (inclusive).
-        Expected format is YYYY-MM-DD (equal to Airflow's ds formats).
-    end_date : str
-        (Templated) end date to fetching ratings up to (exclusive).
-        Expected format is YYYY-MM-DD (equal to Airflow's ds formats).
-    batch_size : int
-        Size of the batches (pages) to fetch from the API. Larger values
-        mean less requests, but more data transferred per request.
+    fluff_file : str
+        path-like string to file containing fluffy folks' data with the format
+        of `generation,username,id`
     """
     @apply_defaults
     def __init__(self, fluff_file: Optional[str] = None, **kwargs):
@@ -76,8 +62,8 @@ class AnilistFetchUserListOperator(BaseOperator):
     def get_fluff(self) -> list[tuple[int, str, int]]:
         """Load fluff data (gen, username, and AL ids)"""
         # gen: int, username: str, id: int
-        format_fluff = lambda d: (int(d[0]), d[1], int(d[2]))
-        with open('fluff', 'r') as f:
+        format_fluff = lambda d: (int(d[0]), str(d[1]), int(d[2]))
+        with open(self._fluff_file, 'r') as f:
             data = [format_fluff(line.rstrip('\n').split(','))
                     for line in f.readlines()]
             self.log.info(f'Fluff: {data}')

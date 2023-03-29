@@ -1,8 +1,8 @@
 from datetime import datetime as dt
 
 import requests
+from custom.queries import *
 from pyrate_limiter import Duration, Limiter, RequestRate
-from queries import *
 
 from airflow.hooks.base import BaseHook
 
