@@ -1,13 +1,9 @@
 import sqlite3
 from typing import Optional
 
-from custom.hooks import AnilistApiHook
-
 from airflow.models import BaseOperator, Variable
 from airflow.utils.decorators import apply_defaults
-
-# Config
-DATABASE_NAME: str = Variable.get("DATABASE_NAME")
+from dags.custom.hooks import AnilistApiHook
 
 
 class AnilistFetchUserListOperator(BaseOperator):
@@ -21,9 +17,16 @@ class AnilistFetchUserListOperator(BaseOperator):
         of `generation,username,id`
     """
     @apply_defaults
-    def __init__(self, fluff_file: Optional[str] = None, **kwargs):
+    def __init__(
+            self,
+            fluff_file: Optional[str] = None,
+            fluff_db: Optional[str] = None,
+            **kwargs
+        ):
         super(AnilistFetchUserListOperator, self).__init__(**kwargs)
         self._fluff_file = fluff_file if fluff_file else 'fluff'
+        self._database_name = fluff_db if fluff_db else Variable.get("DATABASE_NAME")
+        self.log.info(f"Using {self._database_name}")
 
     def execute(self, context):
         # load static users data
@@ -71,7 +74,7 @@ class AnilistFetchUserListOperator(BaseOperator):
         return data
 
     def _create_db(self):
-        con = sqlite3.connect(DATABASE_NAME)
+        con = sqlite3.connect(self._database_name)
         cur = con.cursor()
 
         cur.execute("DROP TABLE IF EXISTS users")
@@ -106,7 +109,7 @@ class AnilistFetchUserListOperator(BaseOperator):
 
     def _save_user_to_db(self, id_, username, score_format, gen):
         """Saves username, id_, score_format and gen to db"""
-        con = sqlite3.connect(DATABASE_NAME)
+        con = sqlite3.connect(self._database_name)
         cur = con.cursor()
         query = f"INSERT INTO users VALUES ('{id_}', '{username}', '{score_format}', '{gen}')"
         cur.execute(query)
@@ -114,7 +117,7 @@ class AnilistFetchUserListOperator(BaseOperator):
         self.log.info(f'{username} info saved!')
 
     def _save_list_to_db(self, data):
-        con = sqlite3.connect(DATABASE_NAME)
+        con = sqlite3.connect(self._database_name)
         cur = con.cursor()
         query = "INSERT INTO raw_lists VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
         cur.executemany(query, data)
@@ -133,9 +136,15 @@ class AnilistFetchUserFavouritesOperator(BaseOperator):
         of `generation,username,id`
     """
     @apply_defaults
-    def __init__(self, fluff_file: Optional[str] = None, **kwargs):
+    def __init__(
+            self,
+            fluff_file: Optional[str] = None,
+            fluff_db: Optional[str] = None,
+            **kwargs
+        ):
         super(AnilistFetchUserFavouritesOperator, self).__init__(**kwargs)
         self._fluff_file = fluff_file if fluff_file else 'fluff'
+        self._database_name = fluff_db if fluff_db else Variable.get("DATABASE_NAME")
 
     def execute(self, context):
         # load static users data
@@ -162,7 +171,7 @@ class AnilistFetchUserFavouritesOperator(BaseOperator):
         return data
 
     def _create_db(self):
-        con = sqlite3.connect(DATABASE_NAME)
+        con = sqlite3.connect(self._database_name)
         cur = con.cursor()
 
         cur.execute("DROP TABLE IF EXISTS favourites")
@@ -181,7 +190,7 @@ class AnilistFetchUserFavouritesOperator(BaseOperator):
         self.log.info('Table favourites created!')
 
     def _save_favourites_to_db(self, data):
-        con = sqlite3.connect(DATABASE_NAME)
+        con = sqlite3.connect(self._database_name)
         cur = con.cursor()
         query = "INSERT INTO favourites VALUES (?, ?, ?, ?, ?)"
         cur.executemany(query, data)
