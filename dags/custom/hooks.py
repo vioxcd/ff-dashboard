@@ -12,21 +12,21 @@ class AnilistApiHook(BaseHook):
 	Hook for the Anilist API.
 
 	Abstracts details of the Anilist (GraphQL) API & provides several convenience
-	methods for fetching data (e.g. users, media, favorites) from the API. 
+	methods for fetching data (e.g. users, media, favourites) from the API. 
 	Provides support for adjusting rate limit and handling of pagination
 	"""
 
 	URL = 'https://graphql.anilist.co'
 
 	# rate limiter
-	minutely_rate = RequestRate(80, Duration.MINUTE)
-	limiter = Limiter(minutely_rate)
+	_minutely_rate = RequestRate(80, Duration.MINUTE)
+	_limiter = Limiter(_minutely_rate)
 
 	def __init__(self):
 		super().__init__()
 
-	@limiter.ratelimit('identity', delay=True)
-	def fetch(self, query_params):
+	@_limiter.ratelimit('identity', delay=True)
+	def _fetch(self, query_params):
 		self.log.info(f"Requesting {query_params['variables']}")
 
 		response = requests.post(self.URL, json=query_params)
@@ -39,11 +39,11 @@ class AnilistApiHook(BaseHook):
 
 		return results['data']
 	
-	def fetch_user_score_format(self, id_: int):
-		query_params = self.get_score_format_query(id_)
-		return self.fetch(query_params)
+	def get_user_score_format(self, id_: int):
+		query_params = self._get_score_format_query(id_)
+		return self._fetch(query_params)
 
-	def fetch_user_lists(self, username: str):
+	def get_user_lists(self, username: str):
 		page = 1
 		has_next_page = True
 		data = []
@@ -51,8 +51,8 @@ class AnilistApiHook(BaseHook):
 			self.log.info(f'Processing {username} page {page}')
 
 			# one fetch-save cycle
-			query_params = self.get_list_query(page, username)
-			results = self.fetch(query_params)
+			query_params = self._get_list_query(page, username)
+			results = self._fetch(query_params)
 			if not results:
 				self.log.error(f"Error when fetching lists for {username} on page {page}")
 				break  # abort fetch for user in case of errors.
@@ -82,11 +82,11 @@ class AnilistApiHook(BaseHook):
 				))
 		return data
 
-	def fetch_media_details(self, users: list[str]):
+	def get_media_details(self, users: list[str]):
 		pass
 
-	@limiter.ratelimit('identity', delay=True)
-	def fetch_favorites(self, users: list[tuple[str, int]]):
+	@_limiter.ratelimit('identity', delay=True)
+	def get_favourites(self, users: list[tuple[str, int]]):
 		data = []
 
 		for username, user_id in users:
@@ -97,14 +97,14 @@ class AnilistApiHook(BaseHook):
 					self.log.info(f'Processing {query_type} favourites for {username} on page {page}')
 
 					# one fetch-save cycle
-					query_params = self.get_favorites_query(query_type, page, user_id)
-					results = self.fetch(query_params)
+					query_params = self._get_favourites_query(query_type, page, user_id)
+					results = self._fetch(query_params)
 
 					if not results:
-						self.log.error(f"Error when fetching favorites {query_type} for {username} on page {page}")
+						self.log.error(f"Error when fetching favourites {query_type} for {username} on page {page}")
 						break
 
-					fav_items = [self.extract_favourites(node, query_type, user_id)
+					fav_items = [self._extract_favourites(node, query_type, user_id)
 								 for node in results['User']['favourites'][query_type]['nodes']]
 					data.extend(fav_items)
 
@@ -117,11 +117,11 @@ class AnilistApiHook(BaseHook):
 		return data
 
 
-	def get_score_format_query(self, id_: int):
+	def _get_score_format_query(self, id_: int):
 		variables = {'id': id_}
 		return {'query': QUERY_SCORE_FORMAT, 'variables': variables}
 
-	def get_list_query(self, page: int, username: str, per_page: int = 50):
+	def _get_list_query(self, page: int, username: str, per_page: int = 50):
 		variables = {
 			'page': page,
 			'perPage': per_page,
@@ -129,16 +129,16 @@ class AnilistApiHook(BaseHook):
 		}
 		return {'query': QUERY_USERS_MEDIALIST, 'variables': variables}
 
-	def get_favorites_query(self, query_type: str, page: int, user_id: int, per_page: int = 50):
-		query = QUERY_USERS_FAVORITES_OPTS[query_type]
+	def _get_favourites_query(self, query_type: str, page: int, user_id: int, per_page: int = 50):
+		query = QUERY_USERS_FAVOURITES_OPTS[query_type]
 		variables = {
 			'page': page,
 			'perPage': per_page,
 			'id': user_id,
 		}
-		return {'query': QUERY_USERS_FAVORITES_TEMPLATE % query, 'variables': variables}
+		return {'query': QUERY_USERS_FAVOURITES_TEMPLATE % query, 'variables': variables}
 
-	def extract_favourites(self, node, query_type, user_id):
+	def _extract_favourites(self, node, query_type, user_id):
 		match query_type:
 			case "anime" | "manga":
 				return (

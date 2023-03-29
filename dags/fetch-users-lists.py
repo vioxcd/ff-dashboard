@@ -1,6 +1,6 @@
 import datetime as dt
 
-from custom.operators import (AnilistFetchUserFavoritesOperator,
+from custom.operators import (AnilistFetchUserFavouritesOperator,
                               AnilistFetchUserListOperator)
 
 from airflow import DAG
@@ -25,7 +25,7 @@ with DAG(
     #     task_id="fetch_user_lists",
     # )
 
-    fetch_user_favorites = AnilistFetchUserFavoritesOperator(
+    fetch_user_favorites = AnilistFetchUserFavouritesOperator(
         task_id="fetch_user_favorites",
     )
 
