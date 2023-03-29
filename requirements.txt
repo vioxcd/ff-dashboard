@@ -4,3 +4,4 @@ streamlit==1.17.0
 sqlalchemy<2.0
 apache-airflow==2.5.1
 dbt-core-1.4.1
+pytest==7.2.2
