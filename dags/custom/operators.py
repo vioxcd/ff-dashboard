@@ -50,7 +50,7 @@ class AnilistFetchUserListOperator(BaseOperator):
 
             # next, prepare to process lists data
             data = hooks.fetch_user_lists(username)
-            
+
             if not data:  # in case some error happened
                 self.log.error(f"Error encountered. Fetch on {username} is aborted")
                 continue
@@ -116,6 +116,71 @@ class AnilistFetchUserListOperator(BaseOperator):
         con = sqlite3.connect(DATABASE_NAME)
         cur = con.cursor()
         query = "INSERT INTO raw_lists VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+        cur.executemany(query, data)
+        con.commit()
+        self.log.info('Results saved!')
+
+
+class AnilistFetchUserFavoritesOperator(BaseOperator):
+    """
+    Operator that fetches user's favorites list from the Anilist API
+
+    Parameters
+    ----------
+    fluff_file : str
+        path-like string to file containing fluffy folks' data with the format
+        of `generation,username,id`
+    """
+    @apply_defaults
+    def __init__(self, fluff_file: Optional[str] = None, **kwargs):
+        super(AnilistFetchUserFavoritesOperator, self).__init__(**kwargs)
+        self._fluff_file = fluff_file if fluff_file else 'fluff'
+
+    def execute(self, context):
+        # load static users data
+        fluffs = [(row[1], row[2]) for row in self.get_fluff()]
+
+        # create users and lists table
+        self.create_db()
+        hooks = AnilistApiHook()
+
+        results = hooks.fetch_favorites(fluffs)
+        self.save_favourites_to_db(results)
+
+        self.log.info('Done!')
+
+    def get_fluff(self) -> list[tuple[int, str, int]]:
+        """Load fluff data (gen, username, and AL ids)"""
+        # gen: int, username: str, id: int
+        format_fluff = lambda d: (int(d[0]), str(d[1]), int(d[2]))
+        with open(self._fluff_file, 'r') as f:
+            data = [format_fluff(line.rstrip('\n').split(','))
+                    for line in f.readlines()]
+            self.log.info(f'Fluff: {data}')
+        return data
+
+    def create_db(self):
+        con = sqlite3.connect(DATABASE_NAME)
+        cur = con.cursor()
+
+        cur.execute("DROP TABLE IF EXISTS favourites")
+        query = """
+            CREATE TABLE favourites(
+                user_id INT,
+                item_id,
+                name TEXT,
+                type TEXT,
+                cover_image_url TEXT
+            );
+
+        """
+        cur.execute(query)
+        self.log.info('Table favourites created!')
+
+    def save_favourites_to_db(self, data):
+        con = sqlite3.connect(DATABASE_NAME)
+        cur = con.cursor()
+        query = "INSERT INTO favourites VALUES (?, ?, ?, ?, ?)"
         cur.executemany(query, data)
         con.commit()
         self.log.info('Results saved!')

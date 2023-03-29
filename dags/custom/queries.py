@@ -40,3 +40,94 @@ query ($page: Int, $perPage: Int, $username: String) {
 	}
 }
 '''
+
+QUERY_USERS_FAVORITES_TEMPLATE = '''
+query ($page: Int, $perPage: Int, $id: Int) {
+	User(id: $id) {
+		favourites {
+			%s
+		}
+	}
+}
+'''
+
+QUERY_USERS_FAVORITES_OPTS = {
+	"anime": '''
+		anime(page: $page, perPage: $perPage) {
+			nodes {
+				id,
+				title {
+					romaji,
+					english
+				},
+				coverImage {
+					large
+				}
+			},
+			pageInfo {
+				hasNextPage
+			}
+		}
+	''',
+	"manga": '''
+		manga(page: $page, perPage: $perPage) {
+			nodes {
+				id,
+				title {
+					romaji,
+					english
+				},
+				coverImage {
+					large
+				}
+			},
+			pageInfo {
+				hasNextPage
+			}
+		}
+	''',
+	"characters": '''
+		characters(page: $page, perPage: $perPage) {
+			nodes {
+				id,
+				name {
+					full
+				},
+				image {
+					large
+					medium
+				}
+			},
+			pageInfo {
+				hasNextPage
+			}
+		}
+	''',
+	"staff": '''
+		staff(page: $page, perPage: $perPage) {
+			nodes {
+				id,
+				name {
+					full
+				},
+				image {
+					large
+				}
+			},
+			pageInfo {
+				hasNextPage
+			}
+		}
+	''',
+	"studios": '''
+		studios(page: $page, perPage: $perPage) {
+			nodes {
+				id,
+				name
+			},
+			pageInfo {
+				hasNextPage
+			}
+		}
+	'''
+}
