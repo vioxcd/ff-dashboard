@@ -131,3 +131,62 @@ QUERY_USERS_FAVOURITES_OPTS = {
 		}
 	'''
 }
+
+
+QUERY_MEDIA_DETAILS = '''
+query ($media_id: Int) {
+	Media(id: $media_id) {
+		id,
+		title {
+			english,
+			native,
+			romaji
+		},
+		season,
+		seasonYear,
+		episodes,
+		type,
+		format,
+		genres,
+		coverImage {
+			extraLarge,
+			large,
+			medium
+		},
+		bannerImage,
+		averageScore,
+		meanScore,
+		source,
+		studios {
+			edges {
+				isMain
+				node {
+					id,
+					name,
+					isAnimationStudio
+				}
+			}
+		},
+		tags {
+			id,
+			name,
+			category,
+			rank
+		},
+		relations {
+			edges {
+				node {
+					id,
+					title {
+					romaji
+					english
+					native
+					userPreferred
+					}
+				},
+				relationType
+			}
+		}
+	}
+}
+'''

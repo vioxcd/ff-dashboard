@@ -3,7 +3,8 @@ from pathlib import Path
 
 import pytest
 
-from dags.custom.operators import (AnilistFetchUserFavouritesOperator,
+from dags.custom.operators import (AnilistFetchMediaDetailsOperator,
+                                   AnilistFetchUserFavouritesOperator,
                                    AnilistFetchUserListOperator)
 
 TEST_TASK_ID = "testing_anilist_fetch_user_operator"
@@ -44,3 +45,24 @@ def test_anilist_fetch_favourites_operator(fluff_test_file, mock_db):
 	with sqlite3.connect(mock_db) as con:
 		cur = con.cursor()
 		assert cur.execute("SELECT COUNT(1) FROM favourites").fetchone()[0] > 1
+
+def test_anilist_fetch_media_details_operator(fluff_test_file, test_db):
+	with sqlite3.connect(test_db) as con:
+		cur = con.cursor()
+		cur.execute("CREATE TABLE favourites (item_id INT, type TEXT)")
+		cur.execute("INSERT INTO favourites VALUES (20698, 'anime')")
+		cur.execute("CREATE TABLE v_as_rules (media_id INT, type TEXT)")
+		cur.execute("INSERT INTO v_as_rules  VALUES (20698, 'anime')")
+	
+	task = AnilistFetchMediaDetailsOperator(
+		task_id=TEST_TASK_ID,
+		fluff_file=fluff_test_file,
+		fluff_db=test_db
+	)
+	_ = task.execute(context={})
+
+	with sqlite3.connect(test_db) as con:
+		cur = con.cursor()
+		assert cur.execute("SELECT COUNT(1) FROM media_details").fetchone()[0] > 0
+		assert cur.execute("SELECT COUNT(1) FROM media_tags").fetchone()[0] > 0
+		assert cur.execute("SELECT COUNT(1) FROM media_tags_bridge").fetchone()[0] > 0

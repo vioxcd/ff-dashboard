@@ -89,8 +89,39 @@ class AnilistApiHook(BaseHook):
 				))
 		return data
 
-	def get_media_details(self, users: list[str]):
-		pass
+	def get_media_details(self, media_ids: list[int]):
+		tags = set()
+		for media_id in media_ids:
+			query_params = self._get_media_details_query(media_id)
+			data = self._fetch(query_params)
+
+			if not data:
+				self.log.error(f"Data not found on {media_id}")
+				continue
+
+			# 'media_id', 'title', 'season', 'season_year', 'type',
+			# 'format', 'genres', 'cover_image_url_md', 'cover_image_url_lg', 'cover_image_url_xl'
+			# 'banner_image_url', 'average_score', 'mean_score' 'source', 'studios', 'is_non_sequel'
+			"""Save media details"""
+			media_details = self._process_media(data)
+
+			"""Filter unseen tags"""
+			new_tags = [tag for tag in data["Media"]["tags"]
+						if tag['id'] not in tags]
+
+			"""Save unseen tags"""
+			tags_ = [(tag['id'], tag['name'], tag['category']) for tag in new_tags]
+
+			"""Update tags list"""
+			new_tag_ids = [tag['id'] for tag in new_tags]
+			tags.update(new_tag_ids)
+
+			"""Save media-tag relationship"""
+			media_tag_bridges = [(media_id, tag['id'], tag['rank'])
+								 for tag in data["Media"]["tags"]]
+
+			yield (media_details, tags_, media_tag_bridges)
+
 
 	@_limiter.ratelimit('identity', delay=True)
 	def get_favourites(self, users: list[tuple[str, int]]):
@@ -123,7 +154,6 @@ class AnilistApiHook(BaseHook):
 		self.log.info('Done!')
 		return data
 
-
 	def _get_score_format_query(self, id_: int):
 		variables = {'id': id_}
 		return {'query': QUERY_SCORE_FORMAT, 'variables': variables}
@@ -144,6 +174,10 @@ class AnilistApiHook(BaseHook):
 			'id': user_id,
 		}
 		return {'query': QUERY_USERS_FAVOURITES_TEMPLATE % query, 'variables': variables}
+
+	def _get_media_details_query(self, media_id: int):
+		variables = {'media_id': media_id}
+		return {'query': QUERY_MEDIA_DETAILS, 'variables': variables}
 
 	def _extract_favourites(self, node, query_type, user_id):
 		match query_type:
@@ -171,3 +205,39 @@ class AnilistApiHook(BaseHook):
 					query_type,
 					None,  # studio don't have cover image
 				)
+
+	def _process_media(self, data):
+		media_detail = data['Media']
+
+		"""Processing several things"""
+		genres = ", ".join(media_detail["genres"])
+		studios_list = [studio_info["node"]["name"]
+						for studio_info in media_detail["studios"]["edges"]
+						if studio_info["isMain"]]
+		studios = ", ".join(studios_list)
+		is_sequel = any([True
+						for relation in media_detail["relations"]["edges"]
+						if relation["relationType"] == "PREQUEL"])
+
+		"""Creating object before saving"""
+		return (
+			media_detail['id'],
+			media_detail["title"]["english"] or \
+				media_detail["title"]["romaji"] or \
+				media_detail["title"]["native"],
+			media_detail["season"],
+			media_detail["seasonYear"],
+			media_detail["episodes"],
+			media_detail["type"],
+			media_detail["format"],
+			genres,
+			media_detail["coverImage"]["extraLarge"],
+			media_detail["coverImage"]["large"],
+			media_detail["coverImage"]["medium"],
+			media_detail["bannerImage"],
+			media_detail["averageScore"],
+			media_detail["meanScore"],
+			media_detail["source"],
+			studios,
+			is_sequel,
+		)
