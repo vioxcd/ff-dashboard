@@ -1,4 +1,5 @@
 import sqlite3
+from pathlib import Path
 from typing import Optional
 
 from airflow import configuration
@@ -353,7 +354,10 @@ class AnilistDownloadImagesOperator(BaseOperator):
         self._output_path = image_folder if image_folder else f"{configuration.get_airflow_home()}/images"
 
     def execute(self, context):
-        media = self._get_media_lists()
+        existing_images = self._get_existing_images()
+        media = [m for m in self._get_media_lists()
+                 if m[2].split("/")[-1] not in existing_images]
+        self.log.info(f"Existing images: {len(existing_images)} items")
         self.log.info(f"Processing {len(media)} items")
 
         hooks = AnilistApiHook()
@@ -371,3 +375,6 @@ class AnilistDownloadImagesOperator(BaseOperator):
         return [m for m in cur.execute('''
             SELECT DISTINCT(title), media_type, cover_image_url_xl FROM media_details
         ''')]
+
+    def _get_existing_images(self) -> set[str]:
+        return set([file_.stem for file_ in Path(self._output_path).iterdir()])
