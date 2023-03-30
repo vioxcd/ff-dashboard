@@ -351,7 +351,7 @@ class AnilistDownloadImagesOperator(BaseOperator):
         ):
         super(AnilistDownloadImagesOperator, self).__init__(**kwargs)
         self._database_name = fluff_db if fluff_db else Variable.get("DATABASE_NAME")
-        self._output_path = image_folder if image_folder else f"{configuration.get_airflow_home()}/images"
+        self._output_path = Path(image_folder) if image_folder else Path(configuration.get_airflow_home()).parent / "images"
 
     def execute(self, context):
         existing_images = self._get_existing_images()
@@ -362,9 +362,10 @@ class AnilistDownloadImagesOperator(BaseOperator):
 
         hooks = AnilistApiHook()
         self.log.info(f"Downloading images to {self._output_path}")
+        self._output_path.mkdir(exist_ok=True)
 
         for m in media:
-            hooks.download_image(m, self._output_path)
+            hooks.download_image(m, self._output_path.absolute())
 
         hooks.log_processed_results()
         self.log.info('Done!')
