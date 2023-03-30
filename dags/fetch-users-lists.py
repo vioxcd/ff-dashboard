@@ -1,6 +1,8 @@
 import datetime as dt
 
-from custom.operators import (AnilistFetchUserFavouritesOperator,
+from custom.operators import (AnilistDownloadImagesOperator,
+                              AnilistFetchMediaDetailsOperator,
+                              AnilistFetchUserFavouritesOperator,
                               AnilistFetchUserListOperator)
 
 from airflow import DAG
@@ -21,13 +23,20 @@ with DAG(
         task_id='end'
     )
 
-    # fetch_user_lists = AnilistFetchUserListOperator(
-    #     task_id="fetch_user_lists",
-    # )
+    fetch_user_lists = AnilistFetchUserListOperator(
+        task_id="fetch_user_lists",
+    )
 
     fetch_user_favorites = AnilistFetchUserFavouritesOperator(
         task_id="fetch_user_favorites",
     )
 
-    # start >> fetch_user_lists >> fetch_user_favorites >> end
-    start >> fetch_user_favorites >> end
+    fetch_media_details = AnilistFetchMediaDetailsOperator(
+        task_id="fetch_media_details",
+    )
+
+    download_images = AnilistDownloadImagesOperator(
+        task_id="download_images",
+    )
+
+    start >> fetch_user_lists >> fetch_user_favorites >> fetch_media_details >> download_images >> end
