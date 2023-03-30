@@ -1,6 +1,7 @@
 import sqlite3
 from typing import Optional
 
+from airflow import configuration
 from airflow.models import BaseOperator, Variable
 from airflow.utils.decorators import apply_defaults
 from dags.custom.hooks import AnilistApiHook
@@ -327,3 +328,46 @@ class AnilistFetchMediaDetailsOperator(BaseOperator):
         query = "INSERT INTO media_tags_bridge VALUES (?, ?, ?)"
         cur.executemany(query, media_tag_bridges)
         con.commit()
+
+
+class AnilistDownloadImagesOperator(BaseOperator):
+    """
+    Operator that download images hosted from the Anilist API
+
+    Parameters
+    ----------
+    fluff_db : str
+        path-like string to sqlite3 db
+    image_folder : str
+        path-like string to folder that stores the images output
+    """
+    @apply_defaults
+    def __init__(
+            self,
+            fluff_db: Optional[str] = None,
+            image_folder : Optional[str] = None,
+            **kwargs
+        ):
+        super(AnilistDownloadImagesOperator, self).__init__(**kwargs)
+        self._database_name = fluff_db if fluff_db else Variable.get("DATABASE_NAME")
+        self._output_path = image_folder if image_folder else f"{configuration.get_airflow_home()}/images"
+
+    def execute(self, context):
+        media = self._get_media_lists()
+        self.log.info(f"Processing {len(media)} items")
+
+        hooks = AnilistApiHook()
+        self.log.info(f"Downloading images to {self._output_path}")
+
+        for m in media:
+            hooks.download_image(m, self._output_path)
+
+        hooks.log_processed_results()
+        self.log.info('Done!')
+
+    def _get_media_lists(self) -> list[tuple[str, str, str]]:
+        con = sqlite3.connect(self._database_name)
+        cur = con.cursor()
+        return [m for m in cur.execute('''
+            SELECT DISTINCT(title), media_type, cover_image_url_xl FROM media_details
+        ''')]
