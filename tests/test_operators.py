@@ -3,7 +3,8 @@ from pathlib import Path
 
 import pytest
 
-from dags.custom.operators import (AnilistFetchMediaDetailsOperator,
+from dags.custom.operators import (AnilistDownloadImagesOperator,
+                                   AnilistFetchMediaDetailsOperator,
                                    AnilistFetchUserFavouritesOperator,
                                    AnilistFetchUserListOperator)
 
@@ -20,6 +21,12 @@ def fluff_test_file(tmp_path: Path):
 def test_db(tmp_path: Path):
 	p = tmp_path / "fluff_test.db"
 	return p
+
+@pytest.fixture
+def tmp_image_folder(tmp_path: Path):
+	d = tmp_path / "images"
+	d.mkdir()
+	return d
 
 def test_anilist_fetch_user_operator(fluff_test_file, test_db):
 	task = AnilistFetchUserListOperator(
@@ -65,3 +72,29 @@ def test_anilist_fetch_media_details_operator(test_db):
 		assert cur.execute("SELECT COUNT(1) FROM media_details").fetchone()[0] > 0
 		assert cur.execute("SELECT COUNT(1) FROM media_tags").fetchone()[0] > 0
 		assert cur.execute("SELECT COUNT(1) FROM media_tags_bridge").fetchone()[0] > 0
+
+def test_download_images_operator(tmp_image_folder: Path, test_db):
+	image_url = 'https://s4.anilist.co/file/anilistcdn/media/anime/cover/small/bx20698-YZIYor2zW3Ta.png'
+	with sqlite3.connect(test_db) as con:
+		cur = con.cursor()
+		cur.execute('''
+			CREATE TABLE media_details (
+				title TEXT,
+				media_type TEXT,
+				cover_image_url_xl TEXT
+			)
+		''')
+		cur.execute('''
+			INSERT INTO media_details VALUES
+				('My Teen Romantic Comedy SNAFU TOO!', 'ANIME', '%s')
+		''' % image_url)
+
+	task = AnilistDownloadImagesOperator(
+		task_id=TEST_TASK_ID,
+		fluff_db=test_db,
+		image_folder=str(tmp_image_folder)
+	)
+	_ = task.execute(context={})
+
+	f = tmp_image_folder / image_url.split("/")[-1]
+	assert f.exists()

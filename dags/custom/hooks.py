@@ -1,3 +1,5 @@
+import os
+import shutil
 from datetime import datetime as dt
 
 import requests
@@ -153,6 +155,23 @@ class AnilistApiHook(BaseHook):
 
 		self.log.info('Done!')
 		return data
+
+	@_limiter.ratelimit('identity', delay=True)
+	def download_image(self, media, image_folder) -> None:
+		(title, media_type, cover_image_url) = media
+		media_ident = f"{title}_{media_type}"
+		file_name = cover_image_url.split("/")[-1]
+		file_path = os.path.join(image_folder, file_name)
+
+		res = requests.get(cover_image_url, stream=True)
+		if res.status_code == 200:
+			with open(file_path,'wb') as f:
+				shutil.copyfileobj(res.raw, f)
+			self.log.info(f'{media_ident} sucessfully downloaded: {file_name}')
+			self._records_counts["processed"] += 1
+		else:
+			self.log.info(f"{media_ident} couldn't be retrieved. url: {cover_image_url}")
+			self._records_counts["failed"] += 1
 
 	def _get_score_format_query(self, id_: int):
 		variables = {'id': id_}
