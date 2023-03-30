@@ -31,8 +31,8 @@ default_args = {
 # {"skip_tasks": ["fetch_user_favorites"]}
 
 with DAG(
-    dag_id="fetch_users_lists",
-    description="Fetches users' score format and lists from the Anilist API using a custom operator.",
+    dag_id="fetch_anilist_data",
+    description="Fetches users' score format, lists, favourites, and all media details from the Anilist API using a custom operator.",
     start_date=dt.datetime(2023, 3, 30),
     end_date=dt.datetime(2023, 3, 31),
     schedule_interval="@daily",
