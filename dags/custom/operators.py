@@ -357,6 +357,11 @@ class AnilistDownloadImagesOperator(BaseOperator):
         existing_images = self._get_existing_images()
         media = [m for m in self._get_media_lists()
                  if m[2].split("/")[-1] not in existing_images]
+
+        # ' check if environment is currently in testing
+        if context.get('params', {}).get("ENVIRONMENT_STATUS") == "TESTING":
+            media = media[:1]  # only take one sample
+
         self.log.info(f"Existing images: {len(existing_images)} items")
         self.log.info(f"Processing {len(media)} items")
 
@@ -378,4 +383,4 @@ class AnilistDownloadImagesOperator(BaseOperator):
         ''')]
 
     def _get_existing_images(self) -> set[str]:
-        return set([file_.stem for file_ in Path(self._output_path).iterdir()])
+        return set([file_.name for file_ in Path(self._output_path).iterdir()])
