@@ -34,6 +34,9 @@ start-airflow:
 	airflow webserver --port 8080 &
 	airflow scheduler &
 
+check-airflow-logs:
+	find $(AIRFLOW_HOME)/logs/dag_id=fetch_anilist_data/**/* -name '*.log' | xargs -I {} grep -E "Processed:|Failed:" {} | sort --reverse | uniq
+
 redo-db:
 	rm fluff.db
 	cp fluff.db.bak fluff.db
