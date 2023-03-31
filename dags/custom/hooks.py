@@ -38,6 +38,7 @@ class AnilistApiHook(BaseHook):
 		# handle rate limit error
 		if "errors" in results:
 			self.log.error(results['errors'][0]['message'])
+			self.log.error(f"Failed: fetch failed with {query_params['variables']}")
 			self._records_counts['failed'] += 1
 			return None
 		self._records_counts['processed'] += 1
@@ -170,7 +171,7 @@ class AnilistApiHook(BaseHook):
 			self.log.info(f'{media_ident} sucessfully downloaded: {file_name}')
 			self._records_counts["processed"] += 1
 		else:
-			self.log.info(f"{media_ident} couldn't be retrieved. url: {cover_image_url}")
+			self.log.error(f"Failed: {media_ident} couldn't be retrieved. url: {cover_image_url}")
 			self._records_counts["failed"] += 1
 
 	def _get_score_format_query(self, id_: int):
