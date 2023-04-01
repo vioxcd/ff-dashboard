@@ -6,7 +6,6 @@ sources:
     schema: main
     tables:
       - name: users
-      - name: lists_2022 # initial lists
       - name: favourites
       - name: raw_lists
       - name: score_mapping
