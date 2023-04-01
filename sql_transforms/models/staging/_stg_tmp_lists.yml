@@ -1,0 +1,5 @@
+version: 2
+
+models:
+  - name: stg_tmp_lists
+    description: This model is the tmp table created before adding more records to historical `stg_lists` table
