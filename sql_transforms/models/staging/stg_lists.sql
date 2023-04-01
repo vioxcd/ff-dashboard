@@ -25,7 +25,7 @@ transformed_to_appropriate_score AS (
 				END
 			ELSE l.score
 		END AS appropriate_score
-	FROM {{ source('ff_anilist', 'lists') }} l
+	FROM {{ ref('stg_tmp_lists') }} l
 		JOIN {{ source('ff_anilist', 'users') }} u
 	USING (username)
 ),
