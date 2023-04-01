@@ -19,7 +19,8 @@ mapped_lists AS (
 		rl.title,
 		rl.progress,
 		rl.completed_at,
-		rl.retrieved_date
+		rl.retrieved_date,
+		rl.next_date
 	FROM {{ source('ff_anilist', 'score_mapping') }} m
 		JOIN {{ source('ff_anilist', 'raw_lists') }} rl
 		ON m.anichan_score = rl.score
@@ -87,7 +88,8 @@ SELECT
 	title,
 	progress,
 	completed_at,
-	retrieved_date
+	retrieved_date,
+	next_date
 FROM transformed_to_appropriate_score
 ORDER BY
 	user_id,

@@ -43,7 +43,8 @@ SELECT DISTINCT  -- there's duplicate here too...
 	title,
 	progress,
 	completed_at,
-	retrieved_date
+	retrieved_date,
+	next_date
 FROM transformed_to_appropriate_score
 ORDER BY
 	user_id,
