@@ -1,6 +1,7 @@
 {{ config(
 	materialized="table",
-	tags=["staging", "historical"]
+	tags=["staging", "historical"],
+	post_hook="DROP TABLE stg_tmp_lists"
 ) }}
 
 WITH
