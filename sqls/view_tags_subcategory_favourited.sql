@@ -1,5 +1,5 @@
--- Most favorited tags over subcategory, by counts and score average
-CREATE VIEW v_tags_favorited
+-- Most favourited tags over subcategory, by counts and score average
+CREATE VIEW v_tags_favourited
 AS
 WITH
 wide_favourite_tags AS (

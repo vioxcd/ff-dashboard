@@ -29,7 +29,7 @@ The rules follows the rules in `#ranking` channel. they are:
 
 ---
 
-##### Why's there so few entries in the favorites?
+##### Why's there so few entries in the favourites?
 
 It's picked based on **90th percentile!**  
 (if it's not there, then probably it's lower than the lowest and is not included)

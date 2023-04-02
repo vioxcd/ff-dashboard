@@ -36,7 +36,7 @@ class AOTY:
 	cover_image_url: str
 
 @dataclass
-class Favorite:
+class Favourite:
 	name: str
 	type: str
 	cover_image_url: str
@@ -96,8 +96,8 @@ def get_aoty_list():
 		FROM v_aoty_2022
 	''')
 
-def get_favorites() -> list[Favorite]:
-	return [Favorite(*f) for f in cur.execute('''SELECT * FROM v_favorites_p90''')]
+def get_favourites() -> list[Favourite]:
+	return [Favourite(*f) for f in cur.execute('''SELECT * FROM v_favourites_p90''')]
 
 ## Variables
 # """
@@ -124,20 +124,20 @@ ul.streamlit-expander {
 st.markdown(hide, unsafe_allow_html=True)
 
 ## Tabs
-tabs = ["Favorites", "Awards 2022", "Anime", "Manga", "Help & FAQs"]
-favorites_tab, aoty_2022_tab, anime_tab, manga_tab, help_tab = st.tabs(tabs)
+tabs = ["Favourites", "Awards 2022", "Anime", "Manga", "Help & FAQs"]
+favourites_tab, aoty_2022_tab, anime_tab, manga_tab, help_tab = st.tabs(tabs)
 
-with favorites_tab:
-	favorites_list = get_favorites()
+with favourites_tab:
+	favourites_list = get_favourites()
 
-	# divide favorites by type
-	anime_fav: list[Favorite] = []
-	manga_fav: list[Favorite]  = []
-	characters_fav: list[Favorite]  = []
-	staff_fav: list[Favorite]  = []
-	studios_fav: list[Favorite]  = []
+	# divide favourites by type
+	anime_fav: list[Favourite] = []
+	manga_fav: list[Favourite]  = []
+	characters_fav: list[Favourite]  = []
+	staff_fav: list[Favourite]  = []
+	studios_fav: list[Favourite]  = []
 
-	for fav in favorites_list:
+	for fav in favourites_list:
 		match fav.type:
 			case "anime":
 				anime_fav.append(fav)
@@ -150,7 +150,7 @@ with favorites_tab:
 			case "studios":
 				studios_fav.append(fav)
 
-	with st.expander("💕️ Top Favorited Anime", expanded=True):
+	with st.expander("💕️ Top Favourited Anime", expanded=True):
 		for animes in chunks(anime_fav, 5):
 			images = [get_local_image(a.cover_image_url, a.name) for a in animes]
 			min_height = min([img.size[1] for img in images])
