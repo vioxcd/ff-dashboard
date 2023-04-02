@@ -1,4 +1,4 @@
-CREATE VIEW v_favorites_p90 AS
+CREATE VIEW v_favourites_p90 AS
 WITH
 counted_favs AS (
 	SELECT
