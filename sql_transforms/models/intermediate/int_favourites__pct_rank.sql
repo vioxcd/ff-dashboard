@@ -7,7 +7,7 @@ counted_favs AS (
 		type,
 		cover_image_url,
 		COUNT(1) AS counts
-	FROM {{ ref('stg_favorites') }}
+	FROM {{ ref('stg_favourites') }}
 	GROUP BY 1, 2
 ),
 ordered_per_type AS (
