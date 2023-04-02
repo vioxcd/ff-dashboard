@@ -16,5 +16,5 @@ DROP VIEW IF EXISTS v_studios_stats;
 DROP VIEW IF EXISTS v_tags_counts_p90;
 DROP VIEW IF EXISTS v_tags_counts_by_media_p90;
 DROP VIEW IF EXISTS v_tags_subcategory_ranked;
-DROP VIEW IF EXISTS v_tags_favorited;
+DROP VIEW IF EXISTS v_tags_favourited;
 ALTER TABLE users DROP COLUMN is_buggy;
