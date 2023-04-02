@@ -3,6 +3,16 @@ export AIRFLOW_HOME := $(shell pwd)/airflow
 PREV_AIRFLOW_DAGS_FOLDER := $(AIRFLOW_HOME)/dags
 NEW_AIRFLOW_DAGS_FOLDER := $(shell pwd)/dags
 
+all:
+	@echo "Fetching fluff's scores..."
+	python3 src/fetch-users-details.py
+
+	@echo "Fetching media details..."
+	python3 src/fetch-media-details.py
+
+	@echo "Fetching fluff's favourites..."
+	python3 src/fetch-favourites.py
+
 clean:
 	rm ff.log fluff.db
 
@@ -109,6 +119,6 @@ sql:
 	sqlite3 $(DB) < sqls/view_tags_subcategory_ranked.sql
 
 	@echo "Creating tags subcategory's favourites stats view..."
-	sqlite3 $(DB) < sqls/view_tags_subcategory_favorited.sql
+	sqlite3 $(DB) < sqls/view_tags_subcategory_favourited.sql
 
 	@echo "Done!"

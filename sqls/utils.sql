@@ -131,7 +131,7 @@
 -- ;
 
 -- * All unique titles that might get displayed
--- criteria: either they fulfill the rules or are favorited
+-- criteria: either they fulfill the rules or are favourited
 -- WITH
 -- all_titles AS (
 --   SELECT title, media_type
@@ -174,9 +174,9 @@
 -- ORDER BY normalized_cr DESC
 
 -- * Should be looked again to investigate what this could be used for
--- ? Kinda looks the same w/ tags_subcategory_favorited. but it's normalized?
--- Most favorited tags' subcategory, normalized
--- CREATE VIEW v_tags_subcategory_favorited_normalized
+-- ? Kinda looks the same w/ tags_subcategory_favourited. but it's normalized?
+-- Most favourited tags' subcategory, normalized
+-- CREATE VIEW v_tags_subcategory_favourited_normalized
 -- AS
 -- WITH
 -- wide_favourite_tags AS (
