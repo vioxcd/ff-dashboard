@@ -54,3 +54,7 @@ sql:
 
 sql-test:
 	dbt test --project-dir sql_transforms
+
+sql-docs:
+	dbt docs generate --project-dir sql_transforms
+	dbt docs serve --project-dir sql_transforms --port 8081  # 8080 is Airflow's
