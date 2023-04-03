@@ -32,6 +32,9 @@ transformed_to_appropriate_score AS (
 ),
 
 initial_lists AS (
+	-- correct_score: score based on AL's score enums, e.g. 3, 5, 10, 10.0, 100
+	-- anichan_score: score appropriated to anichan's (fetched with params `score_format` POINT_100)
+	-- appropriate_score: anichan's score is "not appropriate" as 5* doesn't translate to 100. this score made it appropriate
 	SELECT DISTINCT  -- there's duplicate here too...
 		id AS user_id,
 		username,
