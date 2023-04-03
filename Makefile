@@ -2,6 +2,8 @@ DB = fluff.db
 export AIRFLOW_HOME := $(shell pwd)/airflow
 PREV_AIRFLOW_DAGS_FOLDER := $(AIRFLOW_HOME)/dags
 NEW_AIRFLOW_DAGS_FOLDER := $(shell pwd)/dags
+EXECUTION_DATE := 04-04-2023
+DAG_ID := fetch_anilist_data
 
 setup-airflow:
 	@echo $(AIRFLOW_HOME)
@@ -31,6 +33,14 @@ start-airflow:
 	test -n $(AIRFLOW_HOME) || (echo "AIRFLOW_HOME is not set" ; exit 1)
 	airflow webserver --port 8080 &
 	airflow scheduler &
+
+# to pass parameter, do it like `make test-airflow DAG_ID=[dag_id] EXECUTION_DATE=[execution_date]
+# https://stackoverflow.com/a/2826178
+test-airflow:
+	airflow dags test \
+		--conf '{"ENVIRONMENT_STATUS": "TESTING"}' \
+		$(DAG_ID) \
+		$(EXECUTION_DATE)
 
 check-airflow-logs:
 	find $(AIRFLOW_HOME)/logs/dag_id=fetch_anilist_data/**/* -name '*.log' | xargs -I {} grep -E "Processed:|Failed:" {} | sort --reverse | uniq

@@ -36,6 +36,11 @@ class AnilistFetchUserListOperator(BaseOperator):
         # load static users data
         fluffs = self._get_fluff()
 
+        # ' check if environment is currently in testing
+        if context.get('params', {}).get("ENVIRONMENT_STATUS") == "TESTING":
+            fluffs = fluffs[-1:]  # only take one sample
+            self._database_name = 'fluff_test.db'
+
         # create users and lists table
         self._create_db()
         hooks = AnilistApiHook()
@@ -158,6 +163,11 @@ class AnilistFetchUserFavouritesOperator(BaseOperator):
         # load static users data
         fluffs = [(row[1], row[2]) for row in self._get_fluff()]
 
+        # ' check if environment is currently in testing
+        if context.get('params', {}).get("ENVIRONMENT_STATUS") == "TESTING":
+            fluffs = fluffs[-1:]  # only take one sample
+            self._database_name = 'fluff_test.db'
+
         # create users and lists table
         self._create_db()
         hooks = AnilistApiHook()
@@ -226,6 +236,12 @@ class AnilistFetchMediaDetailsOperator(BaseOperator):
     def execute(self, context):
         # load static users data
         media_ids = self._get_fluff_media()
+
+        # ' check if environment is currently in testing
+        if context.get('params', {}).get("ENVIRONMENT_STATUS") == "TESTING":
+            media_ids = media_ids[:1]  # only take one sample
+            self._database_name = 'fluff_test.db'
+
         self.log.info(f"Processing {len(media_ids)} items")
 
         # create users and lists table

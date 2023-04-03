@@ -1,8 +1,7 @@
-ff.log
 fluff
 fluff.db
-fluff.db-journal
-*.bak
+fluff_test.db
+*.db.bak
 .python-version
 
 __pycache__
@@ -11,3 +10,6 @@ data/
 logs/
 images/
 airflow/
+
+dags/test-dag.py
+dags/custom/testing_operators.py
