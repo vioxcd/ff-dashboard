@@ -261,7 +261,7 @@ class AnilistFetchMediaDetailsOperator(BaseOperator):
         cur = con.cursor()
         return [media_id for (media_id,) in cur.execute('''
             SELECT media_id
-            FROM v_as_rules
+            FROM int_media__as_rules
             UNION
             SELECT item_id
             FROM favourites
