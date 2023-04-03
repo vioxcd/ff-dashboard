@@ -98,9 +98,9 @@ class AnilistFetchUserListOperator(BaseOperator):
         cur.execute(query)
         self.log.info('Table users created!')
 
-        cur.execute("DROP TABLE IF EXISTS src_lists")
+        cur.execute("DROP TABLE IF EXISTS raw_lists")
         query = """
-            CREATE TABLE src_lists(
+            CREATE TABLE raw_lists(
                 username TEXT,
                 score TEXT,
                 anichan_score TEXT,
@@ -110,7 +110,8 @@ class AnilistFetchUserListOperator(BaseOperator):
                 title TEXT,
                 progress INTEGER,
                 completed_at TEXT,
-                retrieved_date TEXT
+                retrieved_date TEXT,
+                next_date TEXT
             );
         """
         cur.execute(query)
@@ -130,7 +131,7 @@ class AnilistFetchUserListOperator(BaseOperator):
         con = sqlite3.connect(self._database_name)
         cur = con.cursor()
 
-        query = "INSERT INTO src_lists VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+        query = "INSERT INTO raw_lists VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL)"
         cur.executemany(query, data)
         con.commit()
         self.log.info('Results saved!')
