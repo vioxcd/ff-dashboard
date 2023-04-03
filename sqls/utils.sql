@@ -244,3 +244,101 @@
 -- SET generation = 1;
 -- 
 -- new users are added in fluff.txt
+
+-- * Trying to make 🔻 and 🔺 indicator
+-- ? idea:
+-- ? preserve only the earliest date if record are unchanged in subsequent date.
+-- ? this format means unchanged dates applies to later date *until* a change is encountered
+-- ' note:
+-- ' don't change score when some users change their score;
+-- ' change score only when there's additional audience
+-- ! Code below is kinda wrong, I guess?
+-- ! Rather than putting indicator when score increases, I should've put it when a certain
+-- ! *order* changes. **That's why I need to get the ordering right first**
+-- WITH
+-- all_lists AS (
+-- 	SELECT * FROM v_appropriate_score -- ' (1)
+-- 	UNION
+-- 	SELECT username, score, anichan_score, status, media_id,
+-- 		media_type, title, progress, completed_at, retrieved_date,
+-- 		user_id AS id, score_format, generation, appropriate_score
+-- 	FROM stg_lists
+-- ),
+-- as_rules AS (
+-- 	SELECT
+-- 		media_id,
+-- 		title,
+-- 		media_type,
+-- 		CAST(ROUND(AVG(anichan_score)) AS INTEGER) AS anichan_score,
+-- 		CAST(ROUND(AVG(appropriate_score)) AS INTEGER) AS ff_score,
+-- 		COUNT(1) AS audience_count,
+-- 		retrieved_date
+-- 	FROM all_lists
+-- 	WHERE
+-- 		(status = 'COMPLETED' OR (status IN ('CURRENT', 'PAUSED') AND progress >= 5))
+-- 		AND anichan_score > 0
+-- 		AND appropriate_score > 0
+-- 	GROUP BY media_id, media_type, retrieved_date
+-- 	HAVING COUNT(1) >= 5
+-- ),
+-- filter_lists AS (
+-- 	-- Filter early to avoid unnecessary calculation
+-- 	SELECT *
+-- 	FROM as_rules
+-- 	WHERE anichan_score >= 85 OR ff_score >= 85
+-- ),
+-- last_active_group AS (
+-- 	-- order by `anichan_score`, as that's what's used in #ranking channels
+-- 	SELECT *,
+-- 		ROW_NUMBER() OVER (PARTITION BY media_type
+-- 						   ORDER BY anichan_score DESC,
+-- 									ff_score DESC,
+-- 									audience_count DESC,
+-- 									title DESC
+-- 						   ) AS ranking
+-- 	FROM filter_lists
+-- 	WHERE retrieved_date = "2023-02-01"
+-- ),
+-- current_active_group AS (
+-- 	SELECT *,
+-- 		ROW_NUMBER() OVER (PARTITION BY media_type
+-- 						   ORDER BY anichan_score DESC,
+-- 									ff_score DESC,
+-- 									audience_count DESC,
+-- 									title DESC
+-- 						   ) AS ranking
+-- 	FROM filter_lists
+-- 	WHERE retrieved_date = "2023-03-04" -- ' (2)
+-- 		AND media_id || '-' || media_type IN
+-- 			(SELECT media_id || '-' || media_type FROM last_active_group)
+--
+-- 	UNION
+--
+-- 	SELECT *,
+-- 		NULL AS ranking
+-- 	FROM filter_lists
+-- 	WHERE retrieved_date = "2023-03-04" -- ' (2)
+-- 	AND media_id || '-' || media_type NOT IN
+-- 			(SELECT media_id || '-' || media_type FROM last_active_group)
+-- )
+-- SELECT
+-- 	c.media_id,
+-- 	c.title,
+-- 	c.media_type,
+-- 	c.ranking AS c_rank,
+-- 	l.ranking AS l_rank,
+-- 	c.audience_count AS c_audience_count,
+-- 	l.audience_count AS l_audience_count,
+-- 	c.anichan_score AS c_score,
+-- 	l.anichan_score AS l_score,
+-- 	CASE
+-- 		WHEN c.ranking IS NULL THEN "new"
+-- 		WHEN c.ranking > l.ranking AND c.anichan_score != l.anichan_score THEN "down"
+-- 		WHEN c.ranking < l.ranking AND c.anichan_score != l.anichan_score THEN "up"
+-- 		ELSE NULL
+-- 	END AS rank_status
+-- FROM current_active_group c
+-- 	LEFT JOIN last_active_group l
+-- 	USING (media_id, media_type)
+-- WHERE media_type = "ANIME"
+-- ORDER BY c_rank
