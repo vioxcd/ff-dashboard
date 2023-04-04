@@ -26,8 +26,17 @@ setup-airflow:
 	sed -i 's|default_timezone = utc|default_timezone = Asia/Jakarta|' airflow/airflow.cfg
 	sed -i 's|default_ui_timezone = UTC|default_ui_timezone = Asia/Jakarta|' airflow/airflow.cfg
 
-	# set environment variables for the project
-	airflow variables set DATABASE_NAME $(DB)
+	# set database connection for the project
+	# https://airflow.apache.org/docs/apache-airflow-providers-sqlite/stable/connections/sqlite.html
+	# also see: `airflow connections list` | grep sqlite_default`
+	# this command might error out if ran twice
+	airflow connections add 'fluff_db' \
+		--conn-type 'sqlite' \
+		--conn-host "$(shell pwd)/fluff.db"
+
+	airflow connections add 'fluff_test_db' \
+		--conn-type 'sqlite' \
+		--conn-host "$(shell pwd)/fluff_test.db"
 
 start-airflow:
 	test -n $(AIRFLOW_HOME) || (echo "AIRFLOW_HOME is not set" ; exit 1)
