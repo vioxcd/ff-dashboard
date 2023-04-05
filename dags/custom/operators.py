@@ -332,21 +332,21 @@ class AnilistDownloadImagesOperator(BaseOperator):
 
     Parameters
     ----------
-    fluff_db : str
-        path-like string to sqlite3 db
     image_folder : str
         path-like string to folder that stores the images output
     """
     @apply_defaults
     def __init__(
             self,
-            fluff_db: Optional[str] = None,
             image_folder : Optional[str] = None,
             **kwargs
         ):
         super(AnilistDownloadImagesOperator, self).__init__(**kwargs)
-        self._database_name = fluff_db if fluff_db else Variable.get("DATABASE_NAME")
+        conn_id = kwargs['default_args'].get('conn_id')
+        self._db_hook: SqliteHook = Connection.get_connection_from_secrets(conn_id).get_hook()
+        self._environment_type = kwargs['default_args'].get('environment_type')
         self._output_path = Path(image_folder) if image_folder else Path(configuration.get_airflow_home()).parent / "images"
+        self.log.info(f"Using {self._db_hook.sqlite_conn_id}")
 
     def execute(self, context):
         existing_images = self._get_existing_images()
@@ -354,7 +354,7 @@ class AnilistDownloadImagesOperator(BaseOperator):
                  if m[2].split("/")[-1] not in existing_images]
 
         # ' check if environment is currently in testing
-        if context.get('params', {}).get("ENVIRONMENT_STATUS") == "TESTING":
+        if self._environment_type == "TESTING":
             media = media[:1]  # only take one sample
 
         self.log.info(f"Existing images: {len(existing_images)} items")
@@ -371,8 +371,7 @@ class AnilistDownloadImagesOperator(BaseOperator):
         self.log.info('Done!')
 
     def _get_media_lists(self) -> list[tuple[str, str, str]]:
-        con = sqlite3.connect(self._database_name)
-        cur = con.cursor()
+        cur = self._db_hook.get_cursor()
         return [m for m in cur.execute('''
             SELECT DISTINCT(title), media_type, cover_image_url_xl FROM media_details
         ''')]
