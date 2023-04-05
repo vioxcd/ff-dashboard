@@ -59,13 +59,6 @@ with DAG(
 
     start, end = [EmptyOperator(task_id=tid) for tid in ["start", "end"]]
 
-    load_score_format_mapping = SQLExecuteQueryOperator(
-        task_id="load_score_format_mapping",
-        sql="sqls/mapping_score_format.sql",
-        split_statements=True,
-        return_last=False,
-    )
-
     load_p3p5_score_mapping = SQLExecuteQueryOperator(
         task_id="load_p3p5_score_mapping",
         sql="sqls/mapping_p3p5_score.sql",
@@ -99,7 +92,7 @@ with DAG(
         task_id="download_images",
     )
 
-    chain(start, load_score_format_mapping, load_p3p5_score_mapping,
+    chain(start, load_p3p5_score_mapping,
           fetch_user_lists, fetch_user_favourites, create_media_as_rules_table,
           fetch_media_details, download_images, end
     )
