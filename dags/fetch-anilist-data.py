@@ -91,7 +91,7 @@ with DAG(
             dbt run \
                 --project-dir {DBT_PROJECT_DIR} \
                 --target {DBT_TARGET_PROFILE} \
-                --select {DBT_MODEL_MEDIA_AS_RULES}
+                --select +{DBT_MODEL_MEDIA_AS_RULES}
         '''
     )
 
