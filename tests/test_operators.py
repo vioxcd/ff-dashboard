@@ -54,17 +54,16 @@ def test_anilist_fetch_user_operator(test_dag, fluff_test_file):
 	assert cur.execute("SELECT COUNT(1) FROM users").fetchone()[0] == 1
 	assert cur.execute("SELECT COUNT(1) FROM raw_lists").fetchone()[0] > 1
 
-def test_anilist_fetch_favourites_operator(fluff_test_file, test_db):
+def test_anilist_fetch_favourites_operator(test_dag, fluff_test_file):
 	task = AnilistFetchUserFavouritesOperator(
 		task_id=TEST_TASK_ID,
 		fluff_file=fluff_test_file,
-		fluff_db=test_db
+		dag=test_dag,
 	)
 	_ = task.execute(context={})
 
-	with sqlite3.connect(test_db) as con:
-		cur = con.cursor()
-		assert cur.execute("SELECT COUNT(1) FROM favourites").fetchone()[0] > 1
+	cur = task._db_hook.get_cursor()
+	assert cur.execute("SELECT COUNT(1) FROM favourites").fetchone()[0] > 1
 
 def test_anilist_fetch_media_details_operator(test_db):
 	with sqlite3.connect(test_db) as con:

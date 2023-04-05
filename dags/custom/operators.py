@@ -141,28 +141,26 @@ class AnilistFetchUserFavouritesOperator(BaseOperator):
     fluff_file : str
         path-like string to file containing fluffy folks' data with the format
         of `generation,username,id`
-    fluff_db : str
-        path-like string to sqlite3 db
     """
     @apply_defaults
     def __init__(
             self,
             fluff_file: Optional[str] = None,
-            fluff_db: Optional[str] = None,
             **kwargs
         ):
         super(AnilistFetchUserFavouritesOperator, self).__init__(**kwargs)
+        conn_id = kwargs['default_args'].get('conn_id')
+        self._db_hook: SqliteHook = Connection.get_connection_from_secrets(conn_id).get_hook()
         self._fluff_file = fluff_file if fluff_file else 'fluff'
-        self._database_name = fluff_db if fluff_db else Variable.get("DATABASE_NAME")
+        self._environment_type = kwargs['default_args'].get('environment_type')
+        self.log.info(f"Using {self._db_hook.sqlite_conn_id}")
 
     def execute(self, context):
         # load static users data
         fluffs = [(row[1], row[2]) for row in self._get_fluff()]
 
-        # ' check if environment is currently in testing
-        if context.get('params', {}).get("ENVIRONMENT_STATUS") == "TESTING":
+        if self._environment_type == "TESTING":
             fluffs = fluffs[-1:]  # only take one sample
-            self._database_name = 'fluff_test.db'
 
         # create users and lists table
         self._create_db()
@@ -185,8 +183,7 @@ class AnilistFetchUserFavouritesOperator(BaseOperator):
         return data
 
     def _create_db(self):
-        con = sqlite3.connect(self._database_name)
-        cur = con.cursor()
+        cur = self._db_hook.get_cursor()
 
         cur.execute("DROP TABLE IF EXISTS favourites")
         query = """
@@ -202,12 +199,10 @@ class AnilistFetchUserFavouritesOperator(BaseOperator):
         self.log.info('Table favourites created!')
 
     def _save_favourites_to_db(self, data):
-        con = sqlite3.connect(self._database_name)
-        cur = con.cursor()
-
-        query = "INSERT INTO favourites VALUES (?, ?, ?, ?, ?)"
-        cur.executemany(query, data)
-        con.commit()
+        with self._db_hook.get_conn() as conn:
+            cur = conn.cursor()
+            query = "INSERT INTO favourites VALUES (?, ?, ?, ?, ?)"
+            cur.executemany(query, data)
         self.log.info('Results saved!')
 
 
