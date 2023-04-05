@@ -342,3 +342,49 @@
 -- 	USING (media_id, media_type)
 -- WHERE media_type = "ANIME"
 -- ORDER BY c_rank
+
+-- * Fixing missing `user_id`
+-- * `user_id` should be present and used in `score_mapping` JOIN
+-- * it also should be present initially in `raw_lists` (as username could change)
+-- * `user_id` helps for identifying users across time
+-- ALTER TABLE score_mapping RENAME TO tmp_score_mapping
+--
+-- ' add `user_id` to `score_mapping`
+-- CREATE TABLE score_mapping AS
+-- SELECT user_id, username, score, anichan_score
+-- FROM stg_lists
+-- WHERE username IN (
+--         SELECT username
+--         FROM users
+--         WHERE score_format IN ("POINT_5", "POINT_3")
+-- )
+-- GROUP BY 1, 2, 3, 4
+--
+-- DROP TABLE tmp_score_mapping;
+-- DROP VIEW stg_raw_lists
+--
+-- ALTER TABLE raw_lists RENAME TO tmp_raw_lists;
+--
+-- ' add `user_id` to `raw_lists`
+-- CREATE TABLE "raw_lists"(
+-- 			user_id INT,
+-- 			username TEXT,
+-- 			score TEXT,
+-- 			anichan_score TEXT,
+-- 			status TEXT,
+-- 			media_id INTEGER,
+-- 			media_type TEXT,
+-- 			title TEXT,
+--          progress INTEGER,
+--          completed_at TEXT,
+-- 			retrieved_date TEXT,
+-- 			next_date TEXT
+-- )
+--
+-- INSERT INTO raw_lists
+-- SELECT u.id, rl.*
+-- FROM users u
+-- JOIN tmp_raw_lists rl
+-- USING (username)
+--
+-- DROP TABLE tmp_raw_lists;
