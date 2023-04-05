@@ -1,23 +1,30 @@
 import datetime as dt
+from pathlib import Path
 
 from custom.operators import (AnilistDownloadImagesOperator,
                               AnilistFetchMediaDetailsOperator,
                               AnilistFetchUserFavouritesOperator,
                               AnilistFetchUserListOperator)
 
-from airflow import DAG
+from airflow import DAG, configuration
 from airflow.exceptions import AirflowException
 from airflow.models import Variable
 from airflow.models.baseoperator import chain
+from airflow.operators.bash import BashOperator
 from airflow.operators.empty import EmptyOperator
+from airflow.providers.common.sql.operators.sql import SQLExecuteQueryOperator
 from airflow.utils.state import State
 
+ROOT_DIR = Path(configuration.get_airflow_home()).parent
 ENVIRONMENT_TYPE = Variable.get("ENVIRONMENT_TYPE", "DEVELOPMENT")
 ENVIRONMENT_CONN_MAPPING = {
     "DEVELOPMENT": 'fluff_db',
     "TESTING": 'fluff_test_db',
 }
 CONN_ID = ENVIRONMENT_CONN_MAPPING[ENVIRONMENT_TYPE]
+DBT_MODEL_MEDIA_AS_RULES = 'int_media__as_rules'
+DBT_PROJECT_DIR = Variable.get("DBT_PROJECT_DIR", str(ROOT_DIR / "sql_transforms"))
+DBT_TARGET_PROFILE = 'test' if ENVIRONMENT_TYPE == "TESTING" else 'dev'
 
 
 def skip_if_specified(context):
@@ -44,24 +51,33 @@ default_args = {
 with DAG(
     dag_id="fetch_anilist_data",
     description="Fetches users' score format, lists, favourites, and all media details from the Anilist API using a custom operator.",
-    start_date=dt.datetime(2023, 3, 30),
-    end_date=dt.datetime(2023, 3, 31),
+    start_date=dt.datetime(2023, 4, 4),
+    end_date=dt.datetime(2023, 4, 9),
     schedule_interval="@daily",
     default_args=default_args
 ) as dag:
-    start = EmptyOperator(
-        task_id='start'
+
+    start, end = [EmptyOperator(task_id=tid) for tid in ["start", "end"]]
+
+    load_score_format_mapping = SQLExecuteQueryOperator(
+        task_id="load_score_format_mapping",
+        sql="sqls/mapping_score_format.sql",
+        split_statements=True,
+        return_last=False,
     )
 
-    end = EmptyOperator(
-        task_id='end'
+    load_p3p5_score_mapping = SQLExecuteQueryOperator(
+        task_id="load_p3p5_score_mapping",
+        sql="sqls/mapping_p3p5_score.sql",
+        split_statements=True,
+        return_last=False,
     )
 
     fetch_user_lists = AnilistFetchUserListOperator(
         task_id="fetch_user_lists",
     )
 
-    fetch_user_favorites = AnilistFetchUserFavouritesOperator(
+    fetch_user_favourites = AnilistFetchUserFavouritesOperator(
         task_id="fetch_user_favorites",
     )
 
@@ -69,8 +85,21 @@ with DAG(
         task_id="fetch_media_details",
     )
 
+    create_media_as_rules_table = BashOperator(
+        task_id='create_media_as_rules_table',
+        bash_command=f'''
+            dbt run \
+                --project-dir {DBT_PROJECT_DIR} \
+                --target {DBT_TARGET_PROFILE} \
+                --select {DBT_MODEL_MEDIA_AS_RULES}
+        '''
+    )
+
     download_images = AnilistDownloadImagesOperator(
         task_id="download_images",
     )
 
-    start >> fetch_user_lists >> fetch_user_favorites >> fetch_media_details >> download_images >> end
+    chain(start, load_score_format_mapping, load_p3p5_score_mapping,
+          fetch_user_lists, fetch_user_favourites, create_media_as_rules_table,
+          fetch_media_details, download_images, end
+    )
