@@ -1,9 +1,8 @@
-import sqlite3
 from pathlib import Path
 from typing import Optional
 
 from airflow import configuration
-from airflow.models import BaseOperator, Variable
+from airflow.models import BaseOperator
 from airflow.models.connection import Connection
 from airflow.providers.sqlite.hooks.sqlite import SqliteHook
 from airflow.utils.decorators import apply_defaults
