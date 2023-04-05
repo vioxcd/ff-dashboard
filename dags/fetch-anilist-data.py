@@ -7,8 +7,17 @@ from custom.operators import (AnilistDownloadImagesOperator,
 
 from airflow import DAG
 from airflow.exceptions import AirflowException
+from airflow.models import Variable
+from airflow.models.baseoperator import chain
 from airflow.operators.empty import EmptyOperator
 from airflow.utils.state import State
+
+ENVIRONMENT_TYPE = Variable.get("ENVIRONMENT_TYPE", "DEVELOPMENT")
+ENVIRONMENT_CONN_MAPPING = {
+    "DEVELOPMENT": 'fluff_db',
+    "TESTING": 'fluff_test_db',
+}
+CONN_ID = ENVIRONMENT_CONN_MAPPING[ENVIRONMENT_TYPE]
 
 
 def skip_if_specified(context):
@@ -23,7 +32,9 @@ def skip_if_specified(context):
 
 default_args = {
     'trigger_rule': 'all_done',  # for skipping tasks
-    'pre_execute': skip_if_specified
+    'pre_execute': skip_if_specified,
+    'conn_id': CONN_ID,
+    'environment_type': ENVIRONMENT_TYPE
 }
 
 # to skip: go to Airflow's dag detail, click on the ">" and pick trigger w/ config
