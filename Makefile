@@ -43,13 +43,14 @@ start-airflow:
 	airflow webserver --port 8080 &
 	airflow scheduler &
 
-# to pass parameter, do it like `make test-airflow DAG_ID=[dag_id] EXECUTION_DATE=[execution_date]
+# to pass parameter, do it like `make test-airflow DAG_ID=[dag_id] EXECUTION_DATE=[execution_date]`
 # https://stackoverflow.com/a/2826178
 test-airflow:
+	airflow variables set ENVIRONMENT_TYPE TESTING
 	airflow dags test \
-		--conf '{"ENVIRONMENT_STATUS": "TESTING"}' \
 		$(DAG_ID) \
 		$(EXECUTION_DATE)
+	airflow variables delete ENVIRONMENT_TYPE
 
 check-airflow-logs:
 	find $(AIRFLOW_HOME)/logs/dag_id=fetch_anilist_data/**/* -name '*.log' | xargs -I {} grep -E "Processed:|Failed:" {} | sort --reverse | uniq
