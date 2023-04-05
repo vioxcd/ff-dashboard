@@ -4,6 +4,8 @@ from typing import Optional
 
 from airflow import configuration
 from airflow.models import BaseOperator, Variable
+from airflow.models.connection import Connection
+from airflow.providers.sqlite.hooks.sqlite import SqliteHook
 from airflow.utils.decorators import apply_defaults
 from dags.custom.hooks import AnilistApiHook
 
@@ -17,29 +19,27 @@ class AnilistFetchUserListOperator(BaseOperator):
     fluff_file : str
         path-like string to file containing fluffy folks' data with the format
         of `generation,username,id`
-    fluff_db : str
-        path-like string to sqlite3 db
     """
     @apply_defaults
     def __init__(
             self,
             fluff_file: Optional[str] = None,
-            fluff_db: Optional[str] = None,
             **kwargs
         ):
         super(AnilistFetchUserListOperator, self).__init__(**kwargs)
+        conn_id = kwargs['default_args'].get('conn_id')
+        self._db_hook: SqliteHook = Connection.get_connection_from_secrets(conn_id).get_hook()
         self._fluff_file = fluff_file if fluff_file else 'fluff'
-        self._database_name = fluff_db if fluff_db else Variable.get("DATABASE_NAME")
-        self.log.info(f"Using {self._database_name}")
+        self._environment_type = kwargs['default_args'].get('environment_type')
+        self.log.info(f"Using {self._db_hook.sqlite_conn_id}")
 
     def execute(self, context):
         # load static users data
         fluffs = self._get_fluff()
 
-        # ' check if environment is currently in testing
-        if context.get('params', {}).get("ENVIRONMENT_STATUS") == "TESTING":
+        # ' only test on one sample (make sure it runs...)
+        if self._environment_type == "TESTING":
             fluffs = fluffs[-1:]  # only take one sample
-            self._database_name = 'fluff_test.db'
 
         # create users and lists table
         self._create_db()
@@ -83,8 +83,7 @@ class AnilistFetchUserListOperator(BaseOperator):
         return data
 
     def _create_db(self):
-        con = sqlite3.connect(self._database_name)
-        cur = con.cursor()
+        cur = self._db_hook.get_cursor()
 
         cur.execute("DROP TABLE IF EXISTS users")
         query = """
@@ -119,21 +118,17 @@ class AnilistFetchUserListOperator(BaseOperator):
 
     def _save_user_to_db(self, id_, username, score_format, gen):
         """Saves username, id_, score_format and gen to db"""
-        con = sqlite3.connect(self._database_name)
-        cur = con.cursor()
-
-        query = f"INSERT INTO users VALUES ('{id_}', '{username}', '{score_format}', '{gen}')"
-        cur.execute(query)
-        con.commit()
+        with self._db_hook.get_conn() as conn:
+            cur = conn.cursor()
+            query = f"INSERT INTO users VALUES ('{id_}', '{username}', '{score_format}', '{gen}')"
+            cur.execute(query)
         self.log.info(f'{username} info saved!')
 
     def _save_list_to_db(self, data):
-        con = sqlite3.connect(self._database_name)
-        cur = con.cursor()
-
-        query = "INSERT INTO raw_lists VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL)"
-        cur.executemany(query, data)
-        con.commit()
+        with self._db_hook.get_conn() as conn:
+            cur = conn.cursor()
+            query = "INSERT INTO raw_lists VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL)"
+            cur.executemany(query, data)
         self.log.info('Results saved!')
 
 

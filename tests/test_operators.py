@@ -1,8 +1,10 @@
 import sqlite3
+from datetime import datetime
 from pathlib import Path
 
 import pytest
 
+from airflow.models.dag import DAG
 from dags.custom.operators import (AnilistDownloadImagesOperator,
                                    AnilistFetchMediaDetailsOperator,
                                    AnilistFetchUserFavouritesOperator,
@@ -10,6 +12,18 @@ from dags.custom.operators import (AnilistDownloadImagesOperator,
 
 TEST_TASK_ID = "testing_anilist_fetch_user_operator"
 
+
+@pytest.fixture
+def test_dag():
+	return DAG(
+        dag_id="test_dag",
+        default_args={
+			"owner": "me",
+			"start_date": datetime(2022, 1, 1),
+			'conn_id': 'fluff_test_db',
+			'environment_type': 'TESTING'
+		},
+    )
 
 @pytest.fixture
 def fluff_test_file(tmp_path: Path):
@@ -28,18 +42,17 @@ def tmp_image_folder(tmp_path: Path):
 	d.mkdir()
 	return d
 
-def test_anilist_fetch_user_operator(fluff_test_file, test_db):
+def test_anilist_fetch_user_operator(test_dag, fluff_test_file):
 	task = AnilistFetchUserListOperator(
 		task_id=TEST_TASK_ID,
+		dag=test_dag,
 		fluff_file=fluff_test_file,
-		fluff_db=test_db
 	)
 	_ = task.execute(context={})
 
-	with sqlite3.connect(test_db) as con:
-		cur = con.cursor()
-		assert cur.execute("SELECT COUNT(1) FROM users").fetchone()[0] == 1
-		assert cur.execute("SELECT COUNT(1) FROM raw_lists").fetchone()[0] > 1
+	cur = task._db_hook.get_cursor()
+	assert cur.execute("SELECT COUNT(1) FROM users").fetchone()[0] == 1
+	assert cur.execute("SELECT COUNT(1) FROM raw_lists").fetchone()[0] > 1
 
 def test_anilist_fetch_favourites_operator(fluff_test_file, test_db):
 	task = AnilistFetchUserFavouritesOperator(
