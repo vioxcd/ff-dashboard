@@ -4,6 +4,7 @@ from pathlib import Path
 
 import pytest
 
+from airflow.models.connection import Connection
 from airflow.models.dag import DAG
 from dags.custom.operators import (AnilistDownloadImagesOperator,
                                    AnilistFetchMediaDetailsOperator,
@@ -65,25 +66,32 @@ def test_anilist_fetch_favourites_operator(test_dag, fluff_test_file):
 	cur = task._db_hook.get_cursor()
 	assert cur.execute("SELECT COUNT(1) FROM favourites").fetchone()[0] > 1
 
-def test_anilist_fetch_media_details_operator(test_db):
-	with sqlite3.connect(test_db) as con:
-		cur = con.cursor()
+def test_anilist_fetch_media_details_operator(test_dag: DAG):
+	conn_id = test_dag.default_args.get('conn_id', 'fluff_test_db')
+	hook = Connection.get_connection_from_secrets(conn_id).get_hook()
+
+	with hook.get_conn() as conn:
+		cur = conn.cursor()
+		cur.execute("DROP TABLE IF EXISTS favourites")
 		cur.execute("CREATE TABLE favourites (item_id INT, type TEXT)")
 		cur.execute("INSERT INTO favourites VALUES (20698, 'anime')")
-		cur.execute("CREATE TABLE v_as_rules (media_id INT, type TEXT)")
-		cur.execute("INSERT INTO v_as_rules  VALUES (20698, 'anime')")
+
+		cur.execute("DROP TABLE IF EXISTS int_media__as_rules")
+		cur.execute("CREATE TABLE int_media__as_rules (media_id INT, type TEXT)")
+		cur.execute("INSERT INTO int_media__as_rules  VALUES (20698, 'anime')")
 
 	task = AnilistFetchMediaDetailsOperator(
 		task_id=TEST_TASK_ID,
-		fluff_db=test_db
+		dag=test_dag
 	)
 	_ = task.execute(context={})
 
-	with sqlite3.connect(test_db) as con:
-		cur = con.cursor()
+	with task._db_hook.get_conn() as conn:
 		assert cur.execute("SELECT COUNT(1) FROM media_details").fetchone()[0] > 0
 		assert cur.execute("SELECT COUNT(1) FROM media_tags").fetchone()[0] > 0
 		assert cur.execute("SELECT COUNT(1) FROM media_tags_bridge").fetchone()[0] > 0
+		cur.execute("DROP TABLE IF EXISTS favourites")
+		cur.execute("DROP TABLE IF EXISTS int_media__as_rules")
 
 def test_download_images_operator(tmp_image_folder: Path, test_db):
 	image_url = 'https://s4.anilist.co/file/anilistcdn/media/anime/cover/small/bx20698-YZIYor2zW3Ta.png'

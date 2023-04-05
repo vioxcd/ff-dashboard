@@ -209,30 +209,24 @@ class AnilistFetchUserFavouritesOperator(BaseOperator):
 class AnilistFetchMediaDetailsOperator(BaseOperator):
     """
     Operator that fetches media list from the Anilist API
-
-    Parameters
-    ----------
-    fluff_db : str
-        path-like string to sqlite3 db
     """
     @apply_defaults
     def __init__(
             self,
-            fluff_db: Optional[str] = None,
             **kwargs
         ):
         super(AnilistFetchMediaDetailsOperator, self).__init__(**kwargs)
-        self._database_name = fluff_db if fluff_db else Variable.get("DATABASE_NAME")
+        conn_id = kwargs['default_args'].get('conn_id')
+        self._db_hook: SqliteHook = Connection.get_connection_from_secrets(conn_id).get_hook()
+        self._environment_type = kwargs['default_args'].get('environment_type')
+        self.log.info(f"Using {self._db_hook.sqlite_conn_id}")
 
     def execute(self, context):
         # load static users data
         media_ids = self._get_fluff_media()
 
-        # ' check if environment is currently in testing
-        if context.get('params', {}).get("ENVIRONMENT_STATUS") == "TESTING":
+        if self._environment_type == "TESTING":
             media_ids = media_ids[:1]  # only take one sample
-            self._database_name = 'fluff_test.db'
-
         self.log.info(f"Processing {len(media_ids)} items")
 
         # create users and lists table
@@ -248,8 +242,7 @@ class AnilistFetchMediaDetailsOperator(BaseOperator):
         self.log.info('Done!')
 
     def _get_fluff_media(self) -> list[int]:
-        con = sqlite3.connect(self._database_name)
-        cur = con.cursor()
+        cur = self._db_hook.get_cursor()
         return [media_id for (media_id,) in cur.execute('''
             SELECT media_id
             FROM int_media__as_rules
@@ -260,9 +253,7 @@ class AnilistFetchMediaDetailsOperator(BaseOperator):
         ''')]
 
     def _create_db(self):
-        con = sqlite3.connect(self._database_name)
-        cur = con.cursor()
-
+        cur = self._db_hook.get_cursor()
         cur.execute("DROP TABLE IF EXISTS media_details")
         # genres and studios are comma-separated list represented in string
         query = """
@@ -312,30 +303,27 @@ class AnilistFetchMediaDetailsOperator(BaseOperator):
         self.log.info('Table `media tags bridge` created!')
 
     def _save_media_detail_to_db(self, data):
-        con = sqlite3.connect(self._database_name)
-        cur = con.cursor()
-        # 17
-        query = "INSERT INTO media_details VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
-        cur.execute(query, data)
-        con.commit()
+        with self._db_hook.get_conn() as conn:
+            cur = conn.cursor()
+            # 17
+            query = "INSERT INTO media_details VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+            cur.execute(query, data)
         self.log.info(f'{data[1]} saved!')
 
     def _save_media_tags_to_db(self, tags):
-        con = sqlite3.connect(self._database_name)
-        cur = con.cursor()
-        query = "INSERT INTO media_tags VALUES (?, ?, ?)"
-        cur.executemany(query, tags)
-        con.commit()
+        with self._db_hook.get_conn() as conn:
+            cur = conn.cursor()
+            query = "INSERT INTO media_tags VALUES (?, ?, ?)"
+            cur.executemany(query, tags)
         if tags:
             self.log.info(f'{tags} saved!')
 
 
     def _save_media_tag_bridge_to_db(self, media_tag_bridges):
-        con = sqlite3.connect(self._database_name)
-        cur = con.cursor()
-        query = "INSERT INTO media_tags_bridge VALUES (?, ?, ?)"
-        cur.executemany(query, media_tag_bridges)
-        con.commit()
+        with self._db_hook.get_conn() as conn:
+            cur = conn.cursor()
+            query = "INSERT INTO media_tags_bridge VALUES (?, ?, ?)"
+            cur.executemany(query, media_tag_bridges)
 
 
 class AnilistDownloadImagesOperator(BaseOperator):
