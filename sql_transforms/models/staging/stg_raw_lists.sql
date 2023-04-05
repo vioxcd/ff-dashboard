@@ -10,6 +10,7 @@ mapped_lists AS (
 	-- here, try to map each of those buggy `score` to an already known mapping of
 	-- `anichan_score` (the mappings are from previously done "correct but slow" ETL)
 	SELECT
+		rl.user_id,
 		rl.username,
 		m.score,  -- use score from the mapping
 		rl.anichan_score,
@@ -24,7 +25,7 @@ mapped_lists AS (
 	FROM {{ source('ff_anilist', 'score_mapping') }} m
 		JOIN {{ source('ff_anilist', 'raw_lists') }} rl
 		ON m.anichan_score = rl.score
-			AND m.username = rl.username
+			AND m.user_id = rl.user_id
 	WHERE CAST(rl.score AS INTEGER) != 0
 ),
 
@@ -75,7 +76,7 @@ transformed_to_appropriate_score AS (
 -- made it as how initial `lists` looks like
 -- important for next stage deduplication
 SELECT
-	id AS user_id,
+	user_id,
 	username,
 	score_format,
 	generation,
