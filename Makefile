@@ -1,7 +1,7 @@
 export AIRFLOW_HOME := $(shell pwd)/airflow
 PREV_AIRFLOW_DAGS_FOLDER := $(AIRFLOW_HOME)/dags
 NEW_AIRFLOW_DAGS_FOLDER := $(shell pwd)/dags
-EXECUTION_DATE := 04-04-2023
+EXECUTION_DATE := $(shell date +'%d-%m-%Y')
 DAG_ID := fetch_anilist_data
 
 setup-airflow:
@@ -44,7 +44,9 @@ start-airflow:
 	airflow webserver --port 8080 &
 	airflow scheduler &
 
-# to pass parameter, do it like `make test-airflow DAG_ID=[dag_id] EXECUTION_DATE=[execution_date]`
+# to pass parameter, do it like:
+# `make test-airflow DAG_ID=[dag_id] EXECUTION_DATE=[execution_date]`
+# `make test-airflow DAG_ID=fetch_anilist_data EXECUTION_DATE=$(date +'%d-%m-%Y')`
 # https://stackoverflow.com/a/2826178
 test-airflow:
 	airflow variables set ENVIRONMENT_TYPE TESTING
