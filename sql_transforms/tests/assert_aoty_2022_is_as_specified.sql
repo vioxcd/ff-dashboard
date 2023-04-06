@@ -2,7 +2,7 @@
 -- Except some already investigated difference, (e.g. Spring's AoT vs Dress-up Darling & audience counts),
 -- this tests ensure that the model generates the correct ordering and statistics
 SELECT *
-FROM {{ ref("aoty_2022") }}
+FROM {{ ref("final_aoty_2022") }}
 WHERE
 	(award = "Anime of the Year"
 		AND
