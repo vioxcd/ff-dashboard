@@ -28,7 +28,7 @@ transformed_to_appropriate_score AS (
 		END AS appropriate_score
 	FROM {{ ref('stg_tmp_lists') }} l
 		JOIN {{ source('ff_anilist', 'users') }} u
-	USING (username)
+		ON l.user_id = u.id
 ),
 
 initial_lists AS (
@@ -75,7 +75,7 @@ numbered_lists AS (
 	SELECT *,
 		ROW_NUMBER() OVER (
 			PARTITION BY
-				username,
+				user_id,
 				media_id,
 				media_type,
 				anichan_score,
@@ -90,7 +90,7 @@ historical_lists AS (
 	SELECT *,
 		LEAD(retrieved_date) OVER (
 			PARTITION BY
-				username,
+				user_id,
 				media_id,
 				media_type
 			ORDER BY

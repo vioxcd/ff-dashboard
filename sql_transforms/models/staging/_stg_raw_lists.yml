@@ -12,4 +12,4 @@ models:
       and dividing `anichan_score` for user with point 10 and decimal 10 score format.
     tests:
       - unique:
-          column_name: "(username || '-' || media_id || '-' || media_type)"
+          column_name: "(user_id || '-' || media_id || '-' || media_type)"
