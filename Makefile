@@ -55,6 +55,11 @@ test-airflow:
 		$(EXECUTION_DATE)
 	airflow variables delete ENVIRONMENT_TYPE
 
+stop-airflow:
+	-kill -INT \
+		$(shell ps -aux | grep '/bin/airflow webserver' | head -n 1 | awk '{print $$2}') \
+		$(shell ps -aux | grep '/bin/airflow scheduler' | head -n 1 | awk '{print $$2}')
+
 check-airflow-logs:
 	find $(AIRFLOW_HOME)/logs/dag_id=fetch_anilist_data/**/* -name '*.log' | xargs -I {} grep -E "Processed:|Failed:" {} | sort --reverse | uniq
 
