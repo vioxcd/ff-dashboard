@@ -388,3 +388,14 @@
 -- USING (username)
 --
 -- DROP TABLE tmp_raw_lists;
+
+-- * Investigating changing user's `score_format` using a new investigation.db
+-- * dump commands:
+-- CREATE TABLE inv_02_2023 AS SELECT * FROM lists l JOIN users u USING (username) WHERE username IN ('musangkuy', 'chameleon13');
+-- sqlite3 fluff_02-2023.db ".dump 'inv_02_2023';" > 02-2023.sql
+-- CREATE TABLE inv_04_2023 AS SELECT * FROM stg_lists WHERE username IN ('musangkuy', 'chameleon13');
+-- sqlite3 fluff_04-2023.db ".dump 'inv_04_2023';" > 04-2023.sql
+--
+-- * load commands
+-- sqlite3 investigation.db < 02-2023.sql
+-- sqlite3 investigation.db < 04-2023.sql
