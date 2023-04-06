@@ -74,13 +74,13 @@ See `FEATURES.md` for details of features, unworked TODOs, and bugs
 
     `make load-sample-data`
 
-14. To run `dbt` models. (caveat: you should setup your [profiles.yml](https://docs.getdbt.com/docs/core/connection-profiles) beforehand). Inspect the result run in the database afterwards
+14. To run `dbt` models. (don't forget to look at the setup of your [profiles.yml](./sql_transforms/profiles.yml)). Inspect the result run in the database afterwards
 
     `make sql`
 
 15. To test the model run correctly
 
-    `make sql-test`
+    `make sql-test SAMPLE_DATA_LOADED=1`
 
 16. To see `dbt` docs
 

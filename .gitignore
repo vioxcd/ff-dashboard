@@ -1,6 +1,5 @@
 fluff
-fluff.db
-fluff_test.db
+*.db
 *.db.bak
 .python-version
 
