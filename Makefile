@@ -1,3 +1,4 @@
+DB := fluff.db
 export AIRFLOW_HOME := $(shell pwd)/airflow
 PREV_AIRFLOW_DAGS_FOLDER := $(AIRFLOW_HOME)/dags
 NEW_AIRFLOW_DAGS_FOLDER := $(shell pwd)/dags
@@ -85,3 +86,6 @@ sql-test:
 sql-docs:
 	dbt docs generate --project-dir sql_transforms
 	dbt docs serve --project-dir sql_transforms --port 8081  # 8080 is Airflow's
+
+load-sample-data:
+	sqlite3 $(DB) < $(shell pwd)/samples/dump_for_public.sql
