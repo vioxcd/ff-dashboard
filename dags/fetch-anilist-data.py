@@ -54,7 +54,10 @@ with DAG(
     start_date=dt.datetime(2023, 4, 4),
     end_date=dt.datetime(2023, 4, 9),
     schedule_interval="@daily",
-    default_args=default_args
+    default_args=default_args,
+    tags=[
+        'anilist',
+    ],
 ) as dag:
 
     start, end = [EmptyOperator(task_id=tid) for tid in ["start", "end"]]
