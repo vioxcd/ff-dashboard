@@ -1,4 +1,3 @@
-DB = fluff.db
 export AIRFLOW_HOME := $(shell pwd)/airflow
 PREV_AIRFLOW_DAGS_FOLDER := $(AIRFLOW_HOME)/dags
 NEW_AIRFLOW_DAGS_FOLDER := $(shell pwd)/dags
@@ -11,30 +10,32 @@ setup-airflow:
 	# required airflow initialization
 	airflow db init
 	airflow users create \
-		--username admin \
-		--password admin \
+		--username airflow \
+		--password airflow \
 		--firstname Airflow \
 		--lastname Admin \
 		--role Admin \
 		--email me@example.com
 
 	# set dags folder
-	mkdir -p dags
 	sed -i "s|dags_folder = $(PREV_AIRFLOW_DAGS_FOLDER)|dags_folder = $(NEW_AIRFLOW_DAGS_FOLDER)|" airflow/airflow.cfg
 
 	# set timezone
 	sed -i 's|default_timezone = utc|default_timezone = Asia/Jakarta|' airflow/airflow.cfg
 	sed -i 's|default_ui_timezone = UTC|default_ui_timezone = Asia/Jakarta|' airflow/airflow.cfg
 
+	# don't load examples
+	sed -i 's|load_examples = True|load_examples = False|' airflow/airflow.cfg
+
 	# set database connection for the project
 	# https://airflow.apache.org/docs/apache-airflow-providers-sqlite/stable/connections/sqlite.html
 	# also see: `airflow connections list` | grep sqlite_default`
 	# this command might error out if ran twice
-	airflow connections add 'fluff_db' \
+	-airflow connections add 'fluff_db' \
 		--conn-type 'sqlite' \
 		--conn-host "$(shell pwd)/fluff.db"
 
-	airflow connections add 'fluff_test_db' \
+	-airflow connections add 'fluff_test_db' \
 		--conn-type 'sqlite' \
 		--conn-host "$(shell pwd)/fluff_test.db"
 
