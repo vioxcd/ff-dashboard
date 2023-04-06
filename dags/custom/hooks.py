@@ -61,7 +61,7 @@ class AnilistApiHook(BaseHook):
 			self.log.info(f'Processing {username} page {page}')
 
 			# one fetch-save cycle
-			query_params = self._get_list_query(page, username)
+			query_params = self._get_list_query(page, user_id)
 			results = self._fetch(query_params)
 			if not results:
 				self.log.error(f"Error when fetching lists for {username} on page {page}")
@@ -179,11 +179,11 @@ class AnilistApiHook(BaseHook):
 		variables = {'id': id_}
 		return {'query': QUERY_SCORE_FORMAT, 'variables': variables}
 
-	def _get_list_query(self, page: int, username: str, per_page: int = 50):
+	def _get_list_query(self, page: int, user_id: int, per_page: int = 50):
 		variables = {
 			'page': page,
 			'perPage': per_page,
-			'username': username,
+			'user_id': user_id,
 		}
 		return {'query': QUERY_USERS_MEDIALIST, 'variables': variables}
 

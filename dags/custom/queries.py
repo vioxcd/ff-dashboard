@@ -12,12 +12,12 @@ query ($id: Int) {
 
 # this query has anichan specific score format included
 QUERY_USERS_MEDIALIST = '''
-query ($page: Int, $perPage: Int, $username: String) {
+query ($page: Int, $perPage: Int, $user_id: Int) {
 	Page (page: $page, perPage: $perPage) {
 		pageInfo {
 			hasNextPage
 		},
-		mediaList(userName: $username) {
+		mediaList(userId: $user_id) {
 			score: score,
 			anichan_score: score(format: POINT_100),
 			status,
