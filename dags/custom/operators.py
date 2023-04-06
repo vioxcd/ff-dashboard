@@ -60,7 +60,7 @@ class AnilistFetchUserListOperator(BaseOperator):
             self._save_user_to_db(id_, username, score_format, gen)
 
             # next, prepare to process lists data
-            data = hooks.get_user_lists(username)
+            data = hooks.get_user_lists(id_, username)
 
             if not data:  # in case some error happened
                 self.log.error(f"Error encountered. Fetch on {username} is aborted")
@@ -99,6 +99,7 @@ class AnilistFetchUserListOperator(BaseOperator):
         cur.execute("DROP TABLE IF EXISTS raw_lists")
         query = """
             CREATE TABLE raw_lists(
+                user_id INT,
                 username TEXT,
                 score TEXT,
                 anichan_score TEXT,
@@ -126,7 +127,7 @@ class AnilistFetchUserListOperator(BaseOperator):
     def _save_list_to_db(self, data):
         with self._db_hook.get_conn() as conn:
             cur = conn.cursor()
-            query = "INSERT INTO raw_lists VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL)"
+            query = "INSERT INTO raw_lists VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL)"
             cur.executemany(query, data)
         self.log.info('Results saved!')
 
