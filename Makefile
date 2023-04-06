@@ -4,6 +4,7 @@ PREV_AIRFLOW_DAGS_FOLDER := $(AIRFLOW_HOME)/dags
 NEW_AIRFLOW_DAGS_FOLDER := $(shell pwd)/dags
 EXECUTION_DATE := $(shell date +"%Y-%m-%dT%H:%M:%S%z")
 DAG_ID := fetch_anilist_data
+SAMPLE_DATA_LOADED := 0
 
 setup-airflow:
 	@echo $(AIRFLOW_HOME)
@@ -81,7 +82,11 @@ sql:
 	dbt run --project-dir sql_transforms
 
 sql-test:
-	dbt test --project-dir sql_transforms
+	@if [ $(SAMPLE_DATA_LOADED) = 0 ]; then \
+		dbt test --project-dir sql_transforms; \
+	else \
+		dbt test --project-dir sql_transforms --exclude final_aoty_2022; \
+	fi
 
 sql-docs:
 	dbt docs generate --project-dir sql_transforms
