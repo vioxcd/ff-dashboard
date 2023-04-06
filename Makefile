@@ -1,7 +1,7 @@
 export AIRFLOW_HOME := $(shell pwd)/airflow
 PREV_AIRFLOW_DAGS_FOLDER := $(AIRFLOW_HOME)/dags
 NEW_AIRFLOW_DAGS_FOLDER := $(shell pwd)/dags
-EXECUTION_DATE := $(shell date +'%d-%m-%Y')
+EXECUTION_DATE := $(shell date +"%Y-%m-%dT%H:%M:%S%z")
 DAG_ID := fetch_anilist_data
 
 setup-airflow:
@@ -54,6 +54,15 @@ test-airflow:
 		$(DAG_ID) \
 		$(EXECUTION_DATE)
 	airflow variables delete ENVIRONMENT_TYPE
+
+# https://stackoverflow.com/a/59316781
+# `make trigger-airflow ENVIRONMENT_TYPE=TESTING`
+trigger-airflow:
+	airflow dags unpause $(DAG_ID)
+	airflow dags trigger \
+		-e $(EXECUTION_DATE) \
+		-r "manual__$(EXECUTION_DATE)" \
+		$(DAG_ID)
 
 stop-airflow:
 	-kill -INT \
