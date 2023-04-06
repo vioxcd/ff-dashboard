@@ -53,7 +53,7 @@ class AnilistApiHook(BaseHook):
 		query_params = self._get_score_format_query(id_)
 		return self._fetch(query_params)
 
-	def get_user_lists(self, username: str):
+	def get_user_lists(self, user_id: int, username: str):
 		page = 1
 		has_next_page = True
 		data = []
@@ -77,6 +77,7 @@ class AnilistApiHook(BaseHook):
 				completed_at = f"{day}-{month}-{year}" if day and month and year else "-"
 
 				data.append((
+					user_id,
 					username,
 					media['score'],
 					media['anichan_score'],
