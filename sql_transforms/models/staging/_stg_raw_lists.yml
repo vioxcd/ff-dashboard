@@ -10,6 +10,10 @@ models:
       Cleaning done by adjusting the "buggy" score from `raw_lists` table`.
       Adjustment done in two ways: mapping for users with point 3 and 5 score format,
       and dividing `anichan_score` for user with point 10 and decimal 10 score format.
+    columns:
+      - name: score
+        tests:
+          - not_null
     tests:
       - unique:
           column_name: "(user_id || '-' || media_id || '-' || media_type)"
