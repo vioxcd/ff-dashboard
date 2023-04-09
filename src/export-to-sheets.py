@@ -14,7 +14,21 @@ def get_aoty_2022(db_name):
                 award_order, award, media_id, title, anichan_score,
                 ff_score, audience_count, season, season_year, media_type,
                 format, source, studios, is_sequel
-            FROM aoty_2022
+            FROM final_aoty_2022
+            """
+    res = cur.execute(query)
+    columns = [description[0] for description in cur.description]
+    rows = [list(row) for row in res.fetchall()]
+    return [columns] + rows
+
+
+def get_favourites_p90(db_name):
+    con = sqlite3.connect(db_name)
+    cur = con.cursor()
+    query = """
+            SELECT
+                name, type, counts, pct_rank
+            FROM final_favourites_p90
             """
     res = cur.execute(query)
     columns = [description[0] for description in cur.description]
@@ -24,6 +38,7 @@ def get_aoty_2022(db_name):
 
 def get_top_anime(db_name):
     pass
+
 
 def get_top_manga(db_name):
     pass
@@ -47,6 +62,7 @@ if __name__ == "__main__":
     # `NAME OF SHEETS`: `METADATA`
     queries = {
         "AOTY 2022": get_aoty_2022,
+        "Favourites p90": get_favourites_p90,
     }
 
     for sheet_name, query in queries.items():
