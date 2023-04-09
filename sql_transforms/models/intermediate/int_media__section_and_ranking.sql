@@ -20,7 +20,7 @@ get_media_lists AS (
 ),
 
 get_sections AS (
-	SELECT *,
+	SELECT
 		CASE
 			WHEN anichan_score >= 90 OR ff_score >= 90
 				THEN "gold"
@@ -30,12 +30,13 @@ get_sections AS (
 			WHEN anichan_score = 85 OR ff_score = 85
 				THEN "bronze"
 			ELSE "-"
-		END AS section
+		END AS section,
+		*
 	FROM get_media_lists
 ),
 
 get_sections_rank AS (
-	SELECT *,	
+	SELECT
 		ROW_NUMBER() OVER (PARTITION BY media_type
 							ORDER BY
 								CASE section
@@ -48,7 +49,8 @@ get_sections_rank AS (
 								ff_score DESC,
 								audience_count DESC,
 								title DESC
-							) AS ranking
+							) AS ranking,
+		*
 	FROM get_sections
 	WHERE section != "-"
 )
