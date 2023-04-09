@@ -37,11 +37,29 @@ def get_favourites_p90(db_name):
 
 
 def get_top_anime(db_name):
-    pass
+    con = sqlite3.connect(db_name)
+    cur = con.cursor()
+    query = """
+            SELECT *
+            FROM final_top_anime
+            """
+    res = cur.execute(query)
+    columns = [description[0] for description in cur.description]
+    rows = [list(row) for row in res.fetchall()]
+    return [columns] + rows
 
 
 def get_top_manga(db_name):
-    pass
+    con = sqlite3.connect(db_name)
+    cur = con.cursor()
+    query = """
+            SELECT *
+            FROM final_top_manga
+            """
+    res = cur.execute(query)
+    columns = [description[0] for description in cur.description]
+    rows = [list(row) for row in res.fetchall()]
+    return [columns] + rows
 
 
 def get_top_seasonals(db_name):
@@ -63,6 +81,8 @@ if __name__ == "__main__":
     queries = {
         "AOTY 2022": get_aoty_2022,
         "Favourites p90": get_favourites_p90,
+        "Top Anime": get_top_anime,
+        "Top Manga": get_top_manga,
     }
 
     for sheet_name, query in queries.items():

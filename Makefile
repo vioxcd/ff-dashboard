@@ -94,3 +94,6 @@ sql-docs:
 
 load-sample-data:
 	sqlite3 $(DB) < $(shell pwd)/samples/dump_for_public.sql
+
+run-export:
+	python3 src/export-to-sheets.py
