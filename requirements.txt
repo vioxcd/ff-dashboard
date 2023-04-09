@@ -6,3 +6,5 @@ apache-airflow==2.5.1
 dbt-core==1.4.1
 dbt-sqlite==1.4.0
 pytest==7.2.2
+gspread==5.7.2
+python-dotenv==1.0.0
