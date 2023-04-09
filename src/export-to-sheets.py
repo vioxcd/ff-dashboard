@@ -89,6 +89,7 @@ if __name__ == "__main__":
         print(f"Inserting {sheet_name}")
         data = query(DATABASE_NAME)
         worksheet = sheet.worksheet(sheet_name)
+        worksheet.clear()
         worksheet.update(data)
 
     print("Done!")
