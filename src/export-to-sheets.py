@@ -1,5 +1,6 @@
 import os
 import sqlite3
+from datetime import datetime
 from pathlib import Path
 
 import gspread
@@ -91,5 +92,7 @@ if __name__ == "__main__":
         worksheet = sheet.worksheet(sheet_name)
         worksheet.clear()
         worksheet.update(data)
+        exported_on_message = f'Exported on: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}'
+        worksheet.update(f"A{len(data) + 5}", exported_on_message)
 
     print("Done!")
