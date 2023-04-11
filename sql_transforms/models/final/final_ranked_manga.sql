@@ -1,4 +1,7 @@
-{{ config(tags='final') }}
+{{ config(
+	tags=["final", "export"]
+) }}
+
 
 -- exclude empty data (season, season_year, episodes, studios) and redundant (format)
 SELECT

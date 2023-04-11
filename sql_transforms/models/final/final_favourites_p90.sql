@@ -1,4 +1,6 @@
-{{ config(tags='final') }}
+{{ config(
+	tags=["final", "export", "dashboard"]
+) }}
 
 SELECT *
 FROM {{ ref('int_favourites__pct_rank') }}

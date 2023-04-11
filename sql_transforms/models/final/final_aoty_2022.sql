@@ -1,5 +1,5 @@
 {{ config(
-	tags=["final", "aoty_2022"]
+	tags=["final", "aoty_2022", "export", "dashboard"]
 ) }}
 
 -- the same as `as_rules`
