@@ -14,7 +14,7 @@ get_media_lists AS (
 		md.studios,
 		md.is_sequel,
 		md.cover_image_url_xl AS cover_image_url
-	FROM int_media__as_rules ar
+	FROM {{ ref('int_media__as_rules') }} ar
 	JOIN media_details md
 		USING (media_id)
 ),
