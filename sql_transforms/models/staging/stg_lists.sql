@@ -95,7 +95,7 @@ historical_lists AS (
 				media_type
 			ORDER BY
 				retrieved_date ASC
-		) AS next_date
+		) AS next_date_lead
 	FROM numbered_lists
 	WHERE number = 1 -- ' filter
 )
@@ -103,5 +103,6 @@ historical_lists AS (
 SELECT
 	user_id, username, score_format, generation, score,
 	anichan_score, appropriate_score, status, media_id, media_type,
-	title, progress, completed_at, retrieved_date, next_date
+	title, progress, completed_at, retrieved_date,
+	next_date_lead AS next_date  -- ' use calculated next_date
 FROM historical_lists

@@ -245,6 +245,42 @@
 -- 
 -- new users are added in fluff.txt
 
+-- * Reload lists to db because there's bug when calculating `next_date`
+-- (it's shadowed by the column of the same name)
+-- sqlite3 data/fluff_03-2023.db
+-- .output data/lists_2023-02.sql
+-- .dump lists_2022
+-- .output data/lists_2023-03.sql
+-- .dump raw_lists
+-- .output data/lists_2023-04.sql
+-- .dump src_lists
+--
+-- sed -i 's/lists_2022/raw_lists_02/g' data/lists_2023-02.sql
+-- sed -i 's/raw_lists/raw_lists_03/g' data/lists_2023-03.sql
+-- sed -i 's/src_lists/raw_lists_04/g' data/lists_2023-04.sql
+--
+-- .read data/lists_2023-02.sql
+-- .read data/lists_2023-03.sql
+-- .read data/lists_2023-04.sql
+--
+-- * Move original fluff.db table
+-- ALTER TABLE raw_lists RENAME TO tmp_raw_lists;
+-- ALTER TABLE stg_lists RENAME TO tmp_stg_lists;
+--
+-- * Start operation
+-- CREATE TABLE raw_lists AS
+-- SELECT u.id AS user_id, rl.*, NULL as next_date
+-- FROM users u
+-- 	JOIN raw_lists_02 rl
+-- 	USING (username)
+--
+-- `dbt run` / make sql
+--
+-- * Run the above query for raw_lists_03 and 04 too
+--
+-- * Query for checking whether it's loaded correctly
+-- SELECT COUNT(next_date) FROM stg_lists
+
 -- * Trying to make 🔻 and 🔺 indicator
 -- ? idea:
 -- ? preserve only the earliest date if record are unchanged in subsequent date.
