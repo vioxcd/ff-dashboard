@@ -51,12 +51,12 @@ def get_favourites_p90(db_name):
     return [columns] + rows
 
 
-def get_top_anime(db_name):
+def get_ranked_anime(db_name):
     con = sqlite3.connect(db_name)
     cur = con.cursor()
     query = """
             SELECT *
-            FROM final_top_anime
+            FROM final_ranked_anime
             """
     res = cur.execute(query)
     columns = [description[0] for description in cur.description]
@@ -64,12 +64,12 @@ def get_top_anime(db_name):
     return [columns] + rows
 
 
-def get_top_manga(db_name):
+def get_ranked_manga(db_name):
     con = sqlite3.connect(db_name)
     cur = con.cursor()
     query = """
             SELECT *
-            FROM final_top_manga
+            FROM final_ranked_manga
             """
     res = cur.execute(query)
     columns = [description[0] for description in cur.description]
@@ -96,8 +96,8 @@ if __name__ == "__main__":
     queries = {
         "AOTY 2022": get_aoty_2022,
         "Favourites p90": get_favourites_p90,
-        "Top Anime": get_top_anime,
-        "Top Manga": get_top_manga,
+        "Ranked Anime": get_ranked_anime,
+        "Ranked Manga": get_ranked_manga,
     }
 
     for sheet_name, query in queries.items():

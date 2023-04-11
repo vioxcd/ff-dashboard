@@ -52,7 +52,6 @@ get_sections_rank AS (
 							) AS ranking,
 		*
 	FROM get_sections
-	WHERE section != "-"
 )
 
 SELECT *
