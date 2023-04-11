@@ -7,6 +7,20 @@ import gspread
 from dotenv import load_dotenv
 
 
+def get_data_last_retrieved_on(db_name):
+    con = sqlite3.connect(db_name)
+    cur = con.cursor()
+    query = """
+            SELECT DISTINCT retrieved_date
+            FROM stg_lists
+            ORDER BY 1 DESC
+            LIMIT 1
+            """
+    res = cur.execute(query)
+    last_retrieved_date = res.fetchone()[0]
+    return last_retrieved_date
+
+
 def get_aoty_2022(db_name):
     con = sqlite3.connect(db_name)
     cur = con.cursor()
@@ -92,6 +106,8 @@ if __name__ == "__main__":
         worksheet = sheet.worksheet(sheet_name)
         worksheet.clear()
         worksheet.update(data)
+        retrieved_on_message = f'Retrieved on: {get_data_last_retrieved_on(DATABASE_NAME)}'
+        worksheet.update(f"A{len(data) + 4}", retrieved_on_message)
         exported_on_message = f'Exported on: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}'
         worksheet.update(f"A{len(data) + 5}", exported_on_message)
 
