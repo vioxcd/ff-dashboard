@@ -9,4 +9,4 @@ sources:
       - name: favourites
       - name: raw_lists
       - name: score_mapping
-      # - name: media_details
+      - name: media_details
