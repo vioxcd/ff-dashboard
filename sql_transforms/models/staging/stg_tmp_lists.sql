@@ -17,7 +17,7 @@
 
 {% if table_exists %}
 
-SELECT * FROM stg_lists
+SELECT * FROM stg_lists  -- ' doesn't use `ref` because it'd break (circular)
 
 {% else %}
 
