@@ -435,3 +435,45 @@
 -- * load commands
 -- sqlite3 investigation.db < 02-2023.sql
 -- sqlite3 investigation.db < 04-2023.sql
+
+-- * Dump for public data
+--
+-- * Copy from latest data/fluff_05-2023.db
+-- cp data/fluff_05-2023.db dump_for_public.db
+--
+-- * Drop all unneeded table
+-- DROP TABLE final_aoty_2022;
+-- DROP TABLE final_favourites_p90;
+-- DROP TABLE final_top_anime;
+-- DROP TABLE final_top_manga;
+-- DROP VIEW int_aoty_2022__as_rules;
+-- DROP VIEW int_favourites__pct_rank;
+-- DROP VIEW int_media__as_rules;
+-- DROP VIEW int_media__potential;
+-- DROP VIEW int_media__section_and_ranking;
+-- DROP VIEW stg_favourites;
+-- DROP VIEW stg_raw_lists;
+-- DROP TABLE raw_lists_02;
+-- DROP TABLE raw_lists_03;
+-- DROP TABLE raw_lists_04;
+-- DROP TABLE tmp_raw_lists;
+-- DROP TABLE tmp_stg_lists;
+--
+-- DELETE FROM users
+-- WHERE username NOT IN
+-- ('musangkuy', 'LZollak', 'lamfao', 'xPabu', '2Reza4', 'llure', 'winuyi', 'amirahalgal', 'hammz', 'SakataAlfred')
+--
+-- DELETE FROM favourites
+-- WHERE user_id
+-- NOT IN (SELECT id FROM users)
+--
+-- DELETE FROM stg_lists
+-- WHERE user_id
+-- NOT IN (SELECT id FROM users)
+--
+-- DELETE FROM raw_lists
+-- WHERE user_id
+-- NOT IN (SELECT id FROM users)
+--
+-- sqlite3 dump_for_public.db ".dump" > samples/dump_for_public.sql
+--
