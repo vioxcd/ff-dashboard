@@ -4,13 +4,13 @@ An end-to-end pipeline and dashboard of Fluffy Folks' statistics!
 
 This pipeline:
 
-1. Fetches and stores the historical FF's data from Anilist
+1. Fetches and stores the historical FF's data from [Anilist](https://anilist.co/)
 
 2. Calculates [many interesting statistics](#statistics) that can be viewed from a dashboard
 
-3. Periodically exports a version of `#rankings` channel content (from Fluffy Folks' discord) to accessible sheets
+3. Periodically exports a version of `#rankings` channel content (from Fluffy Folks' discord) to [accessible sheets](https://docs.google.com/spreadsheets/d/1CUSfaHK2nlhUibzl5yADVuSef7hYPdTqOz4yGJSIE54)
 
-4. Created using `Airflow`, `dbt`, and `streamlit`
+4. Created while learning (a lot) about `Airflow`, `dbt`, and `streamlit`
 
 ## Why?
 
@@ -21,6 +21,14 @@ This pipeline:
 3. I'm learning about pipelines, SQLs, and dashboarding stuffs
 
 See `FEATURES.md` for details of features, unworked TODOs, and bugs
+
+## How's It Going
+
+Initially I was just curious about the question, so I ran a query with an already retrieved data (3 months), and at this point I haven't notified my circles yet. Then, BOOM. It just went public just like that, and got positive response
+
+![Twitter QRTs of the DB Browser interface with an SQL query and its result - it's about "which anime movie are better than Revue Starlight Movie"](./assets/1-twitter-qrt.png)
+
+![Reply to the above QRTs from my friend saying this could help the currently manual data-gathering](./assets/2-twitter-qrt-continued.png)
 
 ## Installation & Usage
 
