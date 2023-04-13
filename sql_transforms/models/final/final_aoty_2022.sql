@@ -11,7 +11,7 @@ aoty_2022 AS (
     ar.ff_score,
     ar.audience_count
   FROM {{ ref('int_aoty_2022__as_rules') }} ar
-  JOIN media_details md
+  JOIN {{ source('ff_anilist', 'media_details') }} md
   USING (media_id)
   WHERE ar.anichan_score >= 80.0
     AND ar.ff_score >= 80.0

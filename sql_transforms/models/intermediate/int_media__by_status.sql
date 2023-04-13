@@ -7,7 +7,7 @@ lists_by_status AS (
 		title,
 		media_type,
 		status
-	FROM stg_lists
+	FROM {{ ref('stg_lists') }}
 	WHERE status IN ("CURRENT", "DROPPED", "PLANNING") AND next_date IS NULL
 ),
 
