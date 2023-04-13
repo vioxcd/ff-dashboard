@@ -77,8 +77,30 @@ def get_ranked_manga(db_name):
     return [columns] + rows
 
 
-def get_top_seasonals(db_name):
-    pass
+def get_seasonals(db_name):
+    con = sqlite3.connect(db_name)
+    cur = con.cursor()
+    query = """
+            SELECT *
+            FROM final_seasonals
+            """
+    res = cur.execute(query)
+    columns = [description[0] for description in cur.description]
+    rows = [list(row) for row in res.fetchall()]
+    return [columns] + rows
+
+
+def get_potentials(db_name):
+    con = sqlite3.connect(db_name)
+    cur = con.cursor()
+    query = """
+            SELECT *
+            FROM final_potential
+            """
+    res = cur.execute(query)
+    columns = [description[0] for description in cur.description]
+    rows = [list(row) for row in res.fetchall()]
+    return [columns] + rows
 
 
 if __name__ == "__main__":
@@ -98,6 +120,9 @@ if __name__ == "__main__":
         "Favourites p90": get_favourites_p90,
         "Ranked Anime": get_ranked_anime,
         "Ranked Manga": get_ranked_manga,
+        "Seasonals": get_seasonals,
+        "Potentials": get_potentials,
+        "Info": get_data_last_retrieved_on,
     }
 
     for sheet_name, query in queries.items():
@@ -105,10 +130,13 @@ if __name__ == "__main__":
         data = query(DATABASE_NAME)
         worksheet = sheet.worksheet(sheet_name)
         worksheet.clear()
-        worksheet.update(data)
-        retrieved_on_message = f'Retrieved on: {get_data_last_retrieved_on(DATABASE_NAME)}'
-        worksheet.update(f"A{len(data) + 4}", retrieved_on_message)
-        exported_on_message = f'Exported on: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}'
-        worksheet.update(f"A{len(data) + 5}", exported_on_message)
+
+        if sheet_name == "Info":
+            retrieved_on_message = f'Retrieved on: {data}'
+            exported_on_message = f'Exported on: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}'
+            worksheet.update(f"A1", retrieved_on_message)
+            worksheet.update(f"A2", exported_on_message)
+        else:
+            worksheet.update(data)
 
     print("Done!")
