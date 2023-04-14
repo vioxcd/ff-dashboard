@@ -10,6 +10,7 @@ data/
 logs/
 images/
 airflow/
+.old/
 
 dags/test-dag.py
 dags/custom/testing_operators.py
