@@ -76,7 +76,7 @@ check-airflow-logs:
 
 app:
 	@echo "Starting streamlit app..."
-	streamlit run src/app.py
+	streamlit run src/streamlit/app.py
 
 sql:
 	dbt run --project-dir sql_transforms
@@ -96,4 +96,4 @@ load-sample-data:
 	sqlite3 $(DB) < $(shell pwd)/samples/dump_for_public.sql
 
 run-export:
-	python3 src/export-to-sheets.py
+	python3 src/sheets/export.py
