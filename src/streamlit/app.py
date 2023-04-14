@@ -4,11 +4,12 @@ from dataclasses import dataclass
 from typing import Iterator
 
 import requests
-import streamlit as st
 from PIL import Image
 
+import streamlit as st
+
 # Config Layer
-st.set_page_config(page_title="FFD :)", layout="wide")
+st.set_page_config(page_title="Fluff ~", layout="wide")
 
 con = sqlite3.connect('fluff.db')
 cur = con.cursor()
@@ -17,15 +18,15 @@ cur = con.cursor()
 ## Objects
 @dataclass
 class Media:
+	ranking: int
+	section: str
 	media_id: int
 	title: str
 	media_type: str
-	cover_image_url: str
 	anichan_score: int
 	ff_score: int
 	audience_count: int
-	section: str
-	ranking: int
+	cover_image_url: str
 
 @dataclass
 class AOTY:
@@ -82,8 +83,44 @@ def get_expanded_sections(media_ranked: list[Media]) -> list[tuple[str, bool, It
 	]
 
 ## Fetching Data
-def get_media_section_and_ranking() -> list[Media]:
-	return [Media(*m) for m in cur.execute('''SELECT * FROM v_media_section_and_ranking''')]
+def get_anime_ranked() -> list[Media]:
+	query = '''
+		SELECT
+			ranking,
+			section,
+			media_id,
+			title,
+			media_type,
+			anichan_score,
+			ff_score,
+			audience_count,
+			cover_image_url
+		FROM final_ranked_anime
+		WHERE section != '-'
+	'''
+	# TODO: create Anime and Manga dataclass
+	# season,
+	# season_year,
+	# format,
+	return [Media(*m) for m in cur.execute(query)]
+
+def get_manga_ranked() -> list[Media]:
+	query = '''
+		SELECT
+			ranking,
+			section,
+			media_id,
+			title,
+			media_type,
+			anichan_score,
+			ff_score,
+			audience_count,
+			cover_image_url
+		FROM final_ranked_manga
+		WHERE section != '-'
+	'''
+	# source,
+	return [Media(*m) for m in cur.execute(query)]
 
 def get_aoty_list():
 	return cur.execute('''
@@ -93,11 +130,11 @@ def get_aoty_list():
 			media_id,
 			title,
 			cover_image_url_xl AS cover_image_url
-		FROM v_aoty_2022
+		FROM final_aoty_2022
 	''')
 
 def get_favourites() -> list[Favourite]:
-	return [Favourite(*f) for f in cur.execute('''SELECT * FROM v_favourites_p90''')]
+	return [Favourite(*f) for f in cur.execute('''SELECT * FROM final_favourites_p90''')]
 
 ## Variables
 # """
@@ -107,12 +144,11 @@ def get_favourites() -> list[Favourite]:
 # (3) Sorted by: score > votes (number of audience) > alphabet
 # (4) Titles are formatted in lowercase English
 # """
-media_ranked = get_media_section_and_ranking()
-anime_ranked = [m for m in media_ranked if m.media_type == "ANIME"]
-manga_ranked = [m for m in media_ranked if m.media_type == "MANGA"]
+anime_ranked = get_anime_ranked()
+manga_ranked = get_manga_ranked()
 
 # Presentation Layer
-st.title("Fluffy Folks Dashboard")
+st.title("Fluffy Folks Dashboard 📊")
 
 ## Hide expander borders
 hide = """
