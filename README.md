@@ -72,3 +72,5 @@ Moved to its own [file](./INSTALLATION.md)
 A note for my future-self as well!
 
 - Be careful when testing stuff! make sure the `ENVIRONMENT_TYPE` are according to what you're going to be doing, e.g. when you trying to test and there's error when running the command, the env-vars might not be *unset*, and from that point on, it might cause bugs in your dag runs when you're actually don't want to test
+
+- Careful when trying to explore `dbt` stuff while *at the same time* running `Airflow` operations, or doing the other two along with `streamlit` as `sqlite` are single-threaded and would throw an error if two operations are running on it at the same time
