@@ -5,6 +5,7 @@ NEW_AIRFLOW_DAGS_FOLDER := $(shell pwd)/dags
 EXECUTION_DATE := $(shell date +"%Y-%m-%dT%H:%M:%S%z")
 DAG_ID := fetch_anilist_data
 SAMPLE_DATA_LOADED := 0
+SKIP_EXPORT := 0
 
 setup-airflow:
 	@echo $(AIRFLOW_HOME)
@@ -61,10 +62,18 @@ test-airflow:
 # `make trigger-airflow ENVIRONMENT_TYPE=TESTING`
 trigger-airflow:
 	airflow dags unpause $(DAG_ID)
-	airflow dags trigger \
-		-e $(EXECUTION_DATE) \
-		-r "manual__$(EXECUTION_DATE)" \
-		$(DAG_ID)
+	@if [ $(SKIP_EXPORT) = 0 ]; then \
+		airflow dags trigger \
+			-e $(EXECUTION_DATE) \
+			-r "manual__$(EXECUTION_DATE)" \
+			$(DAG_ID); \
+	else \
+		airflow dags trigger \
+			-c '{"skip_tasks": ["export_to_sheet"]}' \
+			-e $(EXECUTION_DATE) \
+			-r "manual__$(EXECUTION_DATE)" \
+			$(DAG_ID); \
+	fi
 
 stop-airflow:
 	-kill -INT \

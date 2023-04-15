@@ -8,7 +8,7 @@
 
    `export AIRFLOW_HOME="$(pwd)/airflow"`
 
-3. Setup Airflow, set users, config, and default connections
+3. Setup Airflow, set users, config, and default connections. Also, set the proper variables for exporting in `.env` file (follow the `.env.example` file)
 
     `make setup-airflow`
 
@@ -38,6 +38,8 @@
 
     `make trigger-airflow  # run the whole dags`
 
+    `make trigger-airflow SKIP_EXPORT=1  # skip export`
+
     see next point if you don't want to run the whole dags!
 
 11. For testing simple dag runs
@@ -65,3 +67,5 @@
 17. Finally, to see the `streamlit` app
 
     `make app`
+
+18. If you set `SH_KEY` in `.env` file, it would also be filled with data now
