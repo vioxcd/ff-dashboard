@@ -20,19 +20,27 @@ This pipeline:
 
 3. I'm learning about pipelines, SQLs, and dashboarding stuffs
 
-See `FEATURES.md` for details of features, unworked TODOs, and bugs
+See `TODOs.md` for details of unworked TODOs and bugs
 
 ## How's It Going
 
-Initially I was just curious about the question, so I ran a query with an already retrieved data (3 months), and at this point I haven't notified my circles yet. Then, BOOM. It just went public just like that, and got positive response
+Initially I was just curious about the question, so I ran a query with an already retrieved data (3 months), and at this point I haven't notified my circles yet. Then, BOOM. It just went public just like that, and got [positive response](https://twitter.com/gyrowayne/status/1645010774144983041)
 
 ![Twitter QRTs of the DB Browser interface with an SQL query and its result - it's about "which anime movie are better than Revue Starlight Movie"](./assets/1-twitter-qrt.png)
 
 ![Reply to the above QRTs from my friend saying this could help the currently manual data-gathering](./assets/2-twitter-qrt-continued.png)
 
+### Other Pics
+
+![Airflow dags](./assets/3-airflow-dags.png)
+
+![dbt lineage](./assets/4-dbt-lineage.png)
+
+![streamlit dashboard](./assets/5-streamlit-dashboard.png)
+
 ## Installation & Usage
 
-Moved to its own [file](./INSTALLATION.md)
+Moved [here](./INSTALLATION.md)
 
 ## Some Notes
 
@@ -47,9 +55,6 @@ Moved to its own [file](./INSTALLATION.md)
   # Silence SQLAlchemy deprecation warning
   # https://stackoverflow.com/a/75109965
   export SQLALCHEMY_SILENCE_UBER_WARNING=1
-  ```
-
-- I encountered some pip's dependency error when trying to install `jsonschema` which are used by `dbt-core` and `airflow`. Try to install `airflow` first before `dbt-core` (as the former uses `jsonschema` v3, and the latter default to v4.17 but could be made to work with v3)
 
 ## Statistics
 
@@ -61,16 +66,18 @@ Moved to its own [file](./INSTALLATION.md)
 | Ranked Manga           | Ranked manga based on aggregated ratings    |
 | Potentials             | Titles that have potentials to be included in ranked    |
 | Seasonals              | Ranked anime but it's viewed from within season perspective   |
-| Planning (anticipated) | Most planned series   |
-| Dropped                | Most dropped series   |
-| Current (followed)     | Most followed series (currently watched)   |
-| Divisive               | Most divisive series (high [stdev](https://en.wikipedia.org/wiki/Standard_deviation))   |
-| Questionable           | Most questionable ratings and titles (e.g. high score given for low rated title)   |
+| Planning (anticipated) | What's people are eagerly waiting for?   |
+| Dropped                | What's most hated... ?   |
+| Current (followed)     | What's most followed/trending?   |
+| Divisive               | Some people rated it highly, others rated it badly (high [stdev](https://en.wikipedia.org/wiki/Standard_deviation))   |
+| Questionable           | Questionable ratings and titles (e.g. high score given for low rated title)   |
 
 ## Caveats
 
 A note for my future-self as well!
 
+- I encountered some pip's dependency error when trying to install `jsonschema` which are used by `dbt-core` and `airflow`. Try to install `airflow` first before `dbt-core` (as the former uses `jsonschema` v3, and the latter default to v4.17 but could be made to work with v3)
+
 - Be careful when testing stuff! make sure the `ENVIRONMENT_TYPE` are according to what you're going to be doing, e.g. when you trying to test and there's error when running the command, the env-vars might not be *unset*, and from that point on, it might cause bugs in your dag runs when you're actually don't want to test
 
-- Careful when trying to explore `dbt` stuff while *at the same time* running `Airflow` operations, or doing the other two along with `streamlit` as `sqlite` are single-threaded and would throw an error if two operations are running on it at the same time
+- Careful when trying to explore `dbt` stuff while *at the same time* running `Airflow` operations, or doing the other two along with `streamlit` as `sqlite` are **single-threaded** and would throw an error if two operations are running on it at the same time
