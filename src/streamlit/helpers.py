@@ -1,5 +1,4 @@
 import os
-from typing import Iterator
 
 import requests
 from data_objects import Media
@@ -32,10 +31,10 @@ def crop(min_height, img):
 	return img.crop((0, top_h, w, bottom_h))
 
 # Presentation Functions
-def get_expanded_sections(media_ranked: list[Media]) -> list[tuple[str, bool, Iterator[Media]]]:
-	section_gold = (media for media in media_ranked if media.section == "gold")
-	section_silver = (media for media in media_ranked if media.section == "silver")
-	section_bronze = (media for media in media_ranked if media.section == "bronze")
+def get_expanded_sections(media_ranked: list[Media]) -> list[tuple[str, bool, list[Media]]]:
+	section_gold = [media for media in media_ranked if media.section == "gold"]
+	section_silver = [media for media in media_ranked if media.section == "silver"]
+	section_bronze = [media for media in media_ranked if media.section == "bronze"]
 	return [
 		("🏅 90+", True, section_gold),
 		("🥈 85+", False, section_silver),

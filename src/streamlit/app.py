@@ -85,23 +85,18 @@ with aoty_2022_tab:
 				col.write("")
 
 with anime_tab:
-	for title, is_expanded, section in get_expanded_sections(anime_ranked):
+	for index, (title, is_expanded, media_in_section) in enumerate(get_expanded_sections(anime_ranked)):
 		with st.expander(title, expanded=is_expanded):
-			_, _, _, col4, col5, col6 = st.columns([1, 2, 9, 2, 2, 2])
-			col4.write(f"<div align='center'>Anichan Score</div>", unsafe_allow_html=True)
-			col5.write(f"<div align='center'>Adjusted Score</div>", unsafe_allow_html=True)
-			col6.write(f"<div align='center'>Audience</div>", unsafe_allow_html=True)
-
-			st.write("")
-
-			for media in section:
-				col1, col2, col3, col4, col5, col6 = st.columns([1, 2, 9, 2, 2, 2])
-				col1.write(f"#{media.ranking}")
-				col2.image(get_local_image(media.cover_image_url, media.title), use_column_width="always")
-				col3.write(media.title)
-				col4.write(f"<div align='center'>{media.anichan_score}</div>", unsafe_allow_html=True)
-				col5.write(f"<div align='center'>{media.ff_score}</div>", unsafe_allow_html=True)
-				col6.write(f"<div align='center'>{media.audience_count}</div>", unsafe_allow_html=True)
+			item_per_column = 5 if index == 0 else 8
+			for animes in chunks(media_in_section, item_per_column):
+				images = [get_local_image(a.cover_image_url, a.title) for a in animes]
+				min_height = min([img.size[1] for img in images])
+				cropped_images = [crop(min_height, img) for img in images]
+				for col, anime, img in zip(st.columns(item_per_column), animes, cropped_images):
+					anchor = get_redirectable_url(anime.title, anime.media_id, anime.media_type)
+					col.image(img, caption=f"({anime.anichan_score} / {anime.audience_count})")
+					col.caption(f"<div align='center'>{anchor}</div>", unsafe_allow_html=True)
+					col.write("")
 
 # similar to the code above, but this one is for manga
 with manga_tab:
