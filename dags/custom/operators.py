@@ -373,7 +373,19 @@ class AnilistDownloadImagesOperator(BaseOperator):
     def _get_media_lists(self) -> list[tuple[str, str, str]]:
         cur = self._db_hook.get_cursor()
         return [m for m in cur.execute('''
-            SELECT DISTINCT(title), media_type, cover_image_url_xl FROM media_details
+            SELECT
+                DISTINCT(title) AS ident,
+                media_type AS type,
+                cover_image_url_xl AS cover_image_url
+            FROM media_details
+            UNION
+            SELECT
+                name AS ident,
+                UPPER(type) AS type,
+                cover_image_url
+            FROM favourites
+            WHERE type NOT IN ("anime", "manga")
+                AND cover_image_url IS NOT NULL
         ''')]
 
     def _get_existing_images(self) -> set[str]:
