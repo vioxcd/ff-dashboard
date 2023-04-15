@@ -203,7 +203,8 @@ with aoty_2022_tab:
 			images = [get_local_image(a.cover_image_url, a.title) for a in awardees]
 			min_height = min([img.size[1] for img in images])
 			cropped_images = [crop(min_height, img) for img in images]
-			for col, awardee, img in zip(st.columns(3), awardees, cropped_images):
+			columns = st.columns(5)  # made 5 column, only allocate the middle 3
+			for col, awardee, img in zip(columns[1:4], awardees, cropped_images):
 				col.image(img)
 				col.caption(f"<h3 align='center';>{awardee.award}</h3>", unsafe_allow_html=True)
 				col.caption(f"<div align='center'>{awardee.title}</div>", unsafe_allow_html=True)
