@@ -250,6 +250,7 @@ with manga_tab:
 				col6.write(f"<div align='center'>{media.audience_count}</div>", unsafe_allow_html=True)
 
 with help_tab:
-	with open("HELP.md", 'r') as f:
+	help_md_path = "src/streamlit/HELP.md"
+	with open(help_md_path, 'r') as f:
 		markdown = f.read()
 	help_tab.markdown(markdown)
