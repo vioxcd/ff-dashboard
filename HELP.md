@@ -13,8 +13,8 @@ The score is calculated in two ways:
 
 ##### So, which score format is used where?
 
-As `anichan_score` seems a bit weird, it's not used except in place where it's obviously displayed, e.g. in the `Anime` and `Manga` tab.  
-For ranking `AOTY`, `underrated`, and others, `ff_score` is used
+As `anichan_score` seems a bit *off*, it's not used except in place where it's obviously displayed, e.g. in the `Anime` and `Manga` tab.  
+For ranking others, `ff_score` is used
 
 ---
 
@@ -23,7 +23,7 @@ For ranking `AOTY`, `underrated`, and others, `ff_score` is used
 The rules follows the rules in `#ranking` channel. they are:  
 
 1. Watched by 5 members at minimum (completed or watching by 5th episode)
-2. Minimum score of 85 (doesn't apply for some, e.g. `underrated` tab)
+2. Minimum score of 85 (doesn't apply for some though)
 3. Sorted by: score > votes (number of audience) > alphabet
 4. ~~Titles are formatted in lowercase English~~ — this doesn't apply!
 
@@ -32,7 +32,7 @@ The rules follows the rules in `#ranking` channel. they are:
 ##### Why's there so few entries in the favourites?
 
 It's picked based on **90th percentile!**  
-(if it's not there, then probably it's lower than the lowest and is not included)
+(if it's not there, then probably it's lower than 90th and is not included)
 
 ---
 
