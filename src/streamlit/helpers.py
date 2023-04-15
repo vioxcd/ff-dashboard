@@ -42,7 +42,7 @@ def get_expanded_sections(media_ranked: list[Media]) -> list[tuple[str, bool, li
 	]
 
 def get_redirectable_url(content: str, media_id: int, media_type: str) -> str:
-	assert media_type.lower() in ('anime', 'manga'), "incorrect media_type passed"
+	assert media_type.lower() in ('anime', 'manga', 'characters', 'staff'), "incorrect media_type passed"
 	url = "https://anilist.co/%s/%s" % (media_type.lower(), media_id)
 	return f"""
 		<a

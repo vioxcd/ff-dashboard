@@ -44,7 +44,7 @@ with favourites_tab:
 	manga_fav: list[Favourite]  = []
 	characters_fav: list[Favourite]  = []
 	staff_fav: list[Favourite]  = []
-	studios_fav: list[Favourite]  = []
+	studio_fav: list[Favourite]  = []
 
 	for fav in favourites_list:
 		match fav.type:
@@ -57,17 +57,34 @@ with favourites_tab:
 			case "staff":
 				staff_fav.append(fav)
 			case "studios":
-				studios_fav.append(fav)
+				studio_fav.append(fav)
 
-	with st.expander("💕️ Top Favourited Anime", expanded=True):
-		for animes in chunks(anime_fav, 5):
-			images = [get_local_image(a.cover_image_url, a.name) for a in animes]
-			min_height = min([img.size[1] for img in images])
-			cropped_images = [crop(min_height, img) for img in images]
-			for col, anime, img in zip(st.columns(5), animes, cropped_images):
-				anchor = get_redirectable_url(anime.name, anime.item_id, anime.type)
-				col.image(img, caption=f"({anime.audience_count})")
-				col.caption(f"<div align='center'>{anchor}</div>", unsafe_allow_html=True)
+	ITEM_PER_COLUMN = 5
+	msg = "💕️ Top Favourited %s"
+	sections = [
+		('Anime', anime_fav),
+		('Manga', manga_fav),
+		('Characters', characters_fav),
+		('Staff', staff_fav),
+		# ' excluding studios
+	]
+	for fav_type, fav_list in sections:
+		with st.expander(msg % fav_type, expanded=True):
+			for favs in chunks(fav_list , ITEM_PER_COLUMN):
+				images = [get_local_image(a.cover_image_url, a.name) for a in favs]
+				min_height = min([img.size[1] for img in images])
+				cropped_images = [crop(min_height, img) for img in images]
+				for col, media, img in zip(st.columns(ITEM_PER_COLUMN), favs, cropped_images):
+					anchor = get_redirectable_url(media.name, media.item_id, media.type)
+					col.image(img, caption=f"({media.audience_count})")
+					col.caption(f"<div align='center'>{anchor}</div>", unsafe_allow_html=True)
+					col.write("")
+
+	with st.expander(msg % 'Studio', expanded=True):
+		for favs in chunks(studio_fav , ITEM_PER_COLUMN):
+			for col, media in zip(st.columns(ITEM_PER_COLUMN), favs):
+				col.caption(f"<div align='center'>{media.name}</div>", unsafe_allow_html=True)
+				col.caption(f"<div align='center'>{media.audience_count}</div>", unsafe_allow_html=True)
 				col.write("")
 
 with aoty_2022_tab:
