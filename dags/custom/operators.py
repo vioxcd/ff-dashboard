@@ -233,10 +233,10 @@ class AnilistFetchMediaDetailsOperator(BaseOperator):
         self._create_db()
         hooks = AnilistApiHook()
 
-        for (media_details, tags_, media_tag_bridges) in hooks.get_media_details(media_ids):
-            self._save_media_detail_to_db(media_details)
-            self._save_media_tags_to_db(tags_ )
-            self._save_media_tag_bridge_to_db(media_tag_bridges)
+        (media_details, tags, media_tag_bridges) = hooks.get_media_details(media_ids)
+        self._save_media_detail_to_db(media_details)
+        self._save_media_tags_to_db(tags)
+        self._save_media_tag_bridge_to_db(media_tag_bridges)
 
         hooks.log_processed_results()
         self.log.info('Done!')
@@ -307,8 +307,8 @@ class AnilistFetchMediaDetailsOperator(BaseOperator):
             cur = conn.cursor()
             # 17
             query = "INSERT INTO media_details VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
-            cur.execute(query, data)
-        self.log.info(f'{data[1]} saved!')
+            cur.executemany(query, data)
+        self.log.info(f'{len(data)} saved!')
 
     def _save_media_tags_to_db(self, tags):
         with self._db_hook.get_conn() as conn:

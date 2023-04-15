@@ -95,6 +95,9 @@ class AnilistApiHook(BaseHook):
 
 	def get_media_details(self, media_ids: list[int]):
 		tags = set()
+		media_details = []
+		media_tag_bridges = []
+
 		for media_id in media_ids:
 			query_params = self._get_media_details_query(media_id)
 			data = self._fetch(query_params)
@@ -107,24 +110,19 @@ class AnilistApiHook(BaseHook):
 			# 'format', 'genres', 'cover_image_url_md', 'cover_image_url_lg', 'cover_image_url_xl'
 			# 'banner_image_url', 'average_score', 'mean_score' 'source', 'studios', 'is_non_sequel'
 			"""Save media details"""
-			media_details = self._process_media(data)
+			media_details.append(self._process_media(data))
 
-			"""Filter unseen tags"""
-			new_tags = [tag for tag in data["Media"]["tags"]
-						if tag['id'] not in tags]
-
-			"""Save unseen tags"""
-			tags_ = [(tag['id'], tag['name'], tag['category']) for tag in new_tags]
-
-			"""Update tags list"""
-			new_tag_ids = [tag['id'] for tag in new_tags]
-			tags.update(new_tag_ids)
+			"""Save tags details"""
+			for tag in data["Media"]["tags"]:
+				tags.add(
+					(tag['id'], tag['name'], tag['category'])
+				)
 
 			"""Save media-tag relationship"""
-			media_tag_bridges = [(media_id, tag['id'], tag['rank'])
-								 for tag in data["Media"]["tags"]]
+			media_tag_bridges.extend([(media_id, tag['id'], tag['rank'])
+									  for tag in data["Media"]["tags"]])
 
-			yield (media_details, tags_, media_tag_bridges)
+		return (media_details, tags, media_tag_bridges)
 
 
 	@_limiter.ratelimit('identity', delay=True)
