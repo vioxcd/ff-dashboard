@@ -54,6 +54,7 @@ with DAG(
     start_date=dt.datetime(2023, 4, 4),
     end_date=dt.datetime(2023, 4, 9),
     schedule_interval="@daily",
+    catchup=False,
     default_args=default_args,
     tags=[
         'anilist',
