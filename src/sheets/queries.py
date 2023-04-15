@@ -8,7 +8,7 @@ AOTY_2022_QUERY = """
 
 FAVOURITES_P90_QUERY = """
                 SELECT
-                    name, type, counts, pct_rank
+                    name, type, audience_count, pct_rank
                 FROM final_favourites_p90
                 """
 

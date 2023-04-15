@@ -27,5 +27,5 @@ class Favourite:
 	name: str
 	type: str
 	cover_image_url: str
-	counts: int
+	audience_count: int
 	pct_rank: float

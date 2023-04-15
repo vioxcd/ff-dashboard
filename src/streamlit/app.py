@@ -66,7 +66,7 @@ with favourites_tab:
 			cropped_images = [crop(min_height, img) for img in images]
 			for col, anime, img in zip(st.columns(5), animes, cropped_images):
 				anchor = get_redirectable_url(anime.name, anime.item_id, anime.type)
-				col.image(img, caption=f"({anime.counts})")
+				col.image(img, caption=f"({anime.audience_count})")
 				col.caption(f"<div align='center'>{anchor}</div>", unsafe_allow_html=True)
 				col.write("")
 
