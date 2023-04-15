@@ -77,7 +77,7 @@ with DAG(
     )
 
     fetch_user_favourites = AnilistFetchUserFavouritesOperator(
-        task_id="fetch_user_favorites",
+        task_id="fetch_user_favourites",
     )
 
     fetch_media_details = AnilistFetchMediaDetailsOperator(
