@@ -3,6 +3,7 @@
 WITH
 counted_favs AS (
 	SELECT
+	 	item_id,
 		name,
 		type,
 		cover_image_url,
@@ -10,6 +11,7 @@ counted_favs AS (
 	FROM {{ ref('stg_favourites') }}
 	GROUP BY 1, 2
 ),
+
 ordered_per_type AS (
 	SELECT
 		*,
@@ -19,5 +21,6 @@ ordered_per_type AS (
 			AS pct_rank
 	FROM counted_favs
 )
+
 SELECT *
 FROM ordered_per_type

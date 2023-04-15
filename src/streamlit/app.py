@@ -1,7 +1,8 @@
 from data_objects import AOTY, Favourite, Media
 from db import (get_anime_ranked, get_aoty_list, get_favourites,
                 get_manga_ranked)
-from helpers import chunks, crop, get_expanded_sections, get_local_image
+from helpers import (chunks, crop, get_expanded_sections, get_local_image,
+                     get_redirectable_url)
 
 import streamlit as st
 
@@ -64,8 +65,9 @@ with favourites_tab:
 			min_height = min([img.size[1] for img in images])
 			cropped_images = [crop(min_height, img) for img in images]
 			for col, anime, img in zip(st.columns(5), animes, cropped_images):
+				anchor = get_redirectable_url(anime.name, anime.item_id, anime.type)
 				col.image(img, caption=f"({anime.counts})")
-				col.caption(f"<div align='center'>{anime.name}</div>", unsafe_allow_html=True)
+				col.caption(f"<div align='center'>{anchor}</div>", unsafe_allow_html=True)
 				col.write("")
 
 with aoty_2022_tab:

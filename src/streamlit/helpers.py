@@ -41,3 +41,14 @@ def get_expanded_sections(media_ranked: list[Media]) -> list[tuple[str, bool, It
 		("🥈 85+", False, section_silver),
 		("🥉 85", False, section_bronze),
 	]
+
+def get_redirectable_url(content: str, media_id: int, media_type: str) -> str:
+	assert media_type.lower() in ('anime', 'manga'), "incorrect media_type passed"
+	url = "https://anilist.co/%s/%s" % (media_type.lower(), media_id)
+	return f"""
+		<a
+			style="color: inherit; text-decoration: none;"
+			href="{url}">
+			{content}
+		</a>
+	"""

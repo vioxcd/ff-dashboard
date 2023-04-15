@@ -23,6 +23,7 @@ class AOTY:
 
 @dataclass
 class Favourite:
+	item_id: int
 	name: str
 	type: str
 	cover_image_url: str
