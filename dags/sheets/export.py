@@ -5,7 +5,8 @@ from pathlib import Path
 
 import gspread
 from dotenv import load_dotenv
-from queries import *
+
+from dags.sheets.queries import *
 
 
 def get_data_last_retrieved_on(db_name):
@@ -31,7 +32,7 @@ def execute_query(db_name, query):
     return [columns] + rows
 
 
-if __name__ == "__main__":
+def export():
     # load env's variables
     load_dotenv()
     SERVICE_ACCOUNT_CREDENTIALS = Path(os.environ["SERVICE_ACCOUNT_CREDENTIALS"])
@@ -68,4 +69,7 @@ if __name__ == "__main__":
     worksheet.update(f"A1", retrieved_on_message)
     worksheet.update(f"A2", exported_on_message)
 
+
+if __name__ == "__main__":
+    export()
     print("Done!")
