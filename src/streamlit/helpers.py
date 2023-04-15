@@ -2,7 +2,7 @@ import os
 
 import requests
 from data_objects import Media
-from PIL import Image
+from PIL import Image, ImageOps
 
 
 def chunks(lst, n):
@@ -21,6 +21,23 @@ def get_local_image(url, name):
 	file_path = os.path.join(IMAGES_FOLDER, file_name)
 	img = Image.open(file_path)
 	print(f"{name} - {img.size}")
+	return img
+
+def resize_with_padding(img, expected_size):
+	STREAMLIT_DARK_BACKGROUND_RGB = (14, 17, 23)
+	return ImageOps.pad(img, expected_size, color=STREAMLIT_DARK_BACKGROUND_RGB)
+
+def fix_image(img, _type=None):
+	w, h = img.size
+	NORMAL_ANIME_WIDTH = 460
+	STAFF_SIZE_WIDTH = 230
+	STAFF_SIZE_HEIGHT = 345
+	if _type == "anime" and w < NORMAL_ANIME_WIDTH:
+		anime_width_factor = round(NORMAL_ANIME_WIDTH / w, 2)
+		factored_h = round(h * anime_width_factor)
+		img = resize_with_padding(img, (NORMAL_ANIME_WIDTH, factored_h))
+	elif _type == "staff" and w < STAFF_SIZE_WIDTH:
+		img = resize_with_padding(img, (STAFF_SIZE_WIDTH, STAFF_SIZE_HEIGHT))
 	return img
 
 def crop(min_height, img):
