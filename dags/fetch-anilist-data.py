@@ -5,6 +5,7 @@ from custom.operators import (AnilistDownloadImagesOperator,
                               AnilistFetchMediaDetailsOperator,
                               AnilistFetchUserFavouritesOperator,
                               AnilistFetchUserListOperator)
+from sheets.export import export
 
 from airflow import DAG, configuration
 from airflow.exceptions import AirflowException
@@ -12,6 +13,7 @@ from airflow.models import Variable
 from airflow.models.baseoperator import chain
 from airflow.operators.bash import BashOperator
 from airflow.operators.empty import EmptyOperator
+from airflow.operators.python import PythonOperator
 from airflow.providers.common.sql.operators.sql import SQLExecuteQueryOperator
 from airflow.utils.state import State
 
@@ -96,7 +98,21 @@ with DAG(
         task_id="download_images",
     )
 
+    run_dbt = BashOperator(
+        task_id='run_dbt',
+        bash_command=f'''
+            dbt run \
+                --project-dir {DBT_PROJECT_DIR} \
+                --target {DBT_TARGET_PROFILE}
+        '''
+    )
+
+    export_to_sheet = PythonOperator(
+        task_id="export_to_sheet",
+        python_callable=export,
+    )
+
     chain(start, load_p3p5_score_mapping,
-          fetch_user_lists, fetch_user_favourites, create_media_as_rules_table,
-          fetch_media_details, download_images, end
+          [fetch_user_lists, fetch_user_favourites], create_media_as_rules_table,
+          fetch_media_details, [download_images, run_dbt], export_to_sheet, end
     )
