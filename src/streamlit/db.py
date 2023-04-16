@@ -1,11 +1,11 @@
 import sqlite3
 
-from data_objects import Favourite, Media
+from data_objects import Favourite, Media, Ranked
 
 con = sqlite3.connect('fluff.db')  # TODO: make proper db connection (.env)
 cur = con.cursor()
 
-def get_anime_ranked() -> list[Media]:
+def get_anime_ranked() -> list[Ranked]:
 	query = '''
 		SELECT
 			ranking,
@@ -24,9 +24,9 @@ def get_anime_ranked() -> list[Media]:
 	# season,
 	# season_year,
 	# format,
-	return [Media(*m) for m in cur.execute(query)]
+	return [Ranked(*m) for m in cur.execute(query)]
 
-def get_manga_ranked() -> list[Media]:
+def get_manga_ranked() -> list[Ranked]:
 	query = '''
 		SELECT
 			ranking,
@@ -42,7 +42,7 @@ def get_manga_ranked() -> list[Media]:
 		WHERE section != '-'
 	'''
 	# source,
-	return [Media(*m) for m in cur.execute(query)]
+	return [Ranked(*m) for m in cur.execute(query)]
 
 def get_aoty_list():
 	return cur.execute('''

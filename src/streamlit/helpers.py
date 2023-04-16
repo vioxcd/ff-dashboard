@@ -1,7 +1,7 @@
 import os
 
 import requests
-from data_objects import Media
+from data_objects import Ranked
 from PIL import Image, ImageOps
 
 
@@ -54,7 +54,7 @@ def crop(min_height, img):
 	return img.crop((0, top_h, w, bottom_h))
 
 # Presentation Functions
-def get_expanded_sections(media_ranked: list[Media]) -> list[tuple[str, bool, list[Media]]]:
+def get_expanded_sections(media_ranked: list[Ranked]) -> list[tuple[str, bool, list[Ranked]]]:
 	section_gold = [media for media in media_ranked if media.section == "gold"]
 	section_silver = [media for media in media_ranked if media.section == "silver"]
 	section_bronze = [media for media in media_ranked if media.section == "bronze"]

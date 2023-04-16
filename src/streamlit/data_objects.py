@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 
 @dataclass
-class Media:
+class Ranked:
 	ranking: int
 	section: str
 	media_id: int
