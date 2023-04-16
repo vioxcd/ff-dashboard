@@ -29,13 +29,13 @@ def resize_with_padding(img, expected_size):
 
 def fix_image(img, _type=None):
 	w, h = img.size
-	NORMAL_ANIME_WIDTH = 460
+	NORMAL_ANIMANGA_WIDTH = 460
 	STAFF_SIZE_WIDTH = 230
 	STAFF_SIZE_HEIGHT = 345
-	if _type == "anime" and w < NORMAL_ANIME_WIDTH:
-		anime_width_factor = round(NORMAL_ANIME_WIDTH / w, 2)
-		factored_h = round(h * anime_width_factor)
-		img = resize_with_padding(img, (NORMAL_ANIME_WIDTH, factored_h))
+	if _type in ("anime", "manga") and w < NORMAL_ANIMANGA_WIDTH:
+		width_factor = round(NORMAL_ANIMANGA_WIDTH / w, 2)
+		factored_h = round(h * width_factor)
+		img = resize_with_padding(img, (NORMAL_ANIMANGA_WIDTH, factored_h))
 	elif _type == "staff" and w < STAFF_SIZE_WIDTH:
 		img = resize_with_padding(img, (STAFF_SIZE_WIDTH, STAFF_SIZE_HEIGHT))
 	return img

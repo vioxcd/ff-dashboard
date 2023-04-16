@@ -119,23 +119,19 @@ with anime_tab:
 
 # similar to the code above, but this one is for manga
 with manga_tab:
-	for title, is_expanded, section in get_expanded_sections(manga_ranked):
+	for index, (title, is_expanded, media_in_section) in enumerate(get_expanded_sections(manga_ranked)):
+		item_per_column = 5 if index == 0 else 8
 		with st.expander(title, expanded=is_expanded):
-			_, _, _, col4, col5, col6 = st.columns([1, 2, 9, 2, 2, 2])
-			col4.write(f"<div align='center'>Anichan Score</div>", unsafe_allow_html=True)
-			col5.write(f"<div align='center'>Adjusted Score</div>", unsafe_allow_html=True)
-			col6.write(f"<div align='center'>Audience</div>", unsafe_allow_html=True)
-
-			st.write("")
-
-			for media in section:
-				col1, col2, col3, col4, col5, col6 = st.columns([1, 2, 9, 2, 2, 2])
-				col1.write(f"#{media.ranking}")
-				col2.image(media.cover_image_url, use_column_width="always")
-				col3.write(media.title)
-				col4.write(f"<div align='center'>{media.anichan_score}</div>", unsafe_allow_html=True)
-				col5.write(f"<div align='center'>{media.ff_score}</div>", unsafe_allow_html=True)
-				col6.write(f"<div align='center'>{media.audience_count}</div>", unsafe_allow_html=True)
+			for mangas in chunks(media_in_section, item_per_column):
+				images = [get_local_image(a.cover_image_url, a.title) for a in mangas]
+				fixed_images = [fix_image(img, 'manga') for img in images]
+				min_height = min([img.size[1] for img in fixed_images])
+				cropped_images = [crop(min_height, img) for img in fixed_images]
+				for col, manga, img in zip(st.columns(item_per_column), mangas, cropped_images):
+					anchor = get_redirectable_url(manga.title, manga.media_id, manga.media_type)
+					col.image(img, caption=f"({manga.anichan_score} / {manga.audience_count})")
+					col.caption(f"<div align='center'>{anchor}</div>", unsafe_allow_html=True)
+					col.write("")
 
 with help_tab:
 	help_md_path = "src/streamlit/HELP.md"
