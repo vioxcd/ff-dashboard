@@ -2,7 +2,8 @@ from data_objects import AOTY, Favourite, Media
 from db import (get_anime_ranked, get_aoty_list, get_favourites,
                 get_manga_ranked)
 from helpers import (chunks, crop, fix_image, get_expanded_sections,
-                     get_local_image, get_redirectable_url)
+                     get_local_image, get_redirectable_url,
+                     make_appropriate_images)
 
 import streamlit as st
 
@@ -72,9 +73,7 @@ with favourites_tab:
 		with st.expander(msg % fav_type, expanded=True):
 			for favs in chunks(fav_list , ITEM_PER_COLUMN):
 				images = [get_local_image(a.cover_image_url, a.name) for a in favs]
-				fixed_images = [fix_image(img, fav_type.lower()) for img in images]
-				min_height = min([img.size[1] for img in fixed_images])
-				cropped_images = [crop(min_height, img) for img in fixed_images]
+				cropped_images = make_appropriate_images(images, _type=fav_type.lower())
 				for col, media, img in zip(st.columns(ITEM_PER_COLUMN), favs, cropped_images):
 					anchor = get_redirectable_url(media.name, media.item_id, media.type)
 					col.image(img, caption=f"({media.audience_count})")
@@ -108,9 +107,7 @@ with anime_tab:
 		with st.expander(title, expanded=is_expanded):
 			for animes in chunks(media_in_section, item_per_column):
 				images = [get_local_image(a.cover_image_url, a.title) for a in animes]
-				fixed_images = [fix_image(img, 'anime') for img in images]
-				min_height = min([img.size[1] for img in fixed_images])
-				cropped_images = [crop(min_height, img) for img in fixed_images]
+				cropped_images = make_appropriate_images(images, _type='anime')
 				for col, anime, img in zip(st.columns(item_per_column), animes, cropped_images):
 					anchor = get_redirectable_url(anime.title, anime.media_id, anime.media_type)
 					col.image(img, caption=f"({anime.anichan_score} / {anime.audience_count})")
@@ -124,9 +121,7 @@ with manga_tab:
 		with st.expander(title, expanded=is_expanded):
 			for mangas in chunks(media_in_section, item_per_column):
 				images = [get_local_image(a.cover_image_url, a.title) for a in mangas]
-				fixed_images = [fix_image(img, 'manga') for img in images]
-				min_height = min([img.size[1] for img in fixed_images])
-				cropped_images = [crop(min_height, img) for img in fixed_images]
+				cropped_images = make_appropriate_images(images, _type='manga')
 				for col, manga, img in zip(st.columns(item_per_column), mangas, cropped_images):
 					anchor = get_redirectable_url(manga.title, manga.media_id, manga.media_type)
 					col.image(img, caption=f"({manga.anichan_score} / {manga.audience_count})")

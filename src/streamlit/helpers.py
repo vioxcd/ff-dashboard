@@ -40,6 +40,12 @@ def fix_image(img, _type=None):
 		img = resize_with_padding(img, (STAFF_SIZE_WIDTH, STAFF_SIZE_HEIGHT))
 	return img
 
+def make_appropriate_images(images, _type=None):
+	fixed_images = [fix_image(img, _type) for img in images]
+	min_height = min([img.size[1] for img in fixed_images])
+	cropped_images = [crop(min_height, img) for img in fixed_images]
+	return cropped_images
+
 def crop(min_height, img):
 	w, h = img.size
 	delta_height = h - min_height
