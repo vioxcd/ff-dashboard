@@ -57,3 +57,6 @@ def get_aoty_list():
 
 def get_favourites() -> list[Favourite]:
 	return [Favourite(*f) for f in cur.execute('''SELECT * FROM final_favourites_p90''')]
+
+def get_potentials() -> list[Media]:
+	return [Media(*f) for f in cur.execute('''SELECT * FROM final_potential''')]

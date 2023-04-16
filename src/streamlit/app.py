@@ -1,6 +1,6 @@
 from data_objects import AOTY, Favourite, Media
 from db import (get_anime_ranked, get_aoty_list, get_favourites,
-                get_manga_ranked)
+                get_manga_ranked, get_potentials)
 from helpers import (chunks, crop, fix_image, get_expanded_sections,
                      get_local_image, get_redirectable_url,
                      make_appropriate_images)
@@ -34,8 +34,8 @@ ul.streamlit-expander {
 st.markdown(hide, unsafe_allow_html=True)
 
 ## Tabs
-tabs = ["Favourites", "Awards 2022", "Anime", "Manga", "Help & FAQs"]
-favourites_tab, aoty_2022_tab, anime_tab, manga_tab, help_tab = st.tabs(tabs)
+tabs = ["Favourites", "Awards 2022", "Anime", "Manga", "Potentials", "Help & FAQs"]
+favourites_tab, aoty_2022_tab, anime_tab, manga_tab, potentials_tab, help_tab = st.tabs(tabs)
 
 with favourites_tab:
 	favourites_list = get_favourites()
@@ -127,6 +127,30 @@ with manga_tab:
 					col.image(img, caption=f"({manga.anichan_score} / {manga.audience_count})")
 					col.caption(f"<div align='center'>{anchor}</div>", unsafe_allow_html=True)
 					col.write("")
+
+with potentials_tab:
+	potentials = get_potentials()
+
+	anime_pot: list[Media] = [p for p in potentials if p.media_type == "ANIME"]
+	manga_pot: list[Media] = [p for p in potentials if p.media_type == "MANGA"]
+
+	ITEM_PER_COLUMN = 5
+	msg = "💕️ Top Potential %s"
+	sections: list[tuple[str, list[Media]]] = [
+		('Anime', anime_pot),
+		('Manga', manga_pot),
+	]
+	for pot_type, pot_list in sections:
+		with st.expander(msg % pot_type, expanded=True):
+			for pots in chunks(pot_list , ITEM_PER_COLUMN):
+				images = [get_local_image(a.cover_image_url, a.title) for a in pots]
+				cropped_images = make_appropriate_images(images, _type=pot_type.lower())
+				for col, media, img in zip(st.columns(ITEM_PER_COLUMN), pots, cropped_images):
+					anchor = get_redirectable_url(media.title, media.media_id, media.media_type)
+					col.image(img, caption=f"({media.ff_score} / {media.audience_count})")
+					col.caption(f"<div align='center'>{anchor}</div>", unsafe_allow_html=True)
+					col.write("")
+
 
 with help_tab:
 	help_md_path = "src/streamlit/HELP.md"

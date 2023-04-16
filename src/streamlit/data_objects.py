@@ -29,3 +29,13 @@ class Favourite:
 	cover_image_url: str
 	audience_count: int
 	pct_rank: float
+
+@dataclass
+class Media:
+	media_id: int
+	title: str
+	media_type: str
+	anichan_score: int
+	ff_score: int
+	audience_count: int
+	cover_image_url: str
