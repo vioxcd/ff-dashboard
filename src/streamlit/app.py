@@ -1,6 +1,6 @@
-from data_objects import AOTY, Favourite, Media
+from data_objects import AOTY, Favourite, Media, Seasonal
 from db import (get_anime_ranked, get_aoty_list, get_favourites,
-                get_manga_ranked, get_potentials)
+                get_manga_ranked, get_potentials, get_seasonals)
 from helpers import (chunks, crop, fix_image, get_expanded_sections,
                      get_local_image, get_redirectable_url,
                      make_appropriate_images)
@@ -34,8 +34,8 @@ ul.streamlit-expander {
 st.markdown(hide, unsafe_allow_html=True)
 
 ## Tabs
-tabs = ["Favourites", "Awards 2022", "Anime", "Manga", "Potentials", "Help & FAQs"]
-favourites_tab, aoty_2022_tab, anime_tab, manga_tab, potentials_tab, help_tab = st.tabs(tabs)
+tabs = ["Favourites", "Awards 2022", "Anime", "Manga", "Seasonals", "Potentials", "Help & FAQs"]
+favourites_tab, aoty_2022_tab, anime_tab, manga_tab, seasonals_tab, potentials_tab, help_tab = st.tabs(tabs)
 
 with favourites_tab:
 	favourites_list = get_favourites()
@@ -125,6 +125,33 @@ with manga_tab:
 				for col, manga, img in zip(st.columns(item_per_column), mangas, cropped_images):
 					anchor = get_redirectable_url(manga.title, manga.media_id, manga.media_type)
 					col.image(img, caption=f"({manga.anichan_score} / {manga.audience_count})")
+					col.caption(f"<div align='center'>{anchor}</div>", unsafe_allow_html=True)
+					col.write("")
+
+with seasonals_tab:
+	seasonals = get_seasonals()
+
+	seasons_part = {}
+	sub_section = []
+	season = seasonals[0].season
+	season_year = seasonals[0].season_year
+	for media in seasonals:
+		if season != media.season or season_year != media.season_year:
+			seasons_part[f"{season} {season_year}"] = sub_section
+			season = media.season
+			season_year = media.season_year
+			sub_section = []
+		sub_section.append(media)
+
+	ITEM_PER_COLUMN = 5
+	for season_year_string, media_in_season in seasons_part.items():
+		with st.expander(season_year_string, expanded=True):
+			for items in chunks(media_in_season , ITEM_PER_COLUMN):
+				images = [get_local_image(a.cover_image_url, a.title) for a in items]
+				cropped_images = make_appropriate_images(images)
+				for col, media, img in zip(st.columns(ITEM_PER_COLUMN), items, cropped_images):
+					anchor = get_redirectable_url(media.title, media.media_id, media.media_type)
+					col.image(img, caption=f"({media.ff_score} / {media.audience_count})")
 					col.caption(f"<div align='center'>{anchor}</div>", unsafe_allow_html=True)
 					col.write("")
 

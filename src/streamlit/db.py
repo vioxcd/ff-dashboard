@@ -1,6 +1,6 @@
 import sqlite3
 
-from data_objects import Favourite, Media, Ranked
+from data_objects import Favourite, Media, Ranked, Seasonal
 
 con = sqlite3.connect('fluff.db')  # TODO: make proper db connection (.env)
 cur = con.cursor()
@@ -60,3 +60,6 @@ def get_favourites() -> list[Favourite]:
 
 def get_potentials() -> list[Media]:
 	return [Media(*f) for f in cur.execute('''SELECT * FROM final_potential''')]
+
+def get_seasonals() -> list[Seasonal]:
+	return [Seasonal(*f) for f in cur.execute('''SELECT * FROM final_seasonals''')]

@@ -31,6 +31,17 @@ season_ranked AS (
 	FROM seasonal_as_rules
 )
 
-SELECT *
+SELECT
+	season_year,
+	season,
+	season_code,
+	in_season_rank,
+	media_id,
+	title,
+	media_type,
+	anichan_score,
+	ff_score,
+	audience_count,
+	cover_image_url_xl AS cover_image_url
 FROM season_ranked
 ORDER BY season_year DESC, season_code DESC, ff_score DESC
