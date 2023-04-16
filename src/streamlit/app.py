@@ -109,7 +109,7 @@ with anime_tab:
 			for animes in chunks(media_in_section, item_per_column):
 				images = [get_local_image(a.cover_image_url, a.title) for a in animes]
 				fixed_images = [fix_image(img, 'anime') for img in images]
-				min_height = min([img.size[1] for img in images])
+				min_height = min([img.size[1] for img in fixed_images])
 				cropped_images = [crop(min_height, img) for img in fixed_images]
 				for col, anime, img in zip(st.columns(item_per_column), animes, cropped_images):
 					anchor = get_redirectable_url(anime.title, anime.media_id, anime.media_type)
