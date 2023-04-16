@@ -60,3 +60,12 @@ class Seasonal:
 	ff_score: int
 	audience_count: int
 	cover_image_url: str
+
+@dataclass
+class Divisive:
+	media_id: int
+	title: str
+	media_type: str
+	stdev: int
+	audience_count: int
+	cover_image_url: str

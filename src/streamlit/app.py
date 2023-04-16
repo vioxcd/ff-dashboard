@@ -1,5 +1,5 @@
-from data_objects import AOTY, Favourite, Media, Seasonal
-from db import (get_anime_ranked, get_aoty_list, get_favourites,
+from data_objects import AOTY, Divisive, Favourite, Media, Seasonal
+from db import (get_anime_ranked, get_aoty_list, get_divisive, get_favourites,
                 get_manga_ranked, get_potentials, get_seasonals)
 from helpers import (chunks, crop, get_expanded_sections, get_local_image,
                      get_redirectable_url, make_appropriate_images)
@@ -33,8 +33,10 @@ ul.streamlit-expander {
 st.markdown(hide, unsafe_allow_html=True)
 
 ## Tabs
-tabs = ["Favourites", "Awards 2022", "Anime", "Manga", "Seasonals", "Potentials", "Help & FAQs"]
-favourites_tab, aoty_2022_tab, anime_tab, manga_tab, seasonals_tab, potentials_tab, help_tab = st.tabs(tabs)
+tabs = ["Favourites", "Awards 2022", "Anime", "Manga", "Seasonals",
+		"Potentials", "Divisive", "Help & FAQs"]
+favourites_tab, aoty_2022_tab, anime_tab, manga_tab, seasonals_tab, \
+	potentials_tab, divisive_tab, help_tab = st.tabs(tabs)
 
 with favourites_tab:
 	favourites_list = get_favourites()
@@ -130,7 +132,7 @@ with manga_tab:
 with seasonals_tab:
 	seasonals = get_seasonals()
 
-	seasons_part = {}
+	seasons_part: dict[str, list[Seasonal]] = {}
 	sub_section = []
 	season = seasonals[0].season
 	season_year = seasonals[0].season_year
@@ -174,6 +176,29 @@ with potentials_tab:
 				for col, media, img in zip(st.columns(ITEM_PER_COLUMN), pots, cropped_images):
 					anchor = get_redirectable_url(media.title, media.media_id, media.media_type)
 					col.image(img, caption=f"({media.ff_score} / {media.audience_count})")
+					col.caption(f"<div align='center'>{anchor}</div>", unsafe_allow_html=True)
+					col.write("")
+
+with divisive_tab:
+	divisives = get_divisive()
+
+	anime_div: list[Divisive] = [x for x in divisives if x.media_type == "ANIME"]
+	manga_div: list[Divisive] = [x for x in divisives if x.media_type == "MANGA"]
+
+	ITEM_PER_COLUMN = 5
+	msg = "💥️ Top Divisive %s"
+	div_sections: list[tuple[str, list[Divisive]]] = [
+		('Anime', anime_div),
+		('Manga', manga_div),
+	]
+	for div_type, div_list in div_sections:
+		with st.expander(msg % div_type, expanded=True):
+			for pots in chunks(div_list , ITEM_PER_COLUMN):
+				images = [get_local_image(a.cover_image_url, a.title) for a in pots]
+				cropped_images = make_appropriate_images(images, _type=div_type.lower())
+				for col, media, img in zip(st.columns(ITEM_PER_COLUMN), pots, cropped_images):
+					anchor = get_redirectable_url(media.title, media.media_id, media.media_type)
+					col.image(img, caption=f"({media.stdev} / {media.audience_count})")
 					col.caption(f"<div align='center'>{anchor}</div>", unsafe_allow_html=True)
 					col.write("")
 

@@ -3,6 +3,7 @@
 WITH
 scores_stddev  AS (
 	SELECT
+		ar.media_id,
 		ar.title,
 		ar.media_type,
 		ar.anichan_score,
@@ -24,8 +25,11 @@ scores_stddev  AS (
 )
 
 SELECT
-	*,
+	ss.*,
+	md.cover_image_url_xl AS cover_image_url,
 	1 - PERCENT_RANK()
 		OVER(ORDER BY ff_stddev DESC)
 		AS pct_rank
-FROM scores_stddev
+FROM scores_stddev ss
+JOIN {{ source('ff_anilist', 'media_details') }} md
+	USING (media_id)
