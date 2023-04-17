@@ -69,3 +69,11 @@ class Divisive:
 	stdev: int
 	audience_count: int
 	cover_image_url: str
+
+@dataclass
+class ByStatus:
+	media_id: int
+	title: str
+	media_type: str
+	audience_count: int
+	cover_image_url: str

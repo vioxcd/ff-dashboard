@@ -1,6 +1,7 @@
-from data_objects import AOTY, Divisive, Favourite, Media, Seasonal
-from db import (get_anime_ranked, get_aoty_list, get_divisive, get_favourites,
-                get_manga_ranked, get_potentials, get_seasonals)
+from data_objects import AOTY, ByStatus, Divisive, Favourite, Media, Seasonal
+from db import (get_anime_ranked, get_aoty_list, get_current, get_divisive,
+                get_dropped, get_favourites, get_manga_ranked, get_planning,
+                get_potentials, get_seasonals)
 from helpers import (chunks, crop, get_expanded_sections, get_local_image,
                      get_redirectable_url, make_appropriate_images)
 
@@ -34,9 +35,9 @@ st.markdown(hide, unsafe_allow_html=True)
 
 ## Tabs
 tabs = ["Favourites", "Awards 2022", "Anime", "Manga", "Seasonals",
-		"Potentials", "Divisive", "Help & FAQs"]
+		"Potentials", "Divisive",  "By Status", "Help & FAQs"]
 favourites_tab, aoty_2022_tab, anime_tab, manga_tab, seasonals_tab, \
-	potentials_tab, divisive_tab, help_tab = st.tabs(tabs)
+	potentials_tab, divisive_tab, by_status_tab, help_tab = st.tabs(tabs)
 
 with favourites_tab:
 	favourites_list = get_favourites()
@@ -199,6 +200,42 @@ with divisive_tab:
 				for col, media, img in zip(st.columns(ITEM_PER_COLUMN), pots, cropped_images):
 					anchor = get_redirectable_url(media.title, media.media_id, media.media_type)
 					col.image(img, caption=f"({media.stdev} / {media.audience_count})")
+					col.caption(f"<div align='center'>{anchor}</div>", unsafe_allow_html=True)
+					col.write("")
+
+with by_status_tab:
+	followed = get_current()
+	anticipated = get_planning()
+	dropped = get_dropped()
+
+	anime_fol: list[ByStatus] = [x for x in followed if x.media_type == "ANIME"]
+	manga_fol: list[ByStatus] = [x for x in followed if x.media_type == "MANGA"]
+
+	anime_ant: list[ByStatus] = [x for x in anticipated if x.media_type == "ANIME"]
+	manga_ant: list[ByStatus] = [x for x in anticipated if x.media_type == "MANGA"]
+
+	anime_drp: list[ByStatus] = [x for x in dropped if x.media_type == "ANIME"]
+	manga_drp: list[ByStatus] = [x for x in dropped if x.media_type == "MANGA"]
+
+	ITEM_PER_COLUMN = 5
+	msg = "💥️ Top %s"
+	by_status_sections: list[tuple[str, list[ByStatus]]] = [
+		('Followed Anime', anime_fol),
+		('Followed Manga', manga_fol),
+		('Anticipated Anime', anime_ant),
+		('Anticipated Manga', manga_ant),
+		('Dropped Anime', anime_drp),
+		('Dropped Manga', manga_drp),
+	]
+
+	for by_status_type, by_status_list in by_status_sections:
+		with st.expander(msg % by_status_type, expanded=True):
+			for pots in chunks(by_status_list, ITEM_PER_COLUMN):
+				images = [get_local_image(a.cover_image_url, a.title) for a in pots]
+				cropped_images = make_appropriate_images(images, _type=by_status_type.lower())
+				for col, media, img in zip(st.columns(ITEM_PER_COLUMN), pots, cropped_images):
+					anchor = get_redirectable_url(media.title, media.media_id, media.media_type)
+					col.image(img, caption=f"({media.audience_count})")
 					col.caption(f"<div align='center'>{anchor}</div>", unsafe_allow_html=True)
 					col.write("")
 

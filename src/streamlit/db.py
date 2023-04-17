@@ -1,6 +1,6 @@
 import sqlite3
 
-from data_objects import Divisive, Favourite, Media, Ranked, Seasonal
+from data_objects import ByStatus, Divisive, Favourite, Media, Ranked, Seasonal
 
 con = sqlite3.connect('fluff.db')  # TODO: make proper db connection (.env)
 cur = con.cursor()
@@ -76,3 +76,39 @@ def get_divisive() -> list[Divisive]:
 		FROM final_divisive_p90
 	'''
 	return [Divisive(*f) for f in cur.execute(query)]
+
+def get_current() -> list[ByStatus]:
+	query = '''
+		SELECT
+			media_id,
+			title,
+			media_type,
+			audience_count,
+			cover_image_url
+		FROM final_current
+	'''
+	return [ByStatus(*f) for f in cur.execute(query)]
+
+def get_planning() -> list[ByStatus]:
+	query = '''
+		SELECT
+			media_id,
+			title,
+			media_type,
+			audience_count,
+			cover_image_url
+		FROM final_planning
+	'''
+	return [ByStatus(*f) for f in cur.execute(query)]
+
+def get_dropped() -> list[ByStatus]:
+	query = '''
+		SELECT
+			media_id,
+			title,
+			media_type,
+			audience_count,
+			cover_image_url
+		FROM final_dropped
+	'''
+	return [ByStatus(*f) for f in cur.execute(query)]
