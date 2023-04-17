@@ -1,9 +1,5 @@
-from data_objects import (AOTY, ByStatus, Divisive, Favourite, Media,
-                          QuestionableByTitle, QuestionableByUser, Seasonal)
-from db import (get_anime_ranked, get_aoty_list, get_current, get_divisive,
-                get_dropped, get_favourites, get_manga_ranked, get_planning,
-                get_potentials, get_questionable_per_title,
-                get_questionable_per_user, get_seasonals)
+import db
+from data_objects import AOTY, ByStatus, Divisive, Favourite, Media, Seasonal
 from helpers import (chunks, crop, get_expanded_sections, get_local_image,
                      get_redirectable_url, make_appropriate_images)
 
@@ -12,7 +8,6 @@ import streamlit as st
 # Config Layer
 st.set_page_config(page_title="Fluff ~", layout="wide")
 
-## Variables
 # """
 # ⭐ Fluffy Folks Ranking Inclusion Rules ⭐
 # (1) Watched by 5 members at minimum (completed or watching by 5th episode)
@@ -20,10 +15,7 @@ st.set_page_config(page_title="Fluff ~", layout="wide")
 # (3) Sorted by: score > votes (number of audience) > alphabet
 # (4) Titles are formatted in lowercase English
 # """
-anime_ranked = get_anime_ranked()
-manga_ranked = get_manga_ranked()
 
-# Presentation Layer
 st.title("Fluffy Folks Dashboard 📊")
 
 ## Hide expander borders
@@ -42,7 +34,7 @@ favourites_tab, aoty_2022_tab, anime_tab, manga_tab, seasonals_tab, \
 	potentials_tab, divisive_tab, by_status_tab, questionable_tab, help_tab = st.tabs(tabs)
 
 with favourites_tab:
-	favourites_list = get_favourites()
+	favourites_list = db.get_favourites()
 
 	# divide favourites by type
 	anime_fav: list[Favourite] = []
@@ -93,7 +85,7 @@ with favourites_tab:
 
 with aoty_2022_tab:
 	with aoty_2022_tab.container():
-		aoty_list = [AOTY(*awardee) for awardee in get_aoty_list()]
+		aoty_list = [AOTY(*awardee) for awardee in db.get_aoty_list()]
 		for awardees in chunks(aoty_list, 3):
 			images = [get_local_image(a.cover_image_url, a.title) for a in awardees]
 			min_height = min([img.size[1] for img in images])
@@ -106,6 +98,7 @@ with aoty_2022_tab:
 				col.write("")
 
 with anime_tab:
+	anime_ranked = db.get_anime_ranked()
 	for index, (title, is_expanded, media_in_section) in enumerate(get_expanded_sections(anime_ranked)):
 		item_per_column = 5 if index == 0 else 8
 		with st.expander(title, expanded=is_expanded):
@@ -120,6 +113,7 @@ with anime_tab:
 
 # similar to the code above, but this one is for manga
 with manga_tab:
+	manga_ranked = db.get_manga_ranked()
 	for index, (title, is_expanded, media_in_section) in enumerate(get_expanded_sections(manga_ranked)):
 		item_per_column = 5 if index == 0 else 8
 		with st.expander(title, expanded=is_expanded):
@@ -133,7 +127,7 @@ with manga_tab:
 					col.write("")
 
 with seasonals_tab:
-	seasonals = get_seasonals()
+	seasonals = db.get_seasonals()
 
 	seasons_part: dict[str, list[Seasonal]] = {}
 	sub_section = []
@@ -160,7 +154,7 @@ with seasonals_tab:
 					col.write("")
 
 with potentials_tab:
-	potentials = get_potentials()
+	potentials = db.get_potentials()
 
 	anime_pot: list[Media] = [p for p in potentials if p.media_type == "ANIME"]
 	manga_pot: list[Media] = [p for p in potentials if p.media_type == "MANGA"]
@@ -184,7 +178,7 @@ with potentials_tab:
 					col.write("")
 
 with divisive_tab:
-	divisives = get_divisive()
+	divisives = db.get_divisive()
 
 	anime_div: list[Divisive] = [x for x in divisives if x.media_type == "ANIME"]
 	manga_div: list[Divisive] = [x for x in divisives if x.media_type == "MANGA"]
@@ -207,9 +201,9 @@ with divisive_tab:
 					col.write("")
 
 with by_status_tab:
-	followed = get_current()
-	anticipated = get_planning()
-	dropped = get_dropped()
+	followed = db.get_current()
+	anticipated = db.get_planning()
+	dropped = db.get_dropped()
 
 	anime_fol: list[ByStatus] = [x for x in followed if x.media_type == "ANIME"]
 	manga_fol: list[ByStatus] = [x for x in followed if x.media_type == "MANGA"]
@@ -243,8 +237,8 @@ with by_status_tab:
 					col.write("")
 
 with questionable_tab:
-	questionable_per_user = get_questionable_per_user()
-	questionable_per_title = get_questionable_per_title()
+	questionable_per_user = db.get_questionable_per_user()
+	questionable_per_title = db.get_questionable_per_title()
 
 	ITEM_PER_COLUMN = 5
 
