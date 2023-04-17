@@ -10,11 +10,6 @@ def chunks(lst, n):
     for i in range(0, len(lst), n):
         yield lst[i:i + n]
 
-def get_image_from_url(url, name):
-	img = Image.open(requests.get(url, stream=True).raw)
-	print(f"{name} - {img.size}")
-	return img
-
 def get_local_image(url, name):
 	IMAGES_FOLDER = os.path.join(os.getcwd(), "images")
 	file_name = url.split("/")[-1]
