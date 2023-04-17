@@ -1,9 +1,18 @@
-import db
+from pathlib import Path
+
 from data_objects import ByStatus, Divisive, Favourite, Potential, Seasonal
 from helpers import (chunks, crop, get_expanded_sections, get_local_image,
                      get_redirectable_url, make_appropriate_images)
 
 import streamlit as st
+
+if Path('.streamlit/secrets.toml').exists():
+	st.secrets.get("public_gsheets_url", None)
+	import src.streamlit.sheets as db
+	print("ENV: CLOUD")
+else:
+	import db
+	print("ENV: LOCAL")
 
 # Config Layer
 st.set_page_config(page_title="Fluff ~", layout="wide")
