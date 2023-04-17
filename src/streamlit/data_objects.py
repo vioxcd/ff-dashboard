@@ -32,7 +32,7 @@ class Favourite:
 	pct_rank: float
 
 @dataclass
-class Media:
+class Potential:
 	media_id: int
 	title: str
 	media_type: str

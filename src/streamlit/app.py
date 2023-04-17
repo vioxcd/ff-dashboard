@@ -1,5 +1,5 @@
 import db
-from data_objects import ByStatus, Divisive, Favourite, Media, Seasonal
+from data_objects import ByStatus, Divisive, Favourite, Potential, Seasonal
 from helpers import (chunks, crop, get_expanded_sections, get_local_image,
                      get_redirectable_url, make_appropriate_images)
 
@@ -156,12 +156,12 @@ with seasonals_tab:
 with potentials_tab:
 	potentials = db.get_potentials()
 
-	anime_pot: list[Media] = [p for p in potentials if p.media_type == "ANIME"]
-	manga_pot: list[Media] = [p for p in potentials if p.media_type == "MANGA"]
+	anime_pot: list[Potential] = [p for p in potentials if p.media_type == "ANIME"]
+	manga_pot: list[Potential] = [p for p in potentials if p.media_type == "MANGA"]
 
 	ITEM_PER_COLUMN = 5
 	msg = "⭐️ Top Potential %s"
-	sections: list[tuple[str, list[Media]]] = [
+	sections: list[tuple[str, list[Potential]]] = [
 		('Anime', anime_pot),
 		('Manga', manga_pot),
 	]

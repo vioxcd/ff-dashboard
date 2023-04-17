@@ -1,7 +1,7 @@
 import sqlite3
 
 from src.streamlit.data_objects import (AOTY, ByStatus, Divisive, Favourite,
-                                        Media, QuestionableByTitle,
+                                        Potential, QuestionableByTitle,
                                         QuestionableByUser, Ranked, Seasonal)
 
 
@@ -67,10 +67,10 @@ def get_favourites() -> list[Favourite]:
 	cur = con.cursor()
 	return [Favourite(*f) for f in cur.execute('''SELECT * FROM final_favourites_p90''')]
 
-def get_potentials() -> list[Media]:
+def get_potentials() -> list[Potential]:
 	con = sqlite3.connect('fluff.db')
 	cur = con.cursor()
-	return [Media(*f) for f in cur.execute('''SELECT * FROM final_potential''')]
+	return [Potential(*f) for f in cur.execute('''SELECT * FROM final_potential''')]
 
 def get_seasonals() -> list[Seasonal]:
 	con = sqlite3.connect('fluff.db')
