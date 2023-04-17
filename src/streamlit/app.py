@@ -173,10 +173,10 @@ with potentials_tab:
 	]
 	for pot_type, pot_list in sections:
 		with st.expander(msg % pot_type, expanded=True):
-			for pots in chunks(pot_list , ITEM_PER_COLUMN):
-				images = [get_local_image(a.cover_image_url, a.title) for a in pots]
+			for items in chunks(pot_list , ITEM_PER_COLUMN):
+				images = [get_local_image(a.cover_image_url, a.title) for a in items]
 				cropped_images = make_appropriate_images(images, _type=pot_type.lower())
-				for col, media, img in zip(st.columns(ITEM_PER_COLUMN), pots, cropped_images):
+				for col, media, img in zip(st.columns(ITEM_PER_COLUMN), items, cropped_images):
 					anchor = get_redirectable_url(media.title, media.media_id, media.media_type)
 					col.image(img, caption=f"({media.ff_score} / {media.audience_count})")
 					col.caption(f"<div align='center'>{anchor}</div>", unsafe_allow_html=True)
@@ -196,10 +196,10 @@ with divisive_tab:
 	]
 	for div_type, div_list in div_sections:
 		with st.expander(msg % div_type, expanded=True):
-			for pots in chunks(div_list , ITEM_PER_COLUMN):
-				images = [get_local_image(a.cover_image_url, a.title) for a in pots]
+			for items in chunks(div_list , ITEM_PER_COLUMN):
+				images = [get_local_image(a.cover_image_url, a.title) for a in items]
 				cropped_images = make_appropriate_images(images, _type=div_type.lower())
-				for col, media, img in zip(st.columns(ITEM_PER_COLUMN), pots, cropped_images):
+				for col, media, img in zip(st.columns(ITEM_PER_COLUMN), items, cropped_images):
 					anchor = get_redirectable_url(media.title, media.media_id, media.media_type)
 					col.image(img, caption=f"({media.stdev} / {media.audience_count})")
 					col.caption(f"<div align='center'>{anchor}</div>", unsafe_allow_html=True)
@@ -232,10 +232,10 @@ with by_status_tab:
 
 	for by_status_type, by_status_list in by_status_sections:
 		with st.expander(msg % by_status_type, expanded=True):
-			for pots in chunks(by_status_list, ITEM_PER_COLUMN):
-				images = [get_local_image(a.cover_image_url, a.title) for a in pots]
+			for items in chunks(by_status_list, ITEM_PER_COLUMN):
+				images = [get_local_image(a.cover_image_url, a.title) for a in items]
 				cropped_images = make_appropriate_images(images, _type=by_status_type.lower())
-				for col, media, img in zip(st.columns(ITEM_PER_COLUMN), pots, cropped_images):
+				for col, media, img in zip(st.columns(ITEM_PER_COLUMN), items, cropped_images):
 					anchor = get_redirectable_url(media.title, media.media_id, media.media_type)
 					col.image(img, caption=f"({media.audience_count})")
 					col.caption(f"<div align='center'>{anchor}</div>", unsafe_allow_html=True)
@@ -248,20 +248,20 @@ with questionable_tab:
 	ITEM_PER_COLUMN = 5
 
 	with st.expander('Questionable per User', expanded=True):
-		for questionables in chunks(questionable_per_user, ITEM_PER_COLUMN):
-			images = [get_local_image(a.cover_image_url, a.title) for a in questionables]
+		for items in chunks(questionable_per_user, ITEM_PER_COLUMN):
+			images = [get_local_image(a.cover_image_url, a.title) for a in items]
 			cropped_images = make_appropriate_images(images)
-			for col, media, img in zip(st.columns(ITEM_PER_COLUMN), questionables, cropped_images):
+			for col, media, img in zip(st.columns(ITEM_PER_COLUMN), items, cropped_images):
 				anchor = get_redirectable_url(media.title, media.media_id, media.media_type)
 				col.image(img, caption=f"{media.username} ({media.user_score} / {media.score_diff})")
 				col.caption(f"<div align='center'>{anchor}</div>", unsafe_allow_html=True)
 				col.write("")
 
 	with st.expander('Questionable per Title', expanded=True):
-		for questionables in chunks(questionable_per_title, ITEM_PER_COLUMN):
-			images = [get_local_image(a.cover_image_url, a.title) for a in questionables]
+		for items in chunks(questionable_per_title, ITEM_PER_COLUMN):
+			images = [get_local_image(a.cover_image_url, a.title) for a in items]
 			cropped_images = make_appropriate_images(images)
-			for col, media, img in zip(st.columns(ITEM_PER_COLUMN), questionables, cropped_images):
+			for col, media, img in zip(st.columns(ITEM_PER_COLUMN), items, cropped_images):
 				anchor = get_redirectable_url(media.title, media.media_id, media.media_type)
 				col.image(img, caption=f"({media.should_be_score} / {media.audience_count}) - ({media.actual_score} / {media.actual_audience_count})")
 				col.caption(f"<div align='center'>{anchor}</div>", unsafe_allow_html=True)
