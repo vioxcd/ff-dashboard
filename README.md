@@ -64,12 +64,12 @@ Moved [here](./INSTALLATION.md)
 | Favourites             | Top favourited anime, manga, characters, staff, and studio   |
 | Ranked Anime           | Ranked anime based on aggregated ratings    |
 | Ranked Manga           | Ranked manga based on aggregated ratings    |
-| Potentials             | Titles that have potentials to be included in ranked    |
 | Seasonals              | Ranked anime but it's viewed from within season perspective   |
+| Potentials             | Titles that have potentials to be included in ranked    |
+| Divisive               | Some people rated it highly, others rated it badly (high [stdev](https://en.wikipedia.org/wiki/Standard_deviation))   |
 | Planning (anticipated) | What's people are eagerly waiting for?   |
 | Dropped                | What's most hated... ?   |
 | Current (followed)     | What's most followed/trending?   |
-| Divisive               | Some people rated it highly, others rated it badly (high [stdev](https://en.wikipedia.org/wiki/Standard_deviation))   |
 | Questionable           | Questionable ratings and titles (e.g. high score given for low rated title)   |
 
 ## Caveats
