@@ -1,8 +1,8 @@
 import sqlite3
 
-from data_objects import (ByStatus, Divisive, Favourite, Media,
-                          QuestionableByTitle, QuestionableByUser, Ranked,
-                          Seasonal)
+from src.streamlit.data_objects import (ByStatus, Divisive, Favourite, Media,
+                                        QuestionableByTitle,
+                                        QuestionableByUser, Ranked, Seasonal)
 
 
 def get_anime_ranked() -> list[Ranked]:
