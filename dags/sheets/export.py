@@ -51,6 +51,9 @@ def export():
         "Ranked Manga": RANKED_MANGA_QUERY,
         "Seasonals": SEASONALS_QUERY,
         "Potentials": POTENTIALS_QUERY,
+        "Current": CURRENT_QUERY,
+        "Planning": PLANNING_QUERY,
+        "Dropped": DROPPED_QUERY,
     }
 
     for sheet_name, query in queries.items():

@@ -31,3 +31,18 @@ POTENTIALS_QUERY = """
                 SELECT *
                 FROM final_potential
                 """
+
+CURRENT_QUERY = """
+                SELECT *
+                FROM final_current
+                """
+
+PLANNING_QUERY = """
+                SELECT *
+                FROM final_planning
+                """
+
+DROPPED_QUERY = """
+                SELECT *
+                FROM final_dropped
+                """
