@@ -1,5 +1,5 @@
 import db
-from data_objects import AOTY, ByStatus, Divisive, Favourite, Media, Seasonal
+from data_objects import ByStatus, Divisive, Favourite, Media, Seasonal
 from helpers import (chunks, crop, get_expanded_sections, get_local_image,
                      get_redirectable_url, make_appropriate_images)
 
@@ -85,7 +85,7 @@ with favourites_tab:
 
 with aoty_2022_tab:
 	with aoty_2022_tab.container():
-		aoty_list = [AOTY(*awardee) for awardee in db.get_aoty_list()]
+		aoty_list = db.get_aoty_list()
 		for awardees in chunks(aoty_list, 3):
 			images = [get_local_image(a.cover_image_url, a.title) for a in awardees]
 			min_height = min([img.size[1] for img in images])

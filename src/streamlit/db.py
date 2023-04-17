@@ -1,7 +1,7 @@
 import sqlite3
 
-from src.streamlit.data_objects import (ByStatus, Divisive, Favourite, Media,
-                                        QuestionableByTitle,
+from src.streamlit.data_objects import (AOTY, ByStatus, Divisive, Favourite,
+                                        Media, QuestionableByTitle,
                                         QuestionableByUser, Ranked, Seasonal)
 
 
@@ -51,7 +51,7 @@ def get_manga_ranked() -> list[Ranked]:
 def get_aoty_list():
 	con = sqlite3.connect('fluff.db')
 	cur = con.cursor()
-	return cur.execute('''
+	query = '''
 		SELECT
 			award,
 			award_order,
@@ -59,7 +59,8 @@ def get_aoty_list():
 			title,
 			cover_image_url_xl AS cover_image_url
 		FROM final_aoty_2022
-	''')
+	'''
+	return [AOTY(*awardee) for awardee in cur.execute(query)]
 
 def get_favourites() -> list[Favourite]:
 	con = sqlite3.connect('fluff.db')
