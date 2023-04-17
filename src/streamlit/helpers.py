@@ -28,16 +28,18 @@ def resize_with_padding(img, expected_size):
 	return ImageOps.pad(img, expected_size, color=STREAMLIT_DARK_BACKGROUND_RGB)
 
 def fix_image(img, _type=None):
+	"""if _type is not `staff` then it's anime or manga"""
 	w, h = img.size
 	NORMAL_ANIMANGA_WIDTH = 460
 	STAFF_SIZE_WIDTH = 230
 	STAFF_SIZE_HEIGHT = 345
-	if _type in ("anime", "manga") and w < NORMAL_ANIMANGA_WIDTH:
+	if _type == "staff" and w < STAFF_SIZE_WIDTH:
+		img = resize_with_padding(img, (STAFF_SIZE_WIDTH, STAFF_SIZE_HEIGHT))
+	elif _type != "staff" and w < NORMAL_ANIMANGA_WIDTH:
 		width_factor = round(NORMAL_ANIMANGA_WIDTH / w, 2)
 		factored_h = round(h * width_factor)
 		img = resize_with_padding(img, (NORMAL_ANIMANGA_WIDTH, factored_h))
-	elif _type == "staff" and w < STAFF_SIZE_WIDTH:
-		img = resize_with_padding(img, (STAFF_SIZE_WIDTH, STAFF_SIZE_HEIGHT))
+
 	return img
 
 def make_appropriate_images(images, _type=None):

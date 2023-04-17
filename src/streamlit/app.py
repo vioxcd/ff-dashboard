@@ -111,7 +111,7 @@ with anime_tab:
 		with st.expander(title, expanded=is_expanded):
 			for animes in chunks(media_in_section, item_per_column):
 				images = [get_local_image(a.cover_image_url, a.title) for a in animes]
-				cropped_images = make_appropriate_images(images, _type='anime')
+				cropped_images = make_appropriate_images(images)
 				for col, anime, img in zip(st.columns(item_per_column), animes, cropped_images):
 					anchor = get_redirectable_url(anime.title, anime.media_id, anime.media_type)
 					col.image(img, caption=f"({anime.anichan_score} / {anime.audience_count})")
@@ -125,7 +125,7 @@ with manga_tab:
 		with st.expander(title, expanded=is_expanded):
 			for mangas in chunks(media_in_section, item_per_column):
 				images = [get_local_image(a.cover_image_url, a.title) for a in mangas]
-				cropped_images = make_appropriate_images(images, _type='manga')
+				cropped_images = make_appropriate_images(images)
 				for col, manga, img in zip(st.columns(item_per_column), mangas, cropped_images):
 					anchor = get_redirectable_url(manga.title, manga.media_id, manga.media_type)
 					col.image(img, caption=f"({manga.anichan_score} / {manga.audience_count})")
@@ -171,11 +171,12 @@ with potentials_tab:
 		('Anime', anime_pot),
 		('Manga', manga_pot),
 	]
+
 	for pot_type, pot_list in sections:
 		with st.expander(msg % pot_type, expanded=True):
 			for items in chunks(pot_list , ITEM_PER_COLUMN):
 				images = [get_local_image(a.cover_image_url, a.title) for a in items]
-				cropped_images = make_appropriate_images(images, _type=pot_type.lower())
+				cropped_images = make_appropriate_images(images)
 				for col, media, img in zip(st.columns(ITEM_PER_COLUMN), items, cropped_images):
 					anchor = get_redirectable_url(media.title, media.media_id, media.media_type)
 					col.image(img, caption=f"({media.ff_score} / {media.audience_count})")
@@ -198,7 +199,7 @@ with divisive_tab:
 		with st.expander(msg % div_type, expanded=True):
 			for items in chunks(div_list , ITEM_PER_COLUMN):
 				images = [get_local_image(a.cover_image_url, a.title) for a in items]
-				cropped_images = make_appropriate_images(images, _type=div_type.lower())
+				cropped_images = make_appropriate_images(images)
 				for col, media, img in zip(st.columns(ITEM_PER_COLUMN), items, cropped_images):
 					anchor = get_redirectable_url(media.title, media.media_id, media.media_type)
 					col.image(img, caption=f"({media.stdev} / {media.audience_count})")
@@ -234,7 +235,7 @@ with by_status_tab:
 		with st.expander(msg % by_status_type, expanded=True):
 			for items in chunks(by_status_list, ITEM_PER_COLUMN):
 				images = [get_local_image(a.cover_image_url, a.title) for a in items]
-				cropped_images = make_appropriate_images(images, _type=by_status_type.lower())
+				cropped_images = make_appropriate_images(images)
 				for col, media, img in zip(st.columns(ITEM_PER_COLUMN), items, cropped_images):
 					anchor = get_redirectable_url(media.title, media.media_id, media.media_type)
 					col.image(img, caption=f"({media.audience_count})")
