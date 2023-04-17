@@ -54,6 +54,9 @@ def export():
         "Current": CURRENT_QUERY,
         "Planning": PLANNING_QUERY,
         "Dropped": DROPPED_QUERY,
+        "Divisive p90": DIVISIVE_QUERY,
+        "Questionable (titles)": QUESTIONABLE_PER_TITLE_QUERY,
+        "Questionable (users)": QUESTIONABLE_PER_USER_QUERY,
     }
 
     for sheet_name, query in queries.items():

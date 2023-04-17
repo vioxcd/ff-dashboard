@@ -46,3 +46,28 @@ DROPPED_QUERY = """
                 SELECT *
                 FROM final_dropped
                 """
+
+
+DIVISIVE_QUERY = """
+                SELECT *
+                FROM final_divisive_p90
+                """
+
+QUESTIONABLE_PER_USER_QUERY = """
+                SELECT
+                    username,
+                    media_id,
+                    title,
+                    media_type,
+                    mean_score,
+                    audience_count,
+                    appropriate_score,
+                    score_diff,
+                    cover_image_url
+                FROM final_questionable_per_user
+                """
+
+QUESTIONABLE_PER_TITLE_QUERY = """
+                SELECT *
+                FROM final_questionable_per_title
+                """
