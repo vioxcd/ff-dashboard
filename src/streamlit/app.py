@@ -85,7 +85,7 @@ with favourites_tab:
 
 with aoty_2022_tab:
 	with aoty_2022_tab.container():
-		aoty_list = db.get_aoty_list()
+		aoty_list = db.get_aoty_2022()
 		for awardees in chunks(aoty_list, 3):
 			images = [get_local_image(a.cover_image_url, a.title) for a in awardees]
 			min_height = min([img.size[1] for img in images])

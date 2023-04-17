@@ -48,7 +48,7 @@ def get_manga_ranked() -> list[Ranked]:
 	# source,
 	return [Ranked(*m) for m in cur.execute(query)]
 
-def get_aoty_list():
+def get_aoty_2022():
 	con = sqlite3.connect('fluff.db')
 	cur = con.cursor()
 	query = '''
