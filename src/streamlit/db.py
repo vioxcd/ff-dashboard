@@ -4,10 +4,10 @@ from data_objects import (ByStatus, Divisive, Favourite, Media,
                           QuestionableByTitle, QuestionableByUser, Ranked,
                           Seasonal)
 
-con = sqlite3.connect('fluff.db')  # TODO: make proper db connection (.env)
-cur = con.cursor()
 
 def get_anime_ranked() -> list[Ranked]:
+	con = sqlite3.connect('fluff.db')  # TODO: make proper db connection (.env)
+	cur = con.cursor()
 	query = '''
 		SELECT
 			ranking,
@@ -29,6 +29,8 @@ def get_anime_ranked() -> list[Ranked]:
 	return [Ranked(*m) for m in cur.execute(query)]
 
 def get_manga_ranked() -> list[Ranked]:
+	con = sqlite3.connect('fluff.db')
+	cur = con.cursor()
 	query = '''
 		SELECT
 			ranking,
@@ -47,6 +49,8 @@ def get_manga_ranked() -> list[Ranked]:
 	return [Ranked(*m) for m in cur.execute(query)]
 
 def get_aoty_list():
+	con = sqlite3.connect('fluff.db')
+	cur = con.cursor()
 	return cur.execute('''
 		SELECT
 			award,
@@ -58,15 +62,23 @@ def get_aoty_list():
 	''')
 
 def get_favourites() -> list[Favourite]:
+	con = sqlite3.connect('fluff.db')
+	cur = con.cursor()
 	return [Favourite(*f) for f in cur.execute('''SELECT * FROM final_favourites_p90''')]
 
 def get_potentials() -> list[Media]:
+	con = sqlite3.connect('fluff.db')
+	cur = con.cursor()
 	return [Media(*f) for f in cur.execute('''SELECT * FROM final_potential''')]
 
 def get_seasonals() -> list[Seasonal]:
+	con = sqlite3.connect('fluff.db')
+	cur = con.cursor()
 	return [Seasonal(*f) for f in cur.execute('''SELECT * FROM final_seasonals''')]
 
 def get_divisive() -> list[Divisive]:
+	con = sqlite3.connect('fluff.db')
+	cur = con.cursor()
 	query = '''
 		SELECT
 			media_id,
@@ -80,6 +92,8 @@ def get_divisive() -> list[Divisive]:
 	return [Divisive(*f) for f in cur.execute(query)]
 
 def get_current() -> list[ByStatus]:
+	con = sqlite3.connect('fluff.db')
+	cur = con.cursor()
 	query = '''
 		SELECT
 			media_id,
@@ -92,6 +106,8 @@ def get_current() -> list[ByStatus]:
 	return [ByStatus(*f) for f in cur.execute(query)]
 
 def get_planning() -> list[ByStatus]:
+	con = sqlite3.connect('fluff.db')
+	cur = con.cursor()
 	query = '''
 		SELECT
 			media_id,
@@ -104,6 +120,8 @@ def get_planning() -> list[ByStatus]:
 	return [ByStatus(*f) for f in cur.execute(query)]
 
 def get_dropped() -> list[ByStatus]:
+	con = sqlite3.connect('fluff.db')
+	cur = con.cursor()
 	query = '''
 		SELECT
 			media_id,
@@ -116,6 +134,8 @@ def get_dropped() -> list[ByStatus]:
 	return [ByStatus(*f) for f in cur.execute(query)]
 
 def get_questionable_per_user() -> list[QuestionableByUser]:
+	con = sqlite3.connect('fluff.db')
+	cur = con.cursor()
 	query = '''
 		SELECT
 			username,
@@ -130,6 +150,8 @@ def get_questionable_per_user() -> list[QuestionableByUser]:
 	return [QuestionableByUser(*f) for f in cur.execute(query)]
 
 def get_questionable_per_title() -> list[QuestionableByTitle]:
+	con = sqlite3.connect('fluff.db')
+	cur = con.cursor()
 	query = '''
 		SELECT
 			media_id,
