@@ -1,6 +1,8 @@
 import sqlite3
 
-from data_objects import ByStatus, Divisive, Favourite, Media, Ranked, Seasonal
+from data_objects import (ByStatus, Divisive, Favourite, Media,
+                          QuestionableByTitle, QuestionableByUser, Ranked,
+                          Seasonal)
 
 con = sqlite3.connect('fluff.db')  # TODO: make proper db connection (.env)
 cur = con.cursor()
@@ -112,3 +114,32 @@ def get_dropped() -> list[ByStatus]:
 		FROM final_dropped
 	'''
 	return [ByStatus(*f) for f in cur.execute(query)]
+
+def get_questionable_per_user() -> list[QuestionableByUser]:
+	query = '''
+		SELECT
+			username,
+			media_id,
+			title,
+			media_type,
+			appropriate_score AS user_score,
+			score_diff,
+			cover_image_url
+		FROM final_questionable_per_user
+	'''
+	return [QuestionableByUser(*f) for f in cur.execute(query)]
+
+def get_questionable_per_title() -> list[QuestionableByTitle]:
+	query = '''
+		SELECT
+			media_id,
+			title,
+			media_type,
+			should_be_score,
+			audience_count,
+			actual_score,
+			actual_audience_count,
+			cover_image_url
+		FROM final_questionable_per_title
+	'''
+	return [QuestionableByTitle(*f) for f in cur.execute(query)]

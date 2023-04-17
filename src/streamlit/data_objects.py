@@ -77,3 +77,24 @@ class ByStatus:
 	media_type: str
 	audience_count: int
 	cover_image_url: str
+
+@dataclass
+class QuestionableByUser:
+	username: str
+	media_id: int
+	title: str
+	media_type: str
+	user_score: int
+	score_diff: int
+	cover_image_url: str
+
+@dataclass
+class QuestionableByTitle:
+	media_id: int
+	title: str
+	media_type: str
+	should_be_score: int
+	audience_count: int
+	actual_score: int
+	actual_audience_count: int
+	cover_image_url: str

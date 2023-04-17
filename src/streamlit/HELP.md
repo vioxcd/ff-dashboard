@@ -46,11 +46,17 @@ The `tags` ones and `studios` use 90th percentile too!
 
 It's calculated based on standard deviation of `ff_score` between users
 
+format: `stdev` / `audience_score`
+
 ---
 
-##### How is `underrated` calculated?
+##### How is `questionable` calculated?
 
 It's calculated based on the difference of score the user gave vs. `ff_score` (the group average)
+
+format for media: `minority_rating` / `minority_audience_count`
+
+format for users: `user's score` / `score diff against average`
 
 ---
 

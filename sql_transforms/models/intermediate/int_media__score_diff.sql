@@ -4,6 +4,7 @@ WITH
 media_scores AS (
 	SELECT
 		l.username,
+		ar.media_id,
 		ar.title,
 		ar.media_type,
 		CAST(ar.ff_score AS INTEGER) AS mean_score,

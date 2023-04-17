@@ -1,7 +1,9 @@
-from data_objects import AOTY, ByStatus, Divisive, Favourite, Media, Seasonal
+from data_objects import (AOTY, ByStatus, Divisive, Favourite, Media,
+                          QuestionableByTitle, QuestionableByUser, Seasonal)
 from db import (get_anime_ranked, get_aoty_list, get_current, get_divisive,
                 get_dropped, get_favourites, get_manga_ranked, get_planning,
-                get_potentials, get_seasonals)
+                get_potentials, get_questionable_per_title,
+                get_questionable_per_user, get_seasonals)
 from helpers import (chunks, crop, get_expanded_sections, get_local_image,
                      get_redirectable_url, make_appropriate_images)
 
@@ -35,9 +37,9 @@ st.markdown(hide, unsafe_allow_html=True)
 
 ## Tabs
 tabs = ["Favourites", "Awards 2022", "Anime", "Manga", "Seasonals",
-		"Potentials", "Divisive",  "By Status", "Help & FAQs"]
+		"Potentials", "Divisive",  "By Status", "Questionable", "Help & FAQs"]
 favourites_tab, aoty_2022_tab, anime_tab, manga_tab, seasonals_tab, \
-	potentials_tab, divisive_tab, by_status_tab, help_tab = st.tabs(tabs)
+	potentials_tab, divisive_tab, by_status_tab, questionable_tab, help_tab = st.tabs(tabs)
 
 with favourites_tab:
 	favourites_list = get_favourites()
@@ -218,7 +220,7 @@ with by_status_tab:
 	manga_drp: list[ByStatus] = [x for x in dropped if x.media_type == "MANGA"]
 
 	ITEM_PER_COLUMN = 5
-	msg = "💥️ Top %s"
+	msg = "Top %s"
 	by_status_sections: list[tuple[str, list[ByStatus]]] = [
 		('Followed Anime', anime_fol),
 		('Followed Manga', manga_fol),
@@ -239,6 +241,31 @@ with by_status_tab:
 					col.caption(f"<div align='center'>{anchor}</div>", unsafe_allow_html=True)
 					col.write("")
 
+with questionable_tab:
+	questionable_per_user = get_questionable_per_user()
+	questionable_per_title = get_questionable_per_title()
+
+	ITEM_PER_COLUMN = 5
+
+	with st.expander('Questionable per User', expanded=True):
+		for questionables in chunks(questionable_per_user, ITEM_PER_COLUMN):
+			images = [get_local_image(a.cover_image_url, a.title) for a in questionables]
+			cropped_images = make_appropriate_images(images)
+			for col, media, img in zip(st.columns(ITEM_PER_COLUMN), questionables, cropped_images):
+				anchor = get_redirectable_url(media.title, media.media_id, media.media_type)
+				col.image(img, caption=f"{media.username} ({media.user_score} / {media.score_diff})")
+				col.caption(f"<div align='center'>{anchor}</div>", unsafe_allow_html=True)
+				col.write("")
+
+	with st.expander('Questionable per Title', expanded=True):
+		for questionables in chunks(questionable_per_title, ITEM_PER_COLUMN):
+			images = [get_local_image(a.cover_image_url, a.title) for a in questionables]
+			cropped_images = make_appropriate_images(images)
+			for col, media, img in zip(st.columns(ITEM_PER_COLUMN), questionables, cropped_images):
+				anchor = get_redirectable_url(media.title, media.media_id, media.media_type)
+				col.image(img, caption=f"({media.should_be_score} / {media.audience_count}) - ({media.actual_score} / {media.actual_audience_count})")
+				col.caption(f"<div align='center'>{anchor}</div>", unsafe_allow_html=True)
+				col.write("")
 
 with help_tab:
 	help_md_path = "src/streamlit/HELP.md"
