@@ -80,10 +80,6 @@ with DAG(
         task_id="fetch_user_favourites",
     )
 
-    fetch_media_details = AnilistFetchMediaDetailsOperator(
-        task_id="fetch_media_details",
-    )
-
     create_media_as_rules_table = BashOperator(
         task_id='create_media_as_rules_table',
         bash_command=f'''
@@ -92,6 +88,10 @@ with DAG(
                 --target {DBT_TARGET_PROFILE} \
                 --select +{DBT_MODEL_MEDIA_AS_RULES}
         '''
+    )
+
+    fetch_media_details = AnilistFetchMediaDetailsOperator(
+        task_id="fetch_media_details",
     )
 
     download_images = AnilistDownloadImagesOperator(
