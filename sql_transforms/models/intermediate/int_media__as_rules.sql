@@ -17,7 +17,7 @@ WHERE
 	AND anichan_score > 0
 	AND appropriate_score > 0 -- don't calculate non-rating
 	AND next_date IS NULL -- ' filter for current media
-GROUP BY title, media_type
+GROUP BY media_id, media_type
 HAVING COUNT(1) >= (
 	SELECT CAST(FLOOR(COUNT(1) * .2) AS INTEGER)
 	FROM users

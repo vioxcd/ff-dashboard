@@ -19,5 +19,5 @@ WHERE
 	AND anichan_score > 0
 	AND appropriate_score > 0 -- don't calculate non-rating
 	AND retrieved_date = "2023-02-01" -- ' filter for aoty
-GROUP BY title, media_type
+GROUP BY media_id, media_type
 HAVING COUNT(1) >= 5 -- (2)
