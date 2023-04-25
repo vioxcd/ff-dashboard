@@ -1,5 +1,31 @@
 # Answering some Qs
 
+Addressing the next [two question](https://twitter.com/gyrowayne/status/1650007524924604417)
+
+---
+
+##### How does the whole thing work?
+
+The whole thing is something technically called a *data pipeline*. How does it work? It works in several simple steps:
+
+1. Getting the data from the source (Anilist provides this source)
+2. Storing the data in my computer (locally)
+3. Cleaning the data (for example, transforming Ani-chan rating values as explained below)
+4. Doing calculations with the cleaned data (like ranking things)
+5. Saving the calculation and exporting the calculation to sheets
+
+Cooking food might be a good analogy: you get the raw ingredients, store it at home, clean the ingredients before you start cooking, make them to an appropriate shape (like, peeling the potato/onion skin), doing stuff with them according to a recipe (it's similar how calculation has its own recipe), and saving the dish to be eaten later.
+
+---
+
+##### How does the ranking got calculated?
+
+It's mostly the average ratings of the members (e.g. if you have 3 people, you add them all up and divide by 3) and counting the number of audiences
+
+Other than that, there's the use of 90th percentiles to get the top value
+
+Along with calculation, the data are grouped by certain criteria or filters (this makes it interesting). For example, grouping by seasons would give us `seasonals` and filtering the highest-rated anime that have a 3-4 audiences give us `potentials`
+
 ---
 
 ##### How is the score calculated? Does it follow Ani-chan or not?
@@ -18,11 +44,21 @@ For ranking others, `ff_score` is used
 
 ---
 
+##### What's the mapping for Ani-chan's score?
+
+- 3*    = 100, 60, 35
+- 5*    = 90, 70, 50, 40, 10
+- 10.0* = x10
+- 10*   = x10
+- 100   = ...
+
+---
+
 ##### What's the rules for picking what's included in these lists?
 
 The rules follows the rules in `#ranking` channel. they are:  
 
-1. Watched by 5 members at minimum (completed or watching by 5th episode)
+1. Watched by 20% members at minimum (completed or watching by 5th episode)
 2. Minimum score of 85 (doesn't apply for some though)
 3. Sorted by: score > votes (number of audience) > alphabet
 4. ~~Titles are formatted in lowercase English~~ — this doesn't apply!
@@ -38,7 +74,7 @@ It's picked based on **90th percentile!**
 
 ##### Any other tab starts from 90th percentile?
 
-The `tags` ones and `studios` use 90th percentile too!
+The `by_status` (current, planning, dropped) and `divisive` use 90th percentile too!
 
 ---
 
@@ -57,6 +93,8 @@ It's calculated based on the difference of score the user gave vs. `ff_score` (t
 format for media: `minority_rating` / `minority_audience_count`
 
 format for users: `user's score` / `score diff against average`
+
+trivia: some people don't have `questionable` ratings (this actually had happened, I only know after someone asked me about it)
 
 ---
 
