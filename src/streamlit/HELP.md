@@ -33,7 +33,9 @@ Along with calculation, the data are grouped by certain criteria or filters (thi
 The score is calculated in two ways:  
 
 1. As Ani-chan did, where 5 and 3-stars rating doesn't translate nicely to 100 points (e.g. 5-stars equal 90 points). This is called `anichan_score`  
-2. The *correct* score translation where 5-stars *is equal* to 100 points, etc., called `ff_score` (some ratings that uses 100 points before changing to 5-stars are preserved in their points form, e.g. winuyi's Sangatsu II rating is 100, not 90)
+2. The *correct* score translation where 5-stars *is equal* to 100 points, etc., called `ff_score`*
+
+*Some ratings that uses 100 points format before changing to 5-stars format are mapped to their currently used points format, e.g. hammz uses 5-stars format and his Chihayafuru rating is 99 previously. His rating is mapped back to 5-stars (99 is 5-stars), and then translated back to 100 points to become 100)
 
 ---
 
