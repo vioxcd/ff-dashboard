@@ -2,7 +2,7 @@
 
 -- Rules:
 -- (1) has completed or at least 5 eps progress
--- (2) minimum watched by 5 members
+-- (2) rules changed! minimum watched by 20% members
 -- a change of logic to this model must happen to `int_aoty_2022__as_rules` model too
 SELECT
 	media_id,
@@ -18,4 +18,7 @@ WHERE
 	AND appropriate_score > 0 -- don't calculate non-rating
 	AND next_date IS NULL -- ' filter for current media
 GROUP BY title, media_type
-HAVING COUNT(1) >= 5 -- (2)
+HAVING COUNT(1) >= (
+	SELECT CAST(FLOOR(COUNT(1) * .2) AS INTEGER)
+	FROM users
+) -- (2)
