@@ -32,11 +32,7 @@ ordered_status AS (
 	FROM status_counts
 )
 
-SELECT
-	os.*,
-	md.cover_image_url_xl AS cover_image_url
-FROM ordered_status os
-JOIN {{ source('ff_anilist', 'media_details') }} md
-	USING (media_id)
+SELECT *
+FROM ordered_status
 WHERE pct_rank > .95
 ORDER BY status, audience_count DESC
