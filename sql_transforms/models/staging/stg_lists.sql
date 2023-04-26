@@ -79,6 +79,7 @@ numbered_lists AS (
 				media_id,
 				media_type,
 				anichan_score,
+				progress,
 				status
 			ORDER BY
 				retrieved_date
