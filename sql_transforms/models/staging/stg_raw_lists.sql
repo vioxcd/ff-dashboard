@@ -20,62 +20,8 @@ converted_raw_lists AS (
 	FROM {{ source('ff_anilist', 'raw_lists') }}
 ),
 
-mapped_lists AS (
-	-- some users have used a different `score_format` in the past and their previous
-	-- score (the ones different than the current `score_format`) is still encoded in the
-	-- `anichan_score` value
-	--
-	-- this make it seems like there's two possible score value: the "correct" one following
-	-- the current `score_format` and the `anichan_score` preserved one
-	--
-	-- the thing is, we can do translation between these two format, that is:
-	-- `anichan` -> `correct` -> `appropriate`, where
-	-- - `anichan` are the preserved ("original" if you like) ones
-	-- - `correct` are anichan's appropriated to user's current `score_format`
-	-- - `appropriate` are `correct` translated to 100s
-	--
-	-- for users with `score_format` of 10s, 100s, or 10.0s, translations is not a problem
-	-- because their it's easy to do, while for users with `score_format` of 3s and 5s,
-	-- a mapping table like this are needed to know exactly what `anichan` score ranges
-	-- are translated to which 3s or 5s
-	--
-	-- as have stated above, these mappings only exists for users that are known to have
-	-- `score_format` of 3s and 5s
-	--
-	-- anyway, the Anilist API has this bug where the 1st record out of each 50 batch
-	-- are the actual score used by the user, while the other 49s follows the `anichan_score`
-	-- and this bug is *always* encoded in `raw_lists` score. why? because to get the "correct"
-	-- score is very slow (must fetch 1 records per-request) and is mostly unnecessary
-	-- (scores rarely changes)
-	--
-	-- so, here we're trying to map each of those buggy `score` to an already known mapping of
-	-- `anichan_score` (the mappings are from previously done "correct but slow" ETL)
-	SELECT
-		rl.user_id,
-		rl.username,
-		m.score,  -- use score from the mapping
-		rl.anichan_score,
-		rl.status,
-		rl.media_id,
-		rl.media_type,
-		rl.title,
-		rl.progress,
-		rl.completed_at,
-		rl.retrieved_date,
-		rl.next_date
-	FROM {{ source('ff_anilist', 'score_mapping') }} m
-	JOIN converted_raw_lists rl
-		ON m.anichan_score = rl.score
-		AND m.user_id = rl.user_id
-	WHERE rl.score != '0'
-),
-
-should_be_mapped_but_not_included AS (
-	-- the data here includes users that changed their `score_format` in the future,
-	-- so there's no mapping for them, but their `correct_score` are translated from
-	-- `anichan` (the preserved ones), assumming they're actually not changing that much
-	--
-	-- the translation here (the ranges) mostly follows the `score_mapping` previously defined
+map_anichan_score_to_point_3_and_5_format AS (
+	-- the translation here (the ranges) mostly follows the `score_mapping` previously investigated
 	-- e.g. users in those table have these ranges of `anichan_score` for these ranges of `correct_score`
 	SELECT
 		rl.user_id,
@@ -111,10 +57,6 @@ should_be_mapped_but_not_included AS (
 		ON rl.user_id = u.id
 	WHERE rl.score != '0'
 		AND u.score_format IN ('POINT_3', 'POINT_5')
-		AND rl.user_id NOT IN (
-			SELECT DISTINCT user_id
-			FROM {{ source('ff_anilist', 'score_mapping') }}
-		)
 ),
 
 nonmapped_lists AS (
@@ -123,17 +65,12 @@ nonmapped_lists AS (
 	WHERE
 		user_id || '-' || media_id || '-' || media_type NOT IN (
 			SELECT user_id || '-' || media_id || '-' || media_type
-			FROM mapped_lists
-			UNION
-			SELECT user_id || '-' || media_id || '-' || media_type
-			FROM should_be_mapped_but_not_included
+			FROM map_anichan_score_to_point_3_and_5_format
 		)
 ),
 
 all_lists AS (
-	SELECT * FROM mapped_lists
-	UNION
-	SELECT * FROM should_be_mapped_but_not_included
+	SELECT * FROM map_anichan_score_to_point_3_and_5_format
 	UNION
 	SELECT * FROM nonmapped_lists
 ),

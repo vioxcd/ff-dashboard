@@ -477,3 +477,64 @@
 --
 -- sqlite3 dump_for_public.db ".dump" > samples/dump_for_public.sql
 --
+
+-- ! Comment about `score_mapping` that is previously implemented,
+-- ! but turns out:
+-- ' (1) it ended up not being used
+-- '     not sure why, but I ended up using `appropriate_score` (the translation of `anichan_score`)
+-- '     instead of "preserved" anichan_score in rating.
+-- '     I think, at some point I thought that the preserved anichan_score is already reflected in the
+-- '     anichan_score itself, so there's no need to "preserve" that to appropriate_score too
+-- '
+-- '     (preserving to appropriate score means: if hammz have an anichan_score of 99, then it's translated
+-- '      to "correct_score" that is 5 (assuming `POINT_5`), and it got translated again to appropriate score
+-- '      to become 100. the intial 99 is missing here. therefore, the initial idea was to "preserve" it in
+-- '      appropriate score, e.g. it doesn't translate 5 to 100, but keep the 99 in appropriate score.
+-- '      BUT, as I have said at the top of this paragraph, I ended up not doing that... somehow.
+-- '      so it's useless now, lol)
+-- '
+-- ' (2) it causes more bugs than it should have
+-- '     when a user change their format, it leads to horrendous result (because of the mapping)
+-- '
+-- ' (3) it doesn't flow nicely in the pipeline
+-- '     initially it was used because of Anilist API bugs, and the only way to mitigate that was to
+-- '     retrieve the buggy records one-by-one which took a long time. this might be reasonable if not
+-- '     for point (1), but, as it no longer stand, it becomes a hassle at this point
+-- '
+-- ' (4) alternative solution
+-- '     the current solution do "rough" translation of "anichan_score" to "correct_score" and then translating
+-- '     this to appropriate score. it's (currently) not buggy, as it preserves the SCORE_FORMAT in case a user
+-- '     change their formatting, and it doesn't do any mapping initially, so user's score won't change in
+-- '     stage of the pipeline (easier to keep track and wrap my head around)
+--
+-- ' anyway, below are the comment of me trying to explain what happen
+-- ' it might seems useless to preserve this, but it's for my future notes if I ever needed it
+-- some users have used a different `score_format` in the past and their previous
+-- score (the ones different than the current `score_format`) is still encoded in the
+-- `anichan_score` value
+--
+-- this make it seems like there's two possible score value: the "correct" one following
+-- the current `score_format` and the `anichan_score` preserved one
+--
+-- the thing is, we can do translation between these two format, that is:
+-- `anichan` -> `correct` -> `appropriate`, where
+-- - `anichan` are the preserved ("original" if you like) ones
+-- - `correct` are anichan's appropriated to user's current `score_format`
+-- - `appropriate` are `correct` translated to 100s
+--
+-- for users with `score_format` of 10s, 100s, or 10.0s, translations is not a problem
+-- because their it's easy to do, while for users with `score_format` of 3s and 5s,
+-- a mapping table like this are needed to know exactly what `anichan` score ranges
+-- are translated to which 3s or 5s
+--
+-- as have stated above, these mappings only exists for users that are known to have
+-- `score_format` of 3s and 5s
+--
+-- anyway, the Anilist API has this bug where the 1st record out of each 50 batch
+-- are the actual score used by the user, while the other 49s follows the `anichan_score`
+-- and this bug is *always* encoded in `raw_lists` score. why? because to get the "correct"
+-- score is very slow (must fetch 1 records per-request) and is mostly unnecessary
+-- (scores rarely changes)
+--
+-- so, here we're trying to map each of those buggy `score` to an already known mapping of
+-- `anichan_score` (the mappings are from previously done "correct but slow" ETL)
