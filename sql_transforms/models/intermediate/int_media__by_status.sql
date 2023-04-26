@@ -35,4 +35,3 @@ ordered_status AS (
 SELECT *
 FROM ordered_status
 WHERE pct_rank > .95
-ORDER BY status, audience_count DESC

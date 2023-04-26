@@ -6,3 +6,4 @@ SELECT
 FROM {{ ref('int_media__by_status') }} s
 JOIN {{ source('ff_anilist', 'media_details') }} md
 	USING (media_id)
+ORDER BY status, audience_count DESC
