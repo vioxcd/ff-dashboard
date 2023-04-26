@@ -40,7 +40,7 @@ def skip_if_specified(context):
 
 
 default_args = {
-    'trigger_rule': 'all_done',  # for skipping tasks
+    'trigger_rule': 'all_success',  # for skipping tasks
     'pre_execute': skip_if_specified,
     'conn_id': CONN_ID,
     'environment_type': ENVIRONMENT_TYPE
