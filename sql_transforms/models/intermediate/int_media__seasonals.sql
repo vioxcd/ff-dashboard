@@ -63,7 +63,7 @@ season_dim AS (
 	)
 ),
 
-current_and_last_season AS (
+current_season AS (
 	SELECT
 		sd.*,
 		l.*,
@@ -74,7 +74,55 @@ current_and_last_season AS (
 	JOIN season_dim sd
 		USING (season, season_year)
 	WHERE
-		season_rank IN (1, 2)
+		season_rank = 1
+		AND audience_count >= (
+			-- apply -1 to current and last
+			SELECT minimal_user - 1
+			FROM calculated_minimal_users
+		)
+),
+
+current_season_possibly_unrated AS (
+	SELECT
+		season,
+		(SELECT season_code FROM current_season),
+		season_year,
+		(SELECT season_rank FROM current_season),
+		media_id,
+		title,
+		media_type,
+		0 AS anichan_score,
+		0 AS ff_score,
+		audience_count,
+		cover_image_url
+	FROM {{ ref('int_media__by_status_join_media') }}
+	WHERE
+		status = "CURRENT"
+		AND media_type = "ANIME"
+		AND season = (SELECT season FROM current_season)
+		AND season_year = (SELECT season_year FROM current_season)
+),
+
+current_season_all AS (
+	SELECT *
+	FROM current_season
+	UNION
+	SELECT *
+	FROM current_season_possibly_unrated
+),
+
+last_season AS (
+	SELECT
+		sd.*,
+		l.*,
+		md.cover_image_url_xl AS cover_image_url
+	FROM counted_lists l
+	JOIN {{ source('ff_anilist', 'media_details') }} md
+		USING (media_id)
+	JOIN season_dim sd
+		USING (season, season_year)
+	WHERE
+		season_rank = 2
 		AND audience_count >= (
 			-- apply -1 to current and last
 			SELECT minimal_user - 1
@@ -102,7 +150,10 @@ SELECT
 
 all_seasons AS (
 	SELECT *
-	FROM current_and_last_season
+	FROM current_season_all
+	UNION
+	SELECT *
+	FROM last_season
 	UNION
 	SELECT *
 	FROM non_current_and_last_season
