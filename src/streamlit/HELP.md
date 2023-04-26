@@ -20,11 +20,13 @@ Cooking food might be a good analogy: you get the raw ingredients, store it at h
 
 ##### How does the ranking got calculated?
 
-It's mostly the average ratings of the members (e.g. if you have 3 people, you add them all up and divide by 3) and counting the number of audiences
+It's a two-step process: filter for inclusion and then do a (simple) calculation
 
-Other than that, there's the use of 90th percentiles to get the top value
+The inclusion criteria for ranked series follow the rules in the `#rankings` channel. That is *"count the number of audiences and only include series with an audience count that is at least 20% of fluffs member count"*
 
-Along with calculation, the data are grouped by certain criteria or filters (this makes it interesting). For example, grouping by seasons would give us `seasonals` and filtering the highest-rated anime that have a 3-4 audiences give us `potentials`
+Other than the rule used in `#ranking`, several sheets use the 90th or 95th percentile for inclusion criteria, `seasonals` include currently popular ongoing series even if it's unrated, and potentials specifically search for low audience count with high-rating (20% - 1 to 3)
+
+The calculations that are done are simple: either averaging the ratings or counting the audience (the most esoteric one is the `stdev` used in `divisive`)
 
 ---
 
