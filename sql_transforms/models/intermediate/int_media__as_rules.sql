@@ -20,5 +20,5 @@ WHERE
 GROUP BY media_id, media_type
 HAVING COUNT(1) >= (
 	SELECT CAST(FLOOR(COUNT(1) * .2) AS INTEGER)
-	FROM users
+	FROM {{ source('ff_anilist', 'users') }}
 ) -- (2)
