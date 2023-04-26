@@ -24,7 +24,7 @@ ENVIRONMENT_CONN_MAPPING = {
     "TESTING": 'fluff_test_db',
 }
 CONN_ID = ENVIRONMENT_CONN_MAPPING[ENVIRONMENT_TYPE]
-DBT_MODEL_MEDIA_AS_RULES = 'int_media__as_rules'
+DBT_MODEL_TMP_FETCH_MEDIA_DETAILS = 'tmp_fetch_media_details'
 DBT_PROJECT_DIR = Variable.get("DBT_PROJECT_DIR", str(ROOT_DIR / "sql_transforms"))
 DBT_TARGET_PROFILE = 'test' if ENVIRONMENT_TYPE == "TESTING" else 'dev'
 
@@ -80,13 +80,13 @@ with DAG(
         task_id="fetch_user_favourites",
     )
 
-    create_media_as_rules_table = BashOperator(
-        task_id='create_media_as_rules_table',
+    create_needed_media_details_table = BashOperator(
+        task_id='create_needed_media_details_table',
         bash_command=f'''
             dbt run \
                 --project-dir {DBT_PROJECT_DIR} \
                 --target {DBT_TARGET_PROFILE} \
-                --select +{DBT_MODEL_MEDIA_AS_RULES}
+                --select +{DBT_MODEL_TMP_FETCH_MEDIA_DETAILS}
         '''
     )
 
@@ -113,6 +113,6 @@ with DAG(
     )
 
     chain(start, load_p3p5_score_mapping,
-          [fetch_user_lists, fetch_user_favourites], create_media_as_rules_table,
+          [fetch_user_lists, fetch_user_favourites], create_needed_media_details_table,
           fetch_media_details, [download_images, run_dbt], export_to_sheet, end
     )

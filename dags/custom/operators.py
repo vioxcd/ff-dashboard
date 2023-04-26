@@ -245,11 +245,7 @@ class AnilistFetchMediaDetailsOperator(BaseOperator):
         cur = self._db_hook.get_cursor()
         return [media_id for (media_id,) in cur.execute('''
             SELECT media_id
-            FROM int_media__as_rules
-            UNION
-            SELECT item_id
-            FROM favourites
-            WHERE type IN ("anime", "manga")
+            FROM tmp_fetch_media_details
         ''')]
 
     def _create_db(self):
