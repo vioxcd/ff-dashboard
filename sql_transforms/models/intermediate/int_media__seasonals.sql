@@ -22,6 +22,7 @@ counted_lists AS (
 		AND anichan_score > 0
 		AND appropriate_score > 0
 		AND next_date IS NULL
+		AND media_type = "ANIME"  -- manga doesn't have seasons...
 	GROUP BY media_id, media_type
 	HAVING COUNT(1) >= (
 		-- same as `as_rules`, but with -1 to include
@@ -45,6 +46,7 @@ season_rules AS (
 	WHERE
 		season IS NOT NULL
 		AND season_year IS NOT NULL
+		AND media_id IN (SELECT DISTINCT media_id FROM counted_lists) -- filter for non-planning
 ),
 
 season_dim AS (
