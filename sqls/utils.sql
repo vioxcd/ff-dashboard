@@ -538,3 +538,9 @@
 --
 -- so, here we're trying to map each of those buggy `score` to an already known mapping of
 -- `anichan_score` (the mappings are from previously done "correct but slow" ETL)
+
+-- ' use this command to check entries sanity
+-- ' just in case the hammz's bug might happen again
+-- SELECT retrieved_date, COUNT(1) AS cnt
+-- FROM stg_lists
+-- GROUP BY retrieved_date
