@@ -30,6 +30,12 @@ Initially I was just curious about the question, so I ran a query with an alread
 
 ![Reply to the above QRTs from my friend saying this could help the currently manual data-gathering](./assets/2-twitter-qrt-continued.png)
 
+![Some Discord interaction of people seeing the sheets](./assets/6-discord-interactions.png)
+
+![Some more Discord](./assets/7-more-discord-interaction.png)
+
+![More interactions and I got a compliment!](./assets/9-more-interactions-and-compliment.png)
+
 ### Other Pics
 
 ![Airflow dags](./assets/3-airflow-dags.png)
@@ -37,6 +43,8 @@ Initially I was just curious about the question, so I ran a query with an alread
 ![dbt lineage](./assets/4-dbt-lineage.png)
 
 ![streamlit dashboard](./assets/5-streamlit-dashboard.png)
+
+![google sheets interface filled with seasonals data](./assets/8-sheets-interface.png)
 
 ## Installation & Usage
 
