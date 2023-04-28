@@ -6,13 +6,13 @@ from helpers import (chunks, crop, get_expanded_sections, get_local_image,
 
 import streamlit as st
 
-if Path('.streamlit/secrets.toml').exists():
+if Path('fluff.db').exists():
+	import db
+	print("ENV: LOCAL")
+else:
 	st.secrets.get("public_gsheets_url", None)
 	import src.streamlit.sheets as db
 	print("ENV: CLOUD")
-else:
-	import db
-	print("ENV: LOCAL")
 
 # Config Layer
 st.set_page_config(page_title="Fluff ~", layout="wide")

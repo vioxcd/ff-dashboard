@@ -52,6 +52,7 @@ class Seasonal:
 	season_year: int
 	season: Season
 	season_code: int
+	season_rank: int
 	in_season_rank: int
 	media_id: int
 	title: str

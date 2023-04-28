@@ -147,6 +147,7 @@ def get_questionable_per_user() -> list[QuestionableByUser]:
 			score_diff,
 			cover_image_url
 		FROM final_questionable_per_user
+		WHERE media_id != -1
 	'''
 	return [QuestionableByUser(*f) for f in cur.execute(query)]
 
