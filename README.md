@@ -12,6 +12,8 @@ This pipeline:
 
 4. Created while learning (a lot) about `Airflow`, `dbt`, and `streamlit`
 
+I had planned to deploy the dashboard-ish end result to streamlit cloud, but it turns out that the dashboard is full of images that viewing it would require lots of images to be downloaded. So, I cancelled that plan and the end result is the data in the sheets. I embed [a video](./assets/10-dashboard-demo.webm) below of how the streamlit dashboard look like (it's like a pretty simplistic version of Anichart - mostly because streamlit doesn't offer a way to compose complex structures)
+
 ## Why?
 
 1. The statistics seems super interesting!
