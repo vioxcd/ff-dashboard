@@ -12,7 +12,7 @@ This pipeline:
 
 4. Created while learning (a lot) about `Airflow`, `dbt`, and `streamlit`
 
-I had planned to deploy the dashboard-ish end result to streamlit cloud, but it turns out that the dashboard is full of images that viewing it would require lots of images to be downloaded. So, I cancelled that plan and the end result is the data in the sheets. I embed [a video](./assets/10-dashboard-demo.webm) below of how the streamlit dashboard look like (it's like a pretty simplistic version of Anichart - mostly because streamlit doesn't offer a way to compose complex structures)
+I had planned to deploy the dashboard-ish end result to streamlit cloud, but it turns out that the dashboard is full of images that viewing it would require lots of images to be downloaded. So, I cancelled that plan and the end result is the data in the sheets. I embed [a video](./assets/10-dashboard-demo.webm) of how the streamlit dashboard look like (it's like a pretty simplistic version of Anichart - mostly because streamlit doesn't offer a way to compose complex structures)
 
 ## Why?
 
@@ -47,6 +47,8 @@ Initially I was just curious about the question, so I ran a query with an alread
 ![streamlit dashboard](./assets/5-streamlit-dashboard.png)
 
 ![google sheets interface filled with seasonals data](./assets/8-sheets-interface.png)
+
+![sqlite database look like](./assets/11-sqlite-db.png)
 
 ## Installation & Usage
 
