@@ -13,7 +13,7 @@ SELECT
 	COUNT(1) AS audience_count
 FROM {{ ref('stg_lists') }}
 WHERE
-	(status = 'COMPLETED' OR (status IN ('CURRENT', 'PAUSED') AND progress >= 5)) -- (1)
+	(status IN ('COMPLETED', 'REPEATING') OR (status IN ('CURRENT', 'PAUSED') AND progress >= 5)) -- (1)
 	AND anichan_score > 0
 	AND appropriate_score > 0 -- don't calculate non-rating
 	AND next_date IS NULL -- ' filter for current media
