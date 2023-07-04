@@ -1,7 +1,9 @@
+.python-version
+pyrightconfig.json
+
 fluff
 *.db
 *.db.bak
-.python-version
 .env
 
 __pycache__
