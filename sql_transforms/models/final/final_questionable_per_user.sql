@@ -5,6 +5,7 @@
 WITH
 ordered_score_diff AS (
 	SELECT
+		u.username,
 		sd.*,
 		ROW_NUMBER() OVER (PARTITION BY username
 						   ORDER BY score_diff DESC)
@@ -13,11 +14,14 @@ ordered_score_diff AS (
 	FROM {{ ref('int_media__score_diff') }} sd
 	JOIN {{ source('ff_anilist', 'media_details') }} md
 		USING (media_id)
+	JOIN {{ source('ff_anilist', 'users') }} u
+		ON sd.user_id = u.id
 ),
 
 users_with_no_questionable_titles AS (
 	SELECT
 		username,
+		id,
 		-1 AS media_id,
 		"no questionable title" AS title,
 		"-" AS media_type,
@@ -28,8 +32,8 @@ users_with_no_questionable_titles AS (
 		-1 AS user_score_diff,
 		"-" AS cover_image_url
 	FROM {{ source('ff_anilist', 'users') }}
-	WHERE username NOT IN (
-		SELECT username FROM ordered_score_diff
+	WHERE id NOT IN (
+		SELECT user_id FROM ordered_score_diff
 	)
 ),
 

@@ -3,7 +3,7 @@
 WITH
 media_scores AS (
 	SELECT
-		l.username,
+		l.user_id,
 		ar.media_id,
 		ar.title,
 		ar.media_type,
